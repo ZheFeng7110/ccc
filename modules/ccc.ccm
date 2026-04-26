@@ -1,0 +1,5 @@
+module;
+
+export module ccc;
+
+export import ccc.pipe_operator_helper;

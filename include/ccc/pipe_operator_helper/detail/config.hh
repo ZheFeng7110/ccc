@@ -1,0 +1,36 @@
+/**
+ * @file config.hh
+ * @brief Configures
+ */
+
+#pragma once
+#ifndef CCC_PIPE_OPERATOR_HELPER_DETAIL_CONFIG_HH
+#define CCC_PIPE_OPERATOR_HELPER_DETAIL_CONFIG_HH
+
+#if (__cplusplus < 201403L)
+#error "Library `ccc::pipe_operator_helper` requires C++14 or higher."
+#endif
+
+#if (__cplusplus >= 202002L)
+#define CCC_PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR constexpr
+#else
+#define CCC_PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR
+#endif
+
+#ifdef CCC_PIPE_OPERATOR_HELPER_MODULE_INTERFACE_UNIT
+
+/* clang-format off */
+#define CCC_PIPE_OPERATOR_HELPER_MODULE_EXPORT       export
+#define CCC_PIPE_OPERATOR_HELPER_MODULE_EXPORT_BEGIN export {
+#define CCC_PIPE_OPERATOR_HELPER_MODULE_EXPORT_END   }
+/* clang-format on */
+
+#else  // CCC_PIPE_OPERATOR_HELPER_MODULE_INTERFACE_UNIT
+
+#define CCC_PIPE_OPERATOR_HELPER_MODULE_EXPORT
+#define CCC_PIPE_OPERATOR_HELPER_MODULE_EXPORT_BEGIN
+#define CCC_PIPE_OPERATOR_HELPER_MODULE_EXPORT_END
+
+#endif  // !CCC_PIPE_OPERATOR_HELPER_MODULE_INTERFACE_UNIT
+
+#endif  // !CCC_PIPE_OPERATOR_HELPER_DETAIL_CONFIG_HH
