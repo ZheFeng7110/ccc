@@ -1,5 +1,20 @@
 module;
 
+#include <exception>
+#include <functional>
+#include <type_traits>
+#include <utility>
+#include <algorithm>
+#include <expected>
+#define CCC_MODULE_INTERFACE_UNIT
+
 export module ccc;
 
 export import ccc.pipe_operator_helper;
+
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Winclude-angled-in-module-purview"
+#endif
+
+#include "ccc/utility.hh"
+#include "ccc/expected.hh"
