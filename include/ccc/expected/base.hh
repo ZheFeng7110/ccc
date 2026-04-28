@@ -17,6 +17,7 @@
 #include <type_traits>
 #include <utility>
 #include <algorithm>
+#include <initializer_list>
 
 #if (__cplusplus >= 202002L)
 #include <compare>

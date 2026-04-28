@@ -12,6 +12,12 @@
 #define CCC_CPP20_CONSTEXPR
 #endif
 
+#if (__cplusplus >= 202002L)
+#define CCC_CONDITIONAL_EXPLICIT(condition) explicit(condition)
+#else
+#define CCC_CONDITIONAL_EXPLICIT(condition) explicit
+#endif
+
 #if (__cplusplus >= 201703L)
 #define CCC_NO_DISCARD [[nodiscard]]
 #else
