@@ -147,6 +147,61 @@ constexpr bool can_be_unexpected_v = std::is_object<E>::value && (!std::is_array
 
 }  // namespace detail
 
+template<typename E>
+class bad_expected_access;
+
+template<>
+class bad_expected_access<void> : public std::exception
+{
+protected:
+    bad_expected_access() noexcept = default;
+    bad_expected_access(const bad_expected_access&) noexcept = default;
+    bad_expected_access(bad_expected_access&&) noexcept = default;
+    bad_expected_access& operator=(const bad_expected_access&) noexcept = default;
+    bad_expected_access& operator=(bad_expected_access&&) noexcept = default;
+    ~bad_expected_access() override = default;
+
+public:
+    CCC_NO_DISCARD const char* what() const noexcept override
+    {
+        return "bad access to ccc::expected without expected value(ErrorType = void)";
+    }
+};
+
+template<typename E>
+class bad_expected_access : public bad_expected_access<void>
+{
+private:
+    E error_;
+
+public:
+    CCC_NO_DISCARD const char* what() const noexcept override
+    {
+        return "bad access to ccc::expected without expected value(ErrorType = non-void)";
+    }
+
+    bad_expected_access() = delete;
+
+    explicit bad_expected_access(E error) : error_(std::move(error)) {}
+
+    const E& error() const& noexcept
+    {
+        return error_;
+    }
+    E& error() & noexcept
+    {
+        return error_;
+    }
+    E&& error() && noexcept
+    {
+        return std::move(error_);
+    }
+    const E&& error() const&& noexcept
+    {
+        return std::move(error_);
+    }
+};
+
 }  // namespace ccc
 
 #endif  // !CCC_EXPECTED_UNEXPECTED_HH

@@ -5,6 +5,8 @@ module;
 #include <type_traits>
 #include <utility>
 #include <algorithm>
+#include <initializer_list>
+#include <memory>
 #include <expected>
 #define CCC_MODULE_INTERFACE_UNIT
 

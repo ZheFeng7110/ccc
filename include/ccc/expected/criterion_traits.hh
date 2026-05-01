@@ -13,12 +13,17 @@ namespace ccc {
 
 namespace detail {
 
-template<typename, typename = void>
+template<typename, typename = void, typename = void>
 struct is_valid_criterion_type : std::false_type {
 };
 
 template<typename T>
-struct is_valid_criterion_type<T, void_t<decltype(std::declval<T>().has_value()), decltype(T::default_error_value)>>
+struct is_valid_criterion_type<T,
+                               void_t<typename T::value_type,
+                                      decltype(std::declval<T>().has_value()),
+                                      decltype(T::default_error_value),
+                                      decltype(std::declval<T>() == std::declval<T>())>,
+                               enable_if_t<is_convertible_v<decltype(std::declval<T>() == std::declval<T>()), bool>>>
     : std::true_type {
 };
 

@@ -11,7 +11,7 @@
 
 #include "ccc/utility.hh"
 
-#ifdef CCC_MODULE_INTERFACE_UNIT
+#ifndef CCC_MODULE_INTERFACE_UNIT
 #include <exception>
 #include <functional>
 #include <type_traits>
