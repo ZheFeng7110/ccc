@@ -39,6 +39,10 @@ else ()
     add_compile_options(-Wall -Wextra -Wpedantic)
 endif ()
 
+if ((${CMAKE_CXX_COMPILER_ID} MATCHES "GNU"))
+    add_compile_options(-fdiagnostics-all-candidates)
+endif ()
+
 set(CMAKE_CXX_STANDARD "${CCC_TEST_CPP_STANDARD}"
     CACHE INTERNAL "" FORCE
 )
@@ -55,8 +59,10 @@ function (globSources cmd variable cxxStdRequired)
 endfunction ()
 
 globSources(GLOB_RECURSE cccPipeOperatorHelperTestSources 11 "pipe_operator_helper_test/*.cc")
+globSources(GLOB expectedTestSources 14 "expected_test/*.cc")
 target_sources(${PROJECT_NAME} PRIVATE
     ${cccPipeOperatorHelperTestSources}
+    ${expectedTestSources}
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")

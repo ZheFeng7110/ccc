@@ -147,6 +147,8 @@ constexpr bool can_be_unexpected_v = std::is_object<E>::value && (!std::is_array
 
 }  // namespace detail
 
+CCC_MODULE_EXPORT_BEGIN
+
 template<typename E>
 class bad_expected_access;
 
@@ -201,6 +203,8 @@ public:
         return std::move(error_);
     }
 };
+
+CCC_MODULE_EXPORT_END
 
 }  // namespace ccc
 

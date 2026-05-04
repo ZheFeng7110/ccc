@@ -17,7 +17,11 @@
 #include "ccc/expected/expected_impl.hh"
 
 #else
+
+#ifndef CCC_SUPRESS_WARNINGS
 #warning "ccc::expected requires C++14 or later"
+#endif
+
 #endif
 
 #endif  // !CCC_EXPECTED_HH

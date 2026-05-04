@@ -14,6 +14,8 @@
 
 namespace ccc {
 
+CCC_MODULE_EXPORT_BEGIN
+
 class default_criterion
 {
 public:
@@ -43,6 +45,8 @@ static_assert(is_criterion_v<default_criterion>, "default_criterion must satisfy
 
 template<typename T, typename E, typename Criterion>
 class expected;
+
+CCC_MODULE_EXPORT_END
 
 namespace detail {
 
@@ -134,6 +138,8 @@ CCC_CPP20_CONSTEXPR void reinit(NewType* new_addr,
 
 }  // namespace detail
 
+CCC_MODULE_EXPORT_BEGIN
+
 template<typename T, typename E, typename Criterion = default_criterion>
 class expected
 {
@@ -178,11 +184,7 @@ public:
         return has_value();
     }
 
-    CCC_NO_DISCARD constexpr const criterion_type& criterion() const noexcept
-    {
-        return criterion_;
-    }
-    CCC_NO_DISCARD constexpr criterion_type& criterion() noexcept
+    CCC_NO_DISCARD constexpr const criterion_type& get_criterion() const noexcept
     {
         return criterion_;
     }
@@ -190,15 +192,12 @@ public:
 public:  // Constructors
     constexpr expected() : value_(), criterion_() {}
 
-    constexpr expected(const expected&) noexcept(std::is_nothrow_copy_constructible<value_type>::value &&
-                                                 std::is_nothrow_copy_constructible<error_type>::value) = default;
+    constexpr expected(const expected&) = default;
 
-    template<typename std::enable_if<std::is_copy_constructible<value_type>::value &&
-                                     std::is_copy_constructible<error_type>::value &&
-                                     !std::is_trivially_copy_constructible<value_type>::value &&
-                                     !std::is_trivially_copy_constructible<error_type>::value>::type* = nullptr>
     constexpr expected(const expected& other) noexcept(std::is_nothrow_copy_constructible<value_type>::value &&
                                                        std::is_nothrow_copy_constructible<error_type>::value)
+        requires(is_copy_constructible_v<value_type> && is_copy_constructible_v<error_type> &&
+                 !is_trivially_copy_constructible_v<value_type> && !is_trivially_copy_constructible_v<error_type>)
         : criterion_(other.criterion_)
     {
         if (has_value()) {
@@ -209,15 +208,12 @@ public:  // Constructors
         }
     }
 
-    constexpr expected(expected&&) noexcept(std::is_nothrow_move_constructible<value_type>::value &&
-                                            std::is_nothrow_move_constructible<error_type>::value) = default;
+    constexpr expected(expected&&) = default;
 
-    template<typename std::enable_if<std::is_move_constructible<value_type>::value &&
-                                     std::is_move_constructible<error_type>::value &&
-                                     !std::is_trivially_move_constructible<value_type>::value &&
-                                     !std::is_trivially_move_constructible<error_type>::value>::type* = nullptr>
     constexpr expected(expected&& other) noexcept(std::is_nothrow_move_constructible<value_type>::value &&
                                                   std::is_nothrow_move_constructible<error_type>::value)
+        requires(is_move_constructible_v<value_type> && is_move_constructible_v<error_type> &&
+                 !is_trivially_move_constructible_v<value_type> && !is_trivially_move_constructible_v<error_type>)
         : criterion_(std::move(other.criterion_))
     {
         if (has_value()) {
@@ -280,7 +276,7 @@ public:  // Constructors
                  !is_same_v<remove_cvref_t<Cr>, unexpect_t>>::type* = nullptr>
     CCC_CONDITIONAL_EXPLICIT((!std::is_convertible<U, value_type>::value ||
                               !std::is_convertible<Cr, criterion_type>::value))
-    constexpr expected(U&& v, Cr&& criterion = {})
+    constexpr expected(U&& v, Cr&& criterion = Cr(criterion_type()))
         : value_(std::forward<U>(v)), criterion_(std::forward<Cr>(criterion))
     {
     }
@@ -293,7 +289,7 @@ public:  // Constructors
                                      !is_same_v<remove_cvref_t<Cr>, unexpect_t>>::type* = nullptr>
     CCC_CONDITIONAL_EXPLICIT((!std::is_convertible_v<const G&, error_type> ||
                               !std::is_convertible<const Cr&, criterion_type>::value))
-    constexpr expected(const unexpected<G>& e, const Cr& cr = Cr::default_error_value)
+    constexpr expected(const unexpected<G>& e, const Cr& cr = Cr(criterion_type::default_error_value))
         : error_(std::forward<const G&>(e.error())), criterion_(std::forward<const Cr&>(cr))
     {
     }
@@ -305,7 +301,7 @@ public:  // Constructors
             std::is_constructible<error_type, G>::value && std::is_constructible<criterion_type, Cr>::value &&
             !is_same_v<remove_cvref<Cr>, in_place_t> && !is_same_v<remove_cvref_t<Cr>, unexpect_t>>::type* = nullptr>
     CCC_CONDITIONAL_EXPLICIT((!std::is_convertible_v<G, error_type> || !std::is_convertible<Cr, criterion_type>::value))
-    constexpr expected(unexpected<G>&& e, Cr&& cr = Cr::default_error_value)
+    constexpr expected(unexpected<G>&& e, Cr&& cr = Cr(criterion_type::default_error_value))
         : error_(std::forward<G>(e.error())), criterion_(std::forward<Cr>(cr))
     {
     }
@@ -349,9 +345,9 @@ public:  // Constructors
     }
 
     template<typename... Args,
-             typename std::enable_if<std::is_constructible<value_type, Args...>::value>::type* = nullptr>
+             typename std::enable_if<std::is_constructible<error_type, Args...>::value>::type* = nullptr>
     explicit constexpr expected(unexpect_t, Args&&... args)
-        : value_(std::forward<Args>(args)...), criterion_(criterion_type::default_error_value)
+        : error_(std::forward<Args>(args)...), criterion_(criterion_type::default_error_value)
     {
     }
 
@@ -359,31 +355,31 @@ public:  // Constructors
         typename Cr,
         typename... Args,
         typename std::enable_if<
-            std::is_constructible<value_type, Args...>::value && std::is_constructible<criterion_type, Cr>::value &&
+            std::is_constructible<error_type, Args...>::value && std::is_constructible<criterion_type, Cr>::value &&
             !is_same_v<remove_cvref<Cr>, in_place_t> && !is_same_v<remove_cvref_t<Cr>, unexpect_t>>::type* = nullptr>
     constexpr expected(Cr&& cr, unexpect_t, Args&&... args)
-        : value_(std::forward<Args>(args)...), criterion_(std::forward<Cr>(cr))
+        : error_(std::forward<Args>(args)...), criterion_(std::forward<Cr>(cr))
     {
     }
 
     template<typename U,
              typename... Args,
              typename std::enable_if<
-                 std::is_constructible<value_type, std::initializer_list<U>&, Args...>::value>::type* = nullptr>
+                 std::is_constructible<error_type, std::initializer_list<U>&, Args...>::value>::type* = nullptr>
     explicit constexpr expected(unexpect_t, std::initializer_list<U> il, Args&&... args)
-        : value_(il, std::forward<Args>(args)...), criterion_(criterion_type::default_error_value)
+        : error_(il, std::forward<Args>(args)...), criterion_(criterion_type::default_error_value)
     {
     }
 
     template<typename Cr,
              typename U,
              typename... Args,
-             typename std::enable_if<std::is_constructible<value_type, std::initializer_list<U>&, Args...>::value &&
+             typename std::enable_if<std::is_constructible<error_type, std::initializer_list<U>&, Args...>::value &&
                                      std::is_constructible<criterion_type, Cr>::value &&
                                      !is_same_v<remove_cvref<Cr>, in_place_t> &&
                                      !is_same_v<remove_cvref_t<Cr>, unexpect_t>>::type* = nullptr>
     constexpr expected(Cr&& cr, unexpect_t, std::initializer_list<U> il, Args&&... args)
-        : value_(il, std::forward<Args>(args)...), criterion_(std::forward<Cr>(cr))
+        : error_(il, std::forward<Args>(args)...), criterion_(std::forward<Cr>(cr))
     {
     }
 
@@ -413,15 +409,16 @@ private:  // Assign
     }
 
 public:
-    template<typename = enable_if_t<std::is_copy_assignable_v<value_type> && std::is_copy_constructible_v<value_type> &&
-                                    std::is_copy_assignable_v<error_type> && std::is_copy_constructible_v<error_type> &&
-                                    (std::is_nothrow_move_constructible_v<value_type> ||
-                                     std::is_nothrow_move_constructible_v<error_type>)>>
-    CCC_CPP20_CONSTEXPR expected& operator=(const expected& other) noexcept(
+    CCC_CPP20_CONSTEXPR auto operator=(const expected& other) noexcept(
         conjunction_v<std::is_nothrow_copy_constructible<value_type>,
                       std::is_nothrow_copy_constructible<error_type>,
                       std::is_nothrow_copy_assignable<value_type>,
                       std::is_nothrow_copy_assignable<error_type>>)
+        -> enable_if_t<std::is_copy_assignable_v<value_type> && std::is_copy_constructible_v<value_type> &&
+                           std::is_copy_assignable_v<error_type> && std::is_copy_constructible_v<error_type> &&
+                           (std::is_nothrow_move_constructible_v<value_type> ||
+                            std::is_nothrow_move_constructible_v<error_type>),
+                       expected&>
     {
         if (this != std::addressof(other)) {
             if (other.has_value()) {
@@ -482,7 +479,7 @@ public:
                  is_constructible_v<criterion_type, Cr> && is_assignable_v<criterion_type&, Cr> &&
                  (std::is_nothrow_constructible_v<value_type, U> || std::is_nothrow_move_constructible_v<value_type> ||
                   std::is_nothrow_move_constructible_v<error_type>)>>
-    CCC_CPP20_CONSTEXPR expected& assign(U&& v, Cr&& cr = criterion_type())
+    CCC_CPP20_CONSTEXPR expected& assign(U&& v, Cr&& cr = Cr(criterion_type()))
     {
         assign_value_(std::forward<U>(v), std::forward<Cr>(cr));
         return *this;
@@ -503,7 +500,7 @@ public:
                   is_nothrow_move_constructible_v<error_type>) &&
                  !is_same_v<remove_cvref<Cr>, in_place_t> && !is_same_v<remove_cvref_t<Cr>, unexpect_t> &&
                  is_constructible_v<criterion_type, const Cr&> && is_assignable_v<criterion_type&, const Cr&>>>
-    CCC_CPP20_CONSTEXPR expected& assign(const unexpected<G>& e, const Cr& cr = criterion_type())
+    CCC_CPP20_CONSTEXPR expected& assign(const unexpected<G>& e, const Cr& cr = Cr(criterion_type::default_error_value))
     {
         assign_error_(e.error(), cr);
         return *this;
@@ -515,7 +512,7 @@ public:
                   is_nothrow_move_constructible_v<error_type>)>>
     CCC_CPP20_CONSTEXPR expected& operator=(const unexpected<G>& e)
     {
-        return this->operator=(e, criterion_type());  // NOLINT(*-unconventional-assign-operator)
+        return this->assign(e);  // NOLINT(*-unconventional-assign-operator)
     }
 
     template<typename G,
@@ -526,7 +523,7 @@ public:
                   is_nothrow_move_constructible_v<error_type>) &&
                  !is_same_v<remove_cvref<Cr>, in_place_t> && !is_same_v<remove_cvref_t<Cr>, unexpect_t> &&
                  is_constructible_v<criterion_type, Cr> && is_assignable_v<criterion_type&, Cr>>>
-    CCC_CPP20_CONSTEXPR expected& assign(unexpected<G>&& e, Cr&& cr = criterion_type())
+    CCC_CPP20_CONSTEXPR expected& assign(unexpected<G>&& e, Cr&& cr = Cr(criterion_type::default_error_value))
     {
         assign_error_(std::move(e.error()), std::forward<Cr>(cr));
         return *this;
@@ -538,7 +535,7 @@ public:
                                      is_nothrow_move_constructible_v<error_type>)>>
     CCC_CPP20_CONSTEXPR expected& operator=(unexpected<G>&& e)
     {
-        return this->assign(std::move(e), std::move(criterion_type()));  // NOLINT(*-unconventional-assign-operator)
+        return this->assign(std::move(e));  // NOLINT(*-unconventional-assign-operator)
     }
 
 public:  // observer
@@ -676,23 +673,20 @@ private:  // swap
     CCC_CPP20_CONSTEXPR void this_value_swap_with_other_error_(expected& other)
     {
         auto& self = *this;
-
-        using no_throw_construct = decltype([&] {
+        if CCC_CPP17_CONSTEXPR (is_nothrow_move_constructible_v<error_type>) {
             detail::expected_impl::Guard<error_type> guard(other.error_);
 
             construct_at(std::addressof(other.value_), std::move(self.value_));
             destroy_at(std::addressof(self.value_));
             construct_at(std::addressof(self.error_), guard.release());
-        });
-        using other_condition = decltype([&] {
+        }
+        else {
             detail::expected_impl::Guard<value_type> guard(self.value_);
 
             construct_at(std::addressof(self.error_), std::move(other.error_));
             destroy_at(std::addressof(other.error_));
             construct_at(std::addressof(other.value_), guard.release());
-        });
-
-        conditional_t<is_nothrow_move_constructible_v<error_type>, no_throw_construct, other_condition>{}();
+        }
     }
 
 public:
@@ -830,6 +824,8 @@ public:  // operator==
         return lhs.has_value() && *lhs == val;
     }
 };
+
+CCC_MODULE_EXPORT_END
 
 }  // namespace ccc
 
