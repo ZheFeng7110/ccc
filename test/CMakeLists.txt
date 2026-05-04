@@ -9,11 +9,10 @@ set(CCC_TEST_CPP_STANDARD 17 CACHE STRING
     "Set the C++ standard for testing."
 )
 set_property(CACHE CCC_TEST_CPP_STANDARD
-    PROPERTY STRINGS "14;17;20;23"
+    PROPERTY STRINGS "11;14;17;20;23"
 )
 
-if ((${CCC_TEST_CPP_STANDARD} LESS 20) AND
-    (CCC_USE_CPP_MODULES))
+if ((${CCC_TEST_CPP_STANDARD} LESS 20) AND (CCC_USE_CPP_MODULES))
     message(FATAL_ERROR "Use modules requires C++20 or higher!")
 endif ()
 
@@ -46,7 +45,16 @@ set(CMAKE_CXX_STANDARD "${CCC_TEST_CPP_STANDARD}"
 
 add_executable(${PROJECT_NAME})
 
-file(GLOB_RECURSE cccPipeOperatorHelperTestSources "pipe_operator_helper_test/*.cc")
+function (globSources cmd variable cxxStdRequired)
+    if (${cxxStdRequired} LESS_EQUAL CMAKE_CXX_STANDARD)
+        file(${cmd} tmpSources ${ARGN})
+        set(${variable} ${tmpSources} PARENT_SCOPE)
+    else ()
+        set(${variable} "" PARENT_SCOPE)
+    endif ()
+endfunction ()
+
+globSources(GLOB_RECURSE cccPipeOperatorHelperTestSources 11 "pipe_operator_helper_test/*.cc")
 target_sources(${PROJECT_NAME} PRIVATE
     ${cccPipeOperatorHelperTestSources}
 )

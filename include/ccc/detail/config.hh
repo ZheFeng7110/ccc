@@ -2,8 +2,8 @@
 #ifndef CCC_DETAIL_CONFIG_HH
 #define CCC_DETAIL_CONFIG_HH
 
-#if (__cplusplus < 201403L)
-#error "Library `ccc` requires C++14 or higher."
+#if (__cplusplus < 201103L)
+#error "Library `ccc` requires C++11 or higher."
 #endif
 
 #if (__cplusplus >= 202002L)
@@ -28,6 +28,12 @@
 #define CCC_NO_DISCARD [[nodiscard]]
 #else
 #define CCC_NO_DISCARD
+#endif
+
+#if (__cplusplus >= 201703L)
+#define CCC_MAYBE_UNUSED [[maybe_unused]]
+#else
+#define CCC_MAYBE_UNUSED
 #endif
 
 #ifdef CCC_MODULE_INTERFACE_UNIT

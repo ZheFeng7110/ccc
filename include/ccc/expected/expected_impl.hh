@@ -178,6 +178,15 @@ public:
         return has_value();
     }
 
+    CCC_NO_DISCARD constexpr const criterion_type& criterion() const noexcept
+    {
+        return criterion_;
+    }
+    CCC_NO_DISCARD constexpr criterion_type& criterion() noexcept
+    {
+        return criterion_;
+    }
+
 public:  // Constructors
     constexpr expected() : value_(), criterion_() {}
 
@@ -467,7 +476,7 @@ public:
     template<typename U = remove_cv_t<value_type>,
              typename Cr = remove_cv_t<criterion_type>,
              typename = enable_if_t<
-                 (!is_same_v<expected, remove_cvref_t<U>>) && (!detail::is_unexpected_v<remove_cvref_t<U>>) &&
+                 !is_same_v<expected, remove_cvref_t<U>> && !detail::is_unexpected_v<remove_cvref_t<U>> &&
                  is_constructible_v<value_type, U> && is_assignable_v<value_type&, U> &&
                  !is_same_v<remove_cvref<Cr>, in_place_t> && !is_same_v<remove_cvref_t<Cr>, unexpect_t> &&
                  is_constructible_v<criterion_type, Cr> && is_assignable_v<criterion_type&, Cr> &&
@@ -578,7 +587,7 @@ public:  // observer
 
     constexpr const value_type& value() const&
     {
-        static_assert(is_copy_constructible_v<error_type>);
+        static_assert(is_copy_constructible_v<error_type>, "error_type must be copy constructible");
         if (!has_value()) {
             throw bad_expected_access<error_type>(as_const(error_));
         }
@@ -586,7 +595,7 @@ public:  // observer
     }
     constexpr value_type& value() &
     {
-        static_assert(is_copy_constructible_v<error_type>);
+        static_assert(is_copy_constructible_v<error_type>, "error_type must be copy constructible");
         if (!has_value()) {
             throw bad_expected_access<error_type>(as_const(error_));
         }
@@ -594,8 +603,9 @@ public:  // observer
     }
     constexpr value_type&& value() &&
     {
-        static_assert(is_copy_constructible_v<error_type>);
-        static_assert(is_constructible_v<error_type, error_type&&>);
+        static_assert(is_copy_constructible_v<error_type>, "error_type must be copy constructible");
+        static_assert(is_constructible_v<error_type, error_type&&>,
+                      "error_type must be constructible from rvalue reference of itself");
         if (!has_value()) {
             throw bad_expected_access<error_type>(std::move(error_));
         }
@@ -603,8 +613,9 @@ public:  // observer
     }
     constexpr const value_type&& value() const&&
     {
-        static_assert(is_copy_constructible_v<error_type>);
-        static_assert(is_constructible_v<error_type, const error_type&&>);
+        static_assert(is_copy_constructible_v<error_type>, "error_type must be copy constructible");
+        static_assert(is_constructible_v<error_type, const error_type&&>,
+                      "error_type must be constructible from rvalue reference of itself");
         if (!has_value()) {
             throw bad_expected_access<error_type>(std::move(error_));
         }
@@ -615,8 +626,8 @@ public:  // observer
     constexpr value_type value_or(U&& v) const& noexcept(
         conjunction_v<std::is_nothrow_copy_constructible<value_type>, std::is_nothrow_convertible<U, value_type>>)
     {
-        static_assert(is_copy_constructible_v<value_type>);
-        static_assert(is_convertible_v<U, value_type>);
+        static_assert(is_copy_constructible_v<value_type>, "value_type must be copy constructible");
+        static_assert(is_convertible_v<U, value_type>, "U must be convertible to value_type");
 
         if (has_value()) {
             return value_;
@@ -628,8 +639,8 @@ public:  // observer
     constexpr value_type value_or(U&& v) && noexcept(
         conjunction_v<std::is_nothrow_move_constructible<value_type>, std::is_nothrow_convertible<U, value_type>>)
     {
-        static_assert(is_move_constructible_v<value_type>);
-        static_assert(is_convertible_v<U, value_type>);
+        static_assert(is_move_constructible_v<value_type>, "value_type must be move constructible");
+        static_assert(is_convertible_v<U, value_type>, "U must be convertible to value_type");
 
         if (has_value()) {
             return std::move(value_);
@@ -640,8 +651,8 @@ public:  // observer
     template<typename G = error_type>
     constexpr error_type error_or(G&& e) const&
     {
-        static_assert(is_copy_constructible_v<error_type>);
-        static_assert(is_convertible_v<G, error_type>);
+        static_assert(is_copy_constructible_v<error_type>, "error_type must be copy constructible");
+        static_assert(is_convertible_v<G, error_type>, "G must be convertible to error_type");
 
         if (has_value()) {
             return std::forward<G>(e);
@@ -652,8 +663,8 @@ public:  // observer
     template<typename G = error_type>
     constexpr error_type error_or(G&& e) &&
     {
-        static_assert(is_move_constructible_v<error_type>);
-        static_assert(is_convertible_v<G, error_type>);
+        static_assert(is_move_constructible_v<error_type>, "error_type must be move constructible");
+        static_assert(is_convertible_v<G, error_type>, "G must be convertible to error_type");
 
         if (has_value()) {
             return std::forward<G>(e);
@@ -723,6 +734,66 @@ public:
         -> void_t<decltype(lhs.swap(rhs))>
     {
         lhs.swap(rhs);
+    }
+
+private:  // emplace
+    CCC_CPP20_CONSTEXPR void emplace_preprocess_()
+    {
+        if (has_value()) {
+            destroy_at(std::addressof(value_));
+        }
+        else {
+            destroy_at(std::addressof(error_));
+        }
+    }
+
+public:
+    template<typename... Args,
+             typename = enable_if_t<is_nothrow_constructible_v<value_type, Args...> &&
+                                    is_nothrow_constructible_v<criterion_type, criterion_type> &&
+                                    is_nothrow_assignable_v<criterion_type&, criterion_type>>>
+    CCC_CPP20_CONSTEXPR value_type& emplace(Args&&... args) noexcept
+    {
+        emplace_preprocess_();
+        criterion_ = criterion_type();
+        return *construct_at(std::addressof(value_), std::forward<Args>(args)...);
+    }
+    template<typename U,
+             typename... Args,
+             typename = enable_if_t<is_nothrow_constructible_v<value_type, std::initializer_list<U>&, Args...> &&
+                                    is_nothrow_constructible_v<criterion_type, criterion_type> &&
+                                    is_nothrow_assignable_v<criterion_type&, criterion_type>>>
+    CCC_CPP20_CONSTEXPR value_type& emplace(std::initializer_list<U> il, Args&&... args) noexcept
+    {
+        emplace_preprocess_();
+        criterion_ = criterion_type();
+        return *construct_at(std::addressof(value_), il, std::forward<Args>(args)...);
+    }
+
+    template<typename Cr,
+             typename... Args,
+             typename = enable_if_t<is_nothrow_constructible_v<value_type, Args...> &&
+                                    is_nothrow_constructible_v<criterion_type, Cr> &&
+                                    is_nothrow_assignable_v<criterion_type&, Cr>>>
+    CCC_CPP20_CONSTEXPR value_type& emplace_with_criterion(Cr&& cr, Args&&... args) noexcept
+    {
+        emplace_preprocess_();
+        criterion_ = std::forward<Cr>(cr);
+        return *construct_at(std::addressof(value_), std::forward<Args>(args)...);
+    }
+    template<typename Cr,
+             typename U,
+             typename... Args,
+             typename = enable_if_t<is_nothrow_constructible_v<value_type, std::initializer_list<U>&, Args...> &&
+                                    is_nothrow_constructible_v<criterion_type, Cr> &&
+                                    is_nothrow_assignable_v<criterion_type&, Cr>>>
+    CCC_CPP20_CONSTEXPR value_type& emplace_with_criterion(Cr&& cr,
+                                                           std::initializer_list<U> il,
+                                                           Args&&... args) noexcept
+    {
+        emplace_preprocess_();
+        criterion_ = std::forward<Cr>(cr);
+        return *construct_at(std::addressof(value_), il, std::forward<Args>(args)...);
     }
 
 public:  // operator==

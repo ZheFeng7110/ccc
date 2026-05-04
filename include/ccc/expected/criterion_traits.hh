@@ -18,13 +18,23 @@ struct is_valid_criterion_type : std::false_type {
 };
 
 template<typename T>
-struct is_valid_criterion_type<T,
-                               void_t<typename T::value_type,
-                                      decltype(std::declval<T>().has_value()),
-                                      decltype(T::default_error_value),
-                                      decltype(std::declval<T>() == std::declval<T>())>,
-                               enable_if_t<is_convertible_v<decltype(std::declval<T>() == std::declval<T>()), bool>>>
-    : std::true_type {
+constexpr bool criterion_type_is_nothrow_callable() noexcept
+{
+    CCC_MAYBE_UNUSED T v{};
+    return noexcept(v.has_value()) && noexcept(v == v);
+}
+
+template<typename T>
+struct is_valid_criterion_type<
+    T,
+    void_t<typename T::value_type,
+           decltype(std::declval<T>().has_value()),
+           decltype(T::default_error_value),
+           decltype(std::declval<T>() == std::declval<T>())>,
+    enable_if_t<is_nothrow_default_constructible_v<T> && is_nothrow_constructible_v<T, typename T::value_type> &&
+                is_convertible_v<decltype(std::declval<T>().has_value()), bool> &&
+                is_convertible_v<decltype(std::declval<T>() == std::declval<T>()), bool> &&
+                criterion_type_is_nothrow_callable<T>()>> : std::true_type {
 };
 
 template<typename T>
