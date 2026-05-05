@@ -21,6 +21,7 @@
 
 #if (__cplusplus >= 202002L)
 #include <compare>
+#include <concepts>
 #endif
 #endif
 

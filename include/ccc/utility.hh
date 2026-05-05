@@ -201,7 +201,25 @@ using remove_cvref = std::remove_cvref<T>;
 #endif
 
 template<typename T>
-using remove_cvref_t = remove_cvref<T>::type;
+using remove_cvref_t = typename remove_cvref<T>::type;
+
+#ifdef __cpp_lib_is_nothrow_convertible
+template<typename From, typename To>
+using is_nothrow_convertible = std::is_nothrow_convertible<From, To>;
+#else
+template<typename From, typename To, typename = void>
+struct is_nothrow_convertible : conjunction<std::is_void<From>, std::is_void<To>> {
+};
+
+template<typename From, typename To>
+struct is_nothrow_convertible<
+    From,
+    To,
+    enable_if_t<std::is_void<void_t<decltype(static_cast<To (*)()>(nullptr)),
+                                    decltype(std::declval<void (&)(To) noexcept>()(std::declval<From>()))>>::value &&
+                noexcept(std::declval<void (&)(To) noexcept>()(std::declval<From>()))>> : std::true_type {
+};
+#endif
 
 template<typename T>
 using remove_cv_t = typename std::remove_cv<T>::type;
@@ -384,6 +402,8 @@ template<typename Base, typename Derived>
 constexpr bool is_base_of_v = std::is_base_of<Base, Derived>::value;
 template<typename From, typename To>
 constexpr bool is_convertible_v = std::is_convertible<From, To>::value;
+template<typename From, typename To>
+constexpr bool is_nothrow_convertible_v = is_nothrow_convertible<From, To>::value;
 
 CCC_MODULE_EXPORT_END
 
@@ -428,7 +448,7 @@ inline CCC_CPP20_CONSTEXPR T* construct_at(T* location,
                                                                                  T(std::declval<Args>()...)))
 {
 #if (__cplusplus < 202002L)
-    static_assert(!std::is_unbounded_array<T>::value, "construct_at does not support unbounded array types");
+    static_assert(!is_unbounded_array_v<T>, "construct_at does not support unbounded array types");
     return detail::construct_at(conditional_t<is_array_v<T>,
                                               detail::construct_at_is_array_type_tag,
                                               detail::construct_at_is_not_array_type_tag>{},

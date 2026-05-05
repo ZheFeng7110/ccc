@@ -33,14 +33,19 @@ block (SCOPE_FOR POLICIES)
     endif ()
 endblock ()
 
+message(STATUS "CMAKE_CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID}")
+message(STATUS "CMAKE_CXX_COMPILER_VERSION=${CMAKE_CXX_COMPILER_VERSION}")
+
 if (MSVC)
     add_compile_options(/W4 /Zc:__cplusplus)
 else ()
     add_compile_options(-Wall -Wextra -Wpedantic)
 endif ()
 
-if ((${CMAKE_CXX_COMPILER_ID} MATCHES "GNU"))
-    add_compile_options(-fdiagnostics-all-candidates)
+if ((${CMAKE_CXX_COMPILER_ID} MATCHES "GNU") AND
+    (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16))
+    add_compile_options(-fdiagnostics-all-candidates -fdiagnostics-add-output=experimental-html)
+    message(TRACE "Added -fdiagnostics-all-candidates for GCC 16 or higher")
 endif ()
 
 set(CMAKE_CXX_STANDARD "${CCC_TEST_CPP_STANDARD}"
