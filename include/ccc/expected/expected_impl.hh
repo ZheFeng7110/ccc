@@ -1172,10 +1172,10 @@ public:
         using FuncResult = detail::expected_impl::result<Func, value_type&>;
         static_assert(detail::is_expected_v<FuncResult>,
                       "The function passed to ccc::expected<T, E, Criterion>::and_then must return a ccc::expected");
-        static_assert(is_same_v<error_type, FuncResult::error_type>,
+        static_assert(is_same_v<error_type, typename FuncResult::error_type>,
                       "The function passed to ccc::expected<T, E, Criterion>::and_then must return a ccc::expected "
                       "with the same error_type");
-        static_assert(is_same_v<criterion_type, FuncResult::criterion_type>,
+        static_assert(is_same_v<criterion_type, typename FuncResult::criterion_type>,
                       "The function passed to ccc::expected<T, E, Criterion>::and_then must return a ccc::expected "
                       "with the same criterion_type");
 
@@ -1199,10 +1199,10 @@ public:
         using FuncResult = detail::expected_impl::result<Func, error_type&>;
         static_assert(detail::is_expected_v<FuncResult>,
                       "The function passed to ccc::expected<T, E, Criterion>::or_else must return a ccc::expected");
-        static_assert(is_same_v<value_type, FuncResult::value_type>,
+        static_assert(is_same_v<value_type, typename FuncResult::value_type>,
                       "The function passed to ccc::expected<T, E, Criterion>::or_else must return a ccc::expected "
                       "with the same value_type");
-        static_assert(is_same_v<criterion_type, FuncResult::criterion_type>,
+        static_assert(is_same_v<criterion_type, typename FuncResult::criterion_type>,
                       "The function passed to ccc::expected<T, E, Criterion>::or_else must return a ccc::expected "
                       "with the same criterion_type");
 
