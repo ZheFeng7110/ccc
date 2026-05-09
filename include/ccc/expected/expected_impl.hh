@@ -1161,7 +1161,8 @@ public:
     template<typename Func
 #ifndef __cpp_concepts
              ,
-             typename = enable_if_t<is_constructible_v<error_type, error_type&>>
+             typename = enable_if_t<is_constructible_v<error_type, error_type&> &&
+                                    is_constructible_v<criterion_type, criterion_type&>>
 #endif
              >
 #ifdef __cpp_concepts
@@ -1188,11 +1189,13 @@ public:
     template<typename Func
 #ifndef __cpp_concepts
              ,
-             typename = enable_if_t<is_constructible_v<error_type, const error_type&>>
+             typename = enable_if_t<is_constructible_v<error_type, const error_type&> &&
+                                    is_constructible_v<criterion_type, const criterion_type&>>
 #endif
              >
 #ifdef __cpp_concepts
-        requires(is_constructible_v<error_type, const error_type&> && is_constructible_v<criterion_type, const criterion_type&>)
+        requires(is_constructible_v<error_type, const error_type&> &&
+                 is_constructible_v<criterion_type, const criterion_type&>)
 #endif
     CCC_CPP20_CONSTEXPR auto and_then(Func&& func) const&
     {
@@ -1215,11 +1218,12 @@ public:
     template<typename Func
 #ifndef __cpp_concepts
              ,
-             typename = enable_if_t<is_constructible_v<error_type, error_type&&>>
+             typename = enable_if_t<is_constructible_v<error_type, error_type&&> &&
+                                    is_constructible_v<criterion_type, criterion_type&&>>
 #endif
              >
 #ifdef __cpp_concepts
-        requires(is_constructible_v<error_type, error_type&&> && is_constructible_v<criterion_type, criterion_type&&>)
+        requires(is_constructible_v<error_type, error_type &&> && is_constructible_v<criterion_type, criterion_type &&>)
 #endif
     CCC_CPP20_CONSTEXPR auto and_then(Func&& func) &&
     {
@@ -1242,11 +1246,13 @@ public:
     template<typename Func
 #ifndef __cpp_concepts
              ,
-             typename = enable_if_t<is_constructible_v<error_type, const error_type&&>>
+             typename = enable_if_t<is_constructible_v<error_type, const error_type&&> &&
+                                    is_constructible_v<criterion_type, const criterion_type&&>>
 #endif
              >
 #ifdef __cpp_concepts
-        requires(is_constructible_v<error_type, const error_type&&> && is_constructible_v<criterion_type, const criterion_type&&>)
+        requires(is_constructible_v<error_type, const error_type &&> &&
+                 is_constructible_v<criterion_type, const criterion_type &&>)
 #endif
     CCC_CPP20_CONSTEXPR auto and_then(Func&& func) const&&
     {
@@ -1269,7 +1275,8 @@ public:
     template<typename Func
 #ifndef __cpp_concepts
              ,
-             typename = enable_if_t<is_constructible_v<value_type, value_type&>>
+             typename = enable_if_t<is_constructible_v<value_type, value_type&> &&
+                                    is_constructible_v<criterion_type, criterion_type&>>
 #endif
              >
 #ifdef __cpp_concepts
@@ -1296,11 +1303,13 @@ public:
     template<typename Func
 #ifndef __cpp_concepts
              ,
-             typename = enable_if_t<is_constructible_v<value_type, const value_type&>>
+             typename = enable_if_t<is_constructible_v<value_type, const value_type&> &&
+                                    is_constructible_v<criterion_type, const criterion_type&>>
 #endif
              >
 #ifdef __cpp_concepts
-        requires(is_constructible_v<value_type, const value_type&> && is_constructible_v<criterion_type, const criterion_type&>)
+        requires(is_constructible_v<value_type, const value_type&> &&
+                 is_constructible_v<criterion_type, const criterion_type&>)
 #endif
     CCC_CPP20_CONSTEXPR auto or_else(Func&& func) const&
     {
@@ -1323,11 +1332,12 @@ public:
     template<typename Func
 #ifndef __cpp_concepts
              ,
-             typename = enable_if_t<is_constructible_v<value_type, value_type&&>>
+             typename = enable_if_t<is_constructible_v<value_type, value_type&&> &&
+                                    is_constructible_v<criterion_type, criterion_type&&>>
 #endif
              >
 #ifdef __cpp_concepts
-        requires(is_constructible_v<value_type, value_type&&> && is_constructible_v<criterion_type, criterion_type&&>)
+        requires(is_constructible_v<value_type, value_type &&> && is_constructible_v<criterion_type, criterion_type &&>)
 #endif
     CCC_CPP20_CONSTEXPR auto or_else(Func&& func) &&
     {
@@ -1350,11 +1360,13 @@ public:
     template<typename Func
 #ifndef __cpp_concepts
              ,
-             typename = enable_if_t<is_constructible_v<value_type, const value_type&&>>
+             typename = enable_if_t<is_constructible_v<value_type, const value_type&&> &&
+                                    is_constructible_v<criterion_type, const criterion_type&&>>
 #endif
              >
 #ifdef __cpp_concepts
-        requires(is_constructible_v<value_type, const value_type&&> && is_constructible_v<criterion_type, const criterion_type&&>)
+        requires(is_constructible_v<value_type, const value_type &&> &&
+                 is_constructible_v<criterion_type, const criterion_type &&>)
 #endif
     CCC_CPP20_CONSTEXPR auto or_else(Func&& func) const&&
     {
@@ -1402,8 +1414,17 @@ public:
         }
     }
 
-    template<typename Func>
-        requires(is_constructible_v<error_type, const error_type&> && is_constructible_v<criterion_type, const criterion_type&>)
+    template<typename Func
+#ifndef __cpp_concepts
+             ,
+             typename = enable_if_t<is_constructible_v<error_type, const error_type&> &&
+                                    is_constructible_v<criterion_type, const criterion_type&>>
+#endif
+             >
+#ifdef __cpp_concepts
+        requires(is_constructible_v<error_type, const error_type&> &&
+                 is_constructible_v<criterion_type, const criterion_type&>)
+#endif
     constexpr auto transform(Func&& func) const&
     {
         using U = detail::expected_impl::result_xform<Func, const value_type&>;
@@ -1430,8 +1451,16 @@ public:
         }
     }
 
-    template<typename Func>
-        requires(is_constructible_v<error_type, error_type&&> && is_constructible_v<criterion_type, criterion_type&&>)
+    template<typename Func
+#ifndef __cpp_concepts
+             ,
+             typename = enable_if_t<is_constructible_v<error_type, error_type&&> &&
+                                    is_constructible_v<criterion_type, criterion_type&&>>
+#endif
+             >
+#ifdef __cpp_concepts
+        requires(is_constructible_v<error_type, error_type &&> && is_constructible_v<criterion_type, criterion_type &&>)
+#endif
     constexpr auto transform(Func&& func) &&
     {
         using U = detail::expected_impl::result_xform<Func, value_type&&>;
@@ -1442,24 +1471,35 @@ public:
 
             using Result = expected<Value, error_type, CriterionType>;
             if (has_value()) {
-                return Result(detail::expected_impl::in_place_invoke,
-                              detail::expected_impl::transform_func_return_2_values,
-                              [&] { return std::invoke(std::forward<Func>(func), std::move(value_), std::move(criterion_)); });
+                return Result(
+                    detail::expected_impl::in_place_invoke,
+                    detail::expected_impl::transform_func_return_2_values,
+                    [&] { return std::invoke(std::forward<Func>(func), std::move(value_), std::move(criterion_)); });
             }
             return Result(unexpect, std::move(error_), std::move(criterion_));
         }
         else {
             using Result = expected<U, error_type, criterion_type>;
             if (has_value()) {
-                return Result(detail::expected_impl::in_place_invoke,
-                              [&] { return std::invoke(std::forward<Func>(func), std::move(value_), std::move(criterion_)); });
+                return Result(detail::expected_impl::in_place_invoke, [&] {
+                    return std::invoke(std::forward<Func>(func), std::move(value_), std::move(criterion_));
+                });
             }
             return Result(unexpect, std::move(error_), std::move(criterion_));
         }
     }
 
-    template<typename Func>
-        requires(is_constructible_v<error_type, const error_type&&> && is_constructible_v<criterion_type, const criterion_type&&>)
+    template<typename Func
+#ifndef __cpp_concepts
+             ,
+             typename = enable_if_t<is_constructible_v<error_type, const error_type&&> &&
+                                    is_constructible_v<criterion_type, const criterion_type&&>>
+#endif
+             >
+#ifdef __cpp_concepts
+        requires(is_constructible_v<error_type, const error_type &&> &&
+                 is_constructible_v<criterion_type, const criterion_type &&>)
+#endif
     constexpr auto transform(Func&& func) const&&
     {
         using U = detail::expected_impl::result_xform<Func, const value_type&&>;
@@ -1470,17 +1510,19 @@ public:
 
             using Result = expected<Value, error_type, CriterionType>;
             if (has_value()) {
-                return Result(detail::expected_impl::in_place_invoke,
-                              detail::expected_impl::transform_func_return_2_values,
-                              [&] { return std::invoke(std::forward<Func>(func), std::move(value_), std::move(criterion_)); });
+                return Result(
+                    detail::expected_impl::in_place_invoke,
+                    detail::expected_impl::transform_func_return_2_values,
+                    [&] { return std::invoke(std::forward<Func>(func), std::move(value_), std::move(criterion_)); });
             }
             return Result(unexpect, std::move(error_), std::move(criterion_));
         }
         else {
             using Result = expected<U, error_type, criterion_type>;
             if (has_value()) {
-                return Result(detail::expected_impl::in_place_invoke,
-                              [&] { return std::invoke(std::forward<Func>(func), std::move(value_), std::move(criterion_)); });
+                return Result(detail::expected_impl::in_place_invoke, [&] {
+                    return std::invoke(std::forward<Func>(func), std::move(value_), std::move(criterion_));
+                });
             }
             return Result(unexpect, std::move(error_), std::move(criterion_));
         }
@@ -1514,8 +1556,17 @@ public:
         }
     }
 
-    template<typename Func>
-        requires(is_constructible_v<value_type, const value_type&> && is_constructible_v<criterion_type, const criterion_type&>)
+    template<typename Func
+#ifndef __cpp_concepts
+             ,
+             typename = enable_if_t<is_constructible_v<value_type, const value_type&> &&
+                                    is_constructible_v<criterion_type, const criterion_type&>>
+#endif
+             >
+#ifdef __cpp_concepts
+        requires(is_constructible_v<value_type, const value_type&> &&
+                 is_constructible_v<criterion_type, const criterion_type&>)
+#endif
     constexpr auto transform_error(Func&& func) const&
     {
         using U = detail::expected_impl::result_xform<Func, const error_type&>;
@@ -1542,8 +1593,16 @@ public:
         }
     }
 
-    template<typename Func>
-        requires(is_constructible_v<value_type, value_type&&> && is_constructible_v<criterion_type, criterion_type&&>)
+    template<typename Func
+#ifndef __cpp_concepts
+             ,
+             typename = enable_if_t<is_constructible_v<value_type, value_type&&> &&
+                                    is_constructible_v<criterion_type, criterion_type&&>>
+#endif
+             >
+#ifdef __cpp_concepts
+        requires(is_constructible_v<value_type, value_type &&> && is_constructible_v<criterion_type, criterion_type &&>)
+#endif
     constexpr auto transform_error(Func&& func) &&
     {
         using U = detail::expected_impl::result_xform<Func, error_type&&>;
@@ -1556,22 +1615,33 @@ public:
             if (has_value()) {
                 return Result(in_place, std::move(value_), std::move(criterion_));
             }
-            return Result(detail::expected_impl::unexpect_invoke,
-                          detail::expected_impl::transform_func_return_2_values,
-                          [&] { return std::invoke(std::forward<Func>(func), std::move(error_), std::move(criterion_)); });
+            return Result(
+                detail::expected_impl::unexpect_invoke,
+                detail::expected_impl::transform_func_return_2_values,
+                [&] { return std::invoke(std::forward<Func>(func), std::move(error_), std::move(criterion_)); });
         }
         else {
             using Result = expected<value_type, U, criterion_type>;
             if (has_value()) {
                 return Result(in_place, std::move(value_), std::move(criterion_));
             }
-            return Result(detail::expected_impl::unexpect_invoke,
-                          [&] { return std::invoke(std::forward<Func>(func), std::move(error_), std::move(criterion_)); });
+            return Result(detail::expected_impl::unexpect_invoke, [&] {
+                return std::invoke(std::forward<Func>(func), std::move(error_), std::move(criterion_));
+            });
         }
     }
 
-    template<typename Func>
-        requires(is_constructible_v<value_type, const value_type&&> && is_constructible_v<criterion_type, const criterion_type&&>)
+    template<typename Func
+#ifndef __cpp_concepts
+             ,
+             typename = enable_if_t<is_constructible_v<value_type, const value_type&&> &&
+                                    is_constructible_v<criterion_type, const criterion_type&&>>
+#endif
+             >
+#ifdef __cpp_concepts
+        requires(is_constructible_v<value_type, const value_type &&> &&
+                 is_constructible_v<criterion_type, const criterion_type &&>)
+#endif
     constexpr auto transform_error(Func&& func) const&&
     {
         using U = detail::expected_impl::result_xform<Func, const error_type&&>;
@@ -1584,17 +1654,19 @@ public:
             if (has_value()) {
                 return Result(in_place, std::move(value_), std::move(criterion_));
             }
-            return Result(detail::expected_impl::unexpect_invoke,
-                          detail::expected_impl::transform_func_return_2_values,
-                          [&] { return std::invoke(std::forward<Func>(func), std::move(error_), std::move(criterion_)); });
+            return Result(
+                detail::expected_impl::unexpect_invoke,
+                detail::expected_impl::transform_func_return_2_values,
+                [&] { return std::invoke(std::forward<Func>(func), std::move(error_), std::move(criterion_)); });
         }
         else {
             using Result = expected<value_type, U, criterion_type>;
             if (has_value()) {
                 return Result(in_place, std::move(value_), std::move(criterion_));
             }
-            return Result(detail::expected_impl::unexpect_invoke,
-                          [&] { return std::invoke(std::forward<Func>(func), std::move(error_), std::move(criterion_)); });
+            return Result(detail::expected_impl::unexpect_invoke, [&] {
+                return std::invoke(std::forward<Func>(func), std::move(error_), std::move(criterion_));
+            });
         }
     }
 #endif  // (__cplusplus >= 201703L)
