@@ -8,7 +8,10 @@
 #include "ccc/detail/config.hh"
 
 #ifndef CCC_MODULE_INTERFACE_UNIT
+#include <cstddef>
+
 #include <utility>
+#include <tuple>
 #include <type_traits>
 #include <memory>
 #endif
@@ -404,6 +407,11 @@ template<typename From, typename To>
 constexpr bool is_convertible_v = std::is_convertible<From, To>::value;
 template<typename From, typename To>
 constexpr bool is_nothrow_convertible_v = is_nothrow_convertible<From, To>::value;
+
+template<typename Tuple>
+constexpr std::size_t tuple_size_v = std::tuple_size<Tuple>::value;
+template<std::size_t I, typename Tuple>
+using tuple_element_t = typename std::tuple_element<I, Tuple>::type;
 
 CCC_MODULE_EXPORT_END
 
