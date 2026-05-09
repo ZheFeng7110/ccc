@@ -12,6 +12,10 @@
 #include "ccc/utility.hh"
 
 #ifndef CCC_MODULE_INTERFACE_UNIT
+#include <cstddef>
+
+#include <array>
+#include <tuple>
 #include <exception>
 #include <functional>
 #include <type_traits>

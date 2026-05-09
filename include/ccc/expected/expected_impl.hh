@@ -67,6 +67,44 @@ constexpr bool is_expected_v = is_expected<T>::value;
 
 namespace expected_impl {
 
+#if (__cplusplus >= 201703L)
+
+template<typename Func, typename T>
+using result = remove_cvref_t<std::invoke_result_t<Func&&, T&&>>;
+
+template<typename Func, typename T>
+using result_xform = remove_cv_t<std::invoke_result_t<Func&&, T&&>>;
+
+constexpr struct in_place_invoke_tag {
+} in_place_invoke;
+
+constexpr struct unexpect_invoke_tag {
+} unexpect_invoke;
+
+template<typename>
+struct is_transform_func_return_2values : std::false_type {
+};
+
+template<typename T, typename U>
+struct is_transform_func_return_2values<std::pair<T, U>> : std::true_type {
+};
+
+template<typename T, typename U>
+struct is_transform_func_return_2values<std::tuple<T, U>> : std::true_type {
+};
+
+template<typename T>
+struct is_transform_func_return_2values<std::array<T, 2>> : std::true_type {
+};
+
+template<typename T>
+constexpr bool is_transform_func_return_2values_v = is_transform_func_return_2values<T>::value;
+
+constexpr struct transform_func_return_2values_tag {
+} transform_func_return_2_values;
+
+#endif  // (__cplusplus >= 201703L)
+
 template<typename T>
 struct Guard {
     static_assert(std::is_nothrow_move_constructible<T>::value, "T must be nothrow move constructible");
@@ -817,8 +855,8 @@ public:  // observer
     }
 
     template<typename U = remove_cv_t<value_type>>
-    constexpr value_type value_or(U&& v) const& noexcept(
-        is_nothrow_copy_constructible_v<value_type> && is_nothrow_convertible_v<U, value_type>)
+    constexpr value_type value_or(U&& v) const& noexcept(is_nothrow_copy_constructible_v<value_type> &&
+                                                         is_nothrow_convertible_v<U, value_type>)
     {
         static_assert(is_copy_constructible_v<value_type>, "value_type must be copy constructible");
         static_assert(is_convertible_v<U, value_type>, "U must be convertible to value_type");
@@ -1090,6 +1128,146 @@ public:  // operator==
         const auto& lhs = *this;
         return lhs.has_value() && *lhs == val;
     }
+
+#if (__cplusplus >= 201703L)
+private:  // Monadic operations
+    template<typename Func>
+    explicit constexpr expected(detail::expected_impl::in_place_invoke_tag,
+                                detail::expected_impl::transform_func_return_2values_tag,
+                                Func&& func)
+    {
+        std::tie(value_, criterion_) = std::invoke(std::forward<Func>(func));
+    }
+    template<typename Func>
+    explicit constexpr expected(detail::expected_impl::in_place_invoke_tag, Func&& func)
+        : value_(std::invoke(std::forward<Func>(func))), criterion_()
+    {
+    }
+
+    template<typename Func>
+    explicit constexpr expected(detail::expected_impl::unexpect_invoke_tag,
+                                detail::expected_impl::transform_func_return_2values_tag,
+                                Func&& func)
+    {
+        std::tie(error_, criterion_) = std::invoke(std::forward<Func>(func));
+    }
+    template<typename Func>
+    explicit constexpr expected(detail::expected_impl::unexpect_invoke_tag, Func&& func)
+        : error_(std::invoke(std::forward<Func>(func))), criterion_(criterion_type::default_error_value)
+    {
+    }
+
+public:
+    template<typename Func
+#ifndef __cpp_concepts
+             ,
+             typename = enable_if_t<is_constructible_v<error_type, error_type&>>
+#endif
+             >
+#ifdef __cpp_concepts
+        requires(is_constructible_v<error_type, error_type&>)
+#endif
+    CCC_CPP20_CONSTEXPR auto and_then(Func&& func) &
+    {
+        using FuncResult = detail::expected_impl::result<Func, value_type&>;
+        static_assert(detail::is_expected_v<FuncResult>,
+                      "The function passed to ccc::expected<T, E, Criterion>::and_then must return a ccc::expected");
+        static_assert(is_same_v<error_type, FuncResult::error_type>,
+                      "The function passed to ccc::expected<T, E, Criterion>::and_then must return a ccc::expected "
+                      "with the same error_type");
+        static_assert(is_same_v<criterion_type, FuncResult::criterion_type>,
+                      "The function passed to ccc::expected<T, E, Criterion>::and_then must return a ccc::expected "
+                      "with the same criterion_type");
+
+        if (has_value()) {
+            return std::invoke(std::forward<Func>(func), value_, criterion_);
+        }
+        return FuncResult(unexpect, error_, criterion_);
+    }
+
+    template<typename Func
+#ifndef __cpp_concepts
+             ,
+             typename = enable_if_t<is_constructible_v<value_type, value_type&>>
+#endif
+             >
+#ifdef __cpp_concepts
+        requires(is_constructible_v<value_type, value_type&>)
+#endif
+    CCC_CPP20_CONSTEXPR auto or_else(Func&& func) &
+    {
+        using FuncResult = detail::expected_impl::result<Func, error_type&>;
+        static_assert(detail::is_expected_v<FuncResult>,
+                      "The function passed to ccc::expected<T, E, Criterion>::or_else must return a ccc::expected");
+        static_assert(is_same_v<value_type, FuncResult::value_type>,
+                      "The function passed to ccc::expected<T, E, Criterion>::or_else must return a ccc::expected "
+                      "with the same value_type");
+        static_assert(is_same_v<criterion_type, FuncResult::criterion_type>,
+                      "The function passed to ccc::expected<T, E, Criterion>::or_else must return a ccc::expected "
+                      "with the same criterion_type");
+
+        if (has_value()) {
+            return FuncResult(in_place, value_, criterion_);
+        }
+        return std::invoke(std::forward<Func>(func), error_, criterion_);
+    }
+
+    template<typename Func>
+        requires is_constructible_v<error_type, error_type&>
+    constexpr auto transform(Func&& func) &
+    {
+        using U = detail::expected_impl::result_xform<Func, value_type&>;
+
+        if constexpr (detail::expected_impl::is_transform_func_return_2values_v<remove_cvref_t<U>>) {
+            using Value = tuple_element_t<0, U>;
+            using CriterionType = tuple_element_t<1, U>;
+
+            using Result = expected<Value, error_type, CriterionType>;
+            if (has_value()) {
+                return Result(detail::expected_impl::in_place_invoke,
+                              detail::expected_impl::transform_func_return_2_values,
+                              [&] { return std::invoke(std::forward<Func>(func), value_, criterion_); });
+            }
+            return Result(unexpect, error_, criterion_);
+        }
+        else {
+            using Result = expected<U, error_type, criterion_type>;
+            if (has_value()) {
+                return Result(detail::expected_impl::in_place_invoke,
+                              [&] { return std::invoke(std::forward<Func>(func), value_, criterion_); });
+            }
+            return Result(unexpect, error_, criterion_);
+        }
+    }
+
+    template<typename Func>
+        requires is_constructible_v<value_type, value_type&>
+    constexpr auto transform_error(Func&& func) &
+    {
+        using U = detail::expected_impl::result_xform<Func, error_type&>;
+
+        if constexpr (detail::expected_impl::is_transform_func_return_2values_v<remove_cvref_t<U>>) {
+            using Err = tuple_element_t<0, U>;
+            using CriterionType = tuple_element_t<1, U>;
+
+            using Result = expected<value_type, Err, CriterionType>;
+            if (has_value()) {
+                return Result(in_place, value_, criterion_);
+            }
+            return Result(detail::expected_impl::unexpect_invoke,
+                          detail::expected_impl::transform_func_return_2_values,
+                          [&] { return std::invoke(std::forward<Func>(func), error_, criterion_); });
+        }
+        else {
+            using Result = expected<value_type, U, criterion_type>;
+            if (has_value()) {
+                return Result(in_place, value_, criterion_);
+            }
+            return Result(detail::expected_impl::unexpect_invoke,
+                          [&] { return std::invoke(std::forward<Func>(func), error_, criterion_); });
+        }
+    }
+#endif  // (__cplusplus >= 201703L)
 };
 
 CCC_MODULE_EXPORT_END
