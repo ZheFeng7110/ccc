@@ -9,9 +9,9 @@
 
 #include "ccc/detail/config.hh"
 
+#ifndef CCC_MODULE_INTERFACE_UNIT
 #include "ccc/utility.hh"
 
-#ifndef CCC_MODULE_INTERFACE_UNIT
 #include <cstddef>
 
 #include <array>

@@ -17,6 +17,8 @@ module;
 
 export module ccc.expected;
 
+export import ccc.utility;
+
 #ifdef __clang__
 #pragma clang diagnostic ignored "-Winclude-angled-in-module-purview"
 #endif
