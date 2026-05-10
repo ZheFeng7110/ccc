@@ -69,11 +69,11 @@ namespace expected_impl {
 
 #if (__cplusplus >= 201703L)
 
-template<typename Func, typename T>
-using result = remove_cvref_t<std::invoke_result_t<Func&&, T&&>>;
+template<typename Func, typename T, typename Cr>
+using result = remove_cvref_t<std::invoke_result_t<Func&&, T&&, Cr&&>>;
 
-template<typename Func, typename T>
-using result_xform = remove_cv_t<std::invoke_result_t<Func&&, T&&>>;
+template<typename Func, typename T, typename Cr>
+using result_xform = remove_cv_t<std::invoke_result_t<Func&&, T&&, Cr&&>>;
 
 constexpr struct in_place_invoke_tag {
 } in_place_invoke;
@@ -230,6 +230,38 @@ public:
     {
         return criterion_;
     }
+
+public:  // Destructors
+#ifdef __cpp_concepts
+    constexpr ~expected() = default;
+
+    constexpr ~expected()
+        requires(!is_trivially_destructible_v<value_type> || !is_trivially_destructible_v<error_type> ||
+                 !is_trivially_destructible_v<criterion_type>)
+    {
+        if (has_value()) {
+            destroy_at(value_);
+        }
+        else {
+            destroy_at(error_);
+        }
+        destroy_at(criterion_);
+    }
+#else
+    CCC_CPP20_CONSTEXPR ~expected()
+    {
+        if CCC_CPP17_CONSTEXPR (!is_trivially_destructible_v<value_type> || !is_trivially_destructible_v<error_type> ||
+                                !is_trivially_destructible_v<criterion_type>) {
+            if (has_value()) {
+                destroy_at(value_);
+            }
+            else {
+                destroy_at(error_);
+            }
+            destroy_at(criterion_);
+        }
+    }
+#endif
 
 public:  // Constructors
     constexpr expected() : value_(), criterion_() {}
@@ -1170,7 +1202,7 @@ public:
 #endif
     CCC_CPP20_CONSTEXPR auto and_then(Func&& func) &
     {
-        using FuncResult = detail::expected_impl::result<Func, value_type&>;
+        using FuncResult = detail::expected_impl::result<Func, value_type&, criterion_type&>;
         static_assert(detail::is_expected_v<FuncResult>,
                       "The function passed to ccc::expected<T, E, Criterion>::and_then must return a ccc::expected");
         static_assert(is_same_v<error_type, typename FuncResult::error_type>,
@@ -1199,7 +1231,7 @@ public:
 #endif
     CCC_CPP20_CONSTEXPR auto and_then(Func&& func) const&
     {
-        using FuncResult = detail::expected_impl::result<Func, const value_type&>;
+        using FuncResult = detail::expected_impl::result<Func, const value_type&, const criterion_type&>;
         static_assert(detail::is_expected_v<FuncResult>,
                       "The function passed to ccc::expected<T, E, Criterion>::and_then must return a ccc::expected");
         static_assert(is_same_v<error_type, typename FuncResult::error_type>,
@@ -1227,7 +1259,7 @@ public:
 #endif
     CCC_CPP20_CONSTEXPR auto and_then(Func&& func) &&
     {
-        using FuncResult = detail::expected_impl::result<Func, value_type&&>;
+        using FuncResult = detail::expected_impl::result<Func, value_type&&, criterion_type&&>;
         static_assert(detail::is_expected_v<FuncResult>,
                       "The function passed to ccc::expected<T, E, Criterion>::and_then must return a ccc::expected");
         static_assert(is_same_v<error_type, typename FuncResult::error_type>,
@@ -1256,7 +1288,7 @@ public:
 #endif
     CCC_CPP20_CONSTEXPR auto and_then(Func&& func) const&&
     {
-        using FuncResult = detail::expected_impl::result<Func, const value_type&&>;
+        using FuncResult = detail::expected_impl::result<Func, const value_type&&, const criterion_type&&>;
         static_assert(detail::is_expected_v<FuncResult>,
                       "The function passed to ccc::expected<T, E, Criterion>::and_then must return a ccc::expected");
         static_assert(is_same_v<error_type, typename FuncResult::error_type>,
@@ -1284,7 +1316,7 @@ public:
 #endif
     CCC_CPP20_CONSTEXPR auto or_else(Func&& func) &
     {
-        using FuncResult = detail::expected_impl::result<Func, error_type&>;
+        using FuncResult = detail::expected_impl::result<Func, error_type&, criterion_type&>;
         static_assert(detail::is_expected_v<FuncResult>,
                       "The function passed to ccc::expected<T, E, Criterion>::or_else must return a ccc::expected");
         static_assert(is_same_v<value_type, typename FuncResult::value_type>,
@@ -1313,7 +1345,7 @@ public:
 #endif
     CCC_CPP20_CONSTEXPR auto or_else(Func&& func) const&
     {
-        using FuncResult = detail::expected_impl::result<Func, const error_type&>;
+        using FuncResult = detail::expected_impl::result<Func, const error_type&, const criterion_type&>;
         static_assert(detail::is_expected_v<FuncResult>,
                       "The function passed to ccc::expected<T, E, Criterion>::or_else must return a ccc::expected");
         static_assert(is_same_v<value_type, typename FuncResult::value_type>,
@@ -1341,7 +1373,7 @@ public:
 #endif
     CCC_CPP20_CONSTEXPR auto or_else(Func&& func) &&
     {
-        using FuncResult = detail::expected_impl::result<Func, error_type&&>;
+        using FuncResult = detail::expected_impl::result<Func, error_type&&, criterion_type&&>;
         static_assert(detail::is_expected_v<FuncResult>,
                       "The function passed to ccc::expected<T, E, Criterion>::or_else must return a ccc::expected");
         static_assert(is_same_v<value_type, typename FuncResult::value_type>,
@@ -1370,7 +1402,7 @@ public:
 #endif
     CCC_CPP20_CONSTEXPR auto or_else(Func&& func) const&&
     {
-        using FuncResult = detail::expected_impl::result<Func, const error_type&&>;
+        using FuncResult = detail::expected_impl::result<Func, const error_type&&, const criterion_type&&>;
         static_assert(detail::is_expected_v<FuncResult>,
                       "The function passed to ccc::expected<T, E, Criterion>::or_else must return a ccc::expected");
         static_assert(is_same_v<value_type, typename FuncResult::value_type>,
@@ -1390,7 +1422,7 @@ public:
         requires(is_constructible_v<error_type, error_type&> && is_constructible_v<criterion_type, criterion_type&>)
     constexpr auto transform(Func&& func) &
     {
-        using U = detail::expected_impl::result_xform<Func, value_type&>;
+        using U = detail::expected_impl::result_xform<Func, value_type&, criterion_type&>;
 
         if constexpr (detail::expected_impl::is_transform_func_return_2values_v<remove_cvref_t<U>>) {
             using Value = tuple_element_t<0, U>;
@@ -1427,7 +1459,7 @@ public:
 #endif
     constexpr auto transform(Func&& func) const&
     {
-        using U = detail::expected_impl::result_xform<Func, const value_type&>;
+        using U = detail::expected_impl::result_xform<Func, const value_type&, const criterion_type&>;
 
         if constexpr (detail::expected_impl::is_transform_func_return_2values_v<remove_cvref_t<U>>) {
             using Value = tuple_element_t<0, U>;
@@ -1463,7 +1495,7 @@ public:
 #endif
     constexpr auto transform(Func&& func) &&
     {
-        using U = detail::expected_impl::result_xform<Func, value_type&&>;
+        using U = detail::expected_impl::result_xform<Func, value_type&&, criterion_type&&>;
 
         if constexpr (detail::expected_impl::is_transform_func_return_2values_v<remove_cvref_t<U>>) {
             using Value = tuple_element_t<0, U>;
@@ -1502,7 +1534,7 @@ public:
 #endif
     constexpr auto transform(Func&& func) const&&
     {
-        using U = detail::expected_impl::result_xform<Func, const value_type&&>;
+        using U = detail::expected_impl::result_xform<Func, const value_type&&, const criterion_type&&>;
 
         if constexpr (detail::expected_impl::is_transform_func_return_2values_v<remove_cvref_t<U>>) {
             using Value = tuple_element_t<0, U>;
@@ -1532,7 +1564,7 @@ public:
         requires(is_constructible_v<value_type, value_type&> && is_constructible_v<criterion_type, criterion_type&>)
     constexpr auto transform_error(Func&& func) &
     {
-        using U = detail::expected_impl::result_xform<Func, error_type&>;
+        using U = detail::expected_impl::result_xform<Func, error_type&, criterion_type&>;
 
         if constexpr (detail::expected_impl::is_transform_func_return_2values_v<remove_cvref_t<U>>) {
             using Err = tuple_element_t<0, U>;
@@ -1569,7 +1601,7 @@ public:
 #endif
     constexpr auto transform_error(Func&& func) const&
     {
-        using U = detail::expected_impl::result_xform<Func, const error_type&>;
+        using U = detail::expected_impl::result_xform<Func, const error_type&, const criterion_type&>;
 
         if constexpr (detail::expected_impl::is_transform_func_return_2values_v<remove_cvref_t<U>>) {
             using Err = tuple_element_t<0, U>;
@@ -1605,7 +1637,7 @@ public:
 #endif
     constexpr auto transform_error(Func&& func) &&
     {
-        using U = detail::expected_impl::result_xform<Func, error_type&&>;
+        using U = detail::expected_impl::result_xform<Func, error_type&&, criterion_type&&>;
 
         if constexpr (detail::expected_impl::is_transform_func_return_2values_v<remove_cvref_t<U>>) {
             using Err = tuple_element_t<0, U>;
@@ -1644,7 +1676,7 @@ public:
 #endif
     constexpr auto transform_error(Func&& func) const&&
     {
-        using U = detail::expected_impl::result_xform<Func, const error_type&&>;
+        using U = detail::expected_impl::result_xform<Func, const error_type&&, const criterion_type&&>;
 
         if constexpr (detail::expected_impl::is_transform_func_return_2values_v<remove_cvref_t<U>>) {
             using Err = tuple_element_t<0, U>;
