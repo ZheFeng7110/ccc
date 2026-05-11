@@ -357,6 +357,7 @@ TEST(Expected, BadExpectedAccessStoresError)
     EXPECT_STREQ("bad access to ccc::expected without expected value(ErrorType = non-void)", base.what());
 }
 
+#if (__cplusplus >= 202002L)
 namespace {
 
 constexpr bool constexpr_expected_value_works()
@@ -376,3 +377,4 @@ static_assert(constexpr_expected_value_works(), "expected value state should be 
 static_assert(constexpr_expected_error_works(), "expected error state should be usable in constexpr contexts");
 
 }  // namespace
+#endif

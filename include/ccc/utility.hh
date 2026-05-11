@@ -479,13 +479,13 @@ inline CCC_CPP20_CONSTEXPR void destroy_at(T* location)
 }
 
 template<typename T>
-constexpr add_const_t<T>& as_const(T& t) noexcept
+inline constexpr add_const_t<T>& as_const(T& t) noexcept
 {
     return t;
 }
 
 template<typename T>
-constexpr add_const_t<T>& as_const(const T&& t) noexcept = delete;
+inline constexpr add_const_t<T>& as_const(const T&& t) noexcept = delete;
 
 CCC_MODULE_EXPORT_END
 
