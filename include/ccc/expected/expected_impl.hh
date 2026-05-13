@@ -1429,7 +1429,7 @@ public:
 #ifndef __cpp_concepts
         ,
         typename = enable_if_t<is_default_constructible_v<value_type> && is_constructible_v<error_type, error_type&> &&
-                               is_constructible_v<criterion_type, criterion_type&>>
+                               is_constructible_v<criterion_type, criterion_type&> && (sizeof(Func) > 0)>
 #endif
         >
 #ifdef __cpp_concepts
@@ -1465,12 +1465,13 @@ public:
     template<typename Func
 #ifndef __cpp_concepts
              ,
-             typename = enable_if_t<is_constructible_v<error_type, const error_type&> &&
-                                    is_constructible_v<criterion_type, const criterion_type&>>
+             typename = enable_if_t<is_default_constructible_v<value_type> &&
+                                    is_constructible_v<error_type, const error_type&> &&
+                                    is_constructible_v<criterion_type, const criterion_type&> && (sizeof(Func) > 0)>
 #endif
              >
 #ifdef __cpp_concepts
-        requires(is_constructible_v<error_type, const error_type&> &&
+        requires(is_default_constructible_v<value_type> && is_constructible_v<error_type, const error_type&> &&
                  is_constructible_v<criterion_type, const criterion_type&>)
 #endif
     constexpr auto transform(Func&& func) const&
@@ -1499,15 +1500,23 @@ public:
         }
     }
 
-    template<typename Func
+    // Why there requires `(sizeof(Func) > 0)` in enable_if_t? It may be a bug in MinGW:
+    // If without `(sizeof(Func) > 0)`, the MinGW compiler will report that substitution failure
+    // in `transform`/`transform_error` function template even if this template have not be instantiated.
+    //
+    // So we use `(sizeof(Func) > 0)` in enable_if_t(But not use it in requires statement, because it
+    // works on successfully with requires statement).
+    template<
+        typename Func
 #ifndef __cpp_concepts
-             ,
-             typename = enable_if_t<is_constructible_v<error_type, error_type&&> &&
-                                    is_constructible_v<criterion_type, criterion_type&&>>
+        ,
+        typename = enable_if_t<is_default_constructible_v<value_type> && is_constructible_v<error_type, error_type&&> &&
+                               is_constructible_v<criterion_type, criterion_type&&> && (sizeof(Func) > 0)>
 #endif
-             >
+        >
 #ifdef __cpp_concepts
-        requires(is_constructible_v<error_type, error_type &&> && is_constructible_v<criterion_type, criterion_type &&>)
+        requires(is_default_constructible_v<value_type> && is_constructible_v<error_type, error_type &&> &&
+                 is_constructible_v<criterion_type, criterion_type &&>)
 #endif
     constexpr auto transform(Func&& func) &&
     {
@@ -1540,12 +1549,13 @@ public:
     template<typename Func
 #ifndef __cpp_concepts
              ,
-             typename = enable_if_t<is_constructible_v<error_type, const error_type&&> &&
-                                    is_constructible_v<criterion_type, const criterion_type&&>>
+             typename = enable_if_t<is_default_constructible_v<value_type> &&
+                                    is_constructible_v<error_type, const error_type&&> &&
+                                    is_constructible_v<criterion_type, const criterion_type&&> && (sizeof(Func) > 0)>
 #endif
              >
 #ifdef __cpp_concepts
-        requires(is_constructible_v<error_type, const error_type &&> &&
+        requires(is_default_constructible_v<value_type> && is_constructible_v<error_type, const error_type &&> &&
                  is_constructible_v<criterion_type, const criterion_type &&>)
 #endif
     constexpr auto transform(Func&& func) const&&
@@ -1576,15 +1586,17 @@ public:
         }
     }
 
-    template<typename Func
+    template<
+        typename Func
 #ifndef __cpp_concepts
-             ,
-             typename = enable_if_t<is_constructible_v<error_type, error_type&> &&
-                                    is_constructible_v<criterion_type, criterion_type&>>
+        ,
+        typename = enable_if_t<is_default_constructible_v<error_type> && is_constructible_v<error_type, error_type&> &&
+                               is_constructible_v<criterion_type, criterion_type&> && (sizeof(Func) > 0)>
 #endif
-             >
+        >
 #ifdef __cpp_concepts
-        requires(is_constructible_v<error_type, error_type&> && is_constructible_v<criterion_type, criterion_type&>)
+        requires(is_default_constructible_v<error_type> && is_constructible_v<error_type, error_type&> &&
+                 is_constructible_v<criterion_type, criterion_type&>)
 #endif
     constexpr auto transform_error(Func&& func) &
     {
@@ -1615,12 +1627,13 @@ public:
     template<typename Func
 #ifndef __cpp_concepts
              ,
-             typename = enable_if_t<is_constructible_v<value_type, const value_type&> &&
-                                    is_constructible_v<criterion_type, const criterion_type&>>
+             typename = enable_if_t<is_default_constructible_v<error_type> &&
+                                    is_constructible_v<error_type, const error_type&> &&
+                                    is_constructible_v<criterion_type, const criterion_type&> && (sizeof(Func) > 0)>
 #endif
              >
 #ifdef __cpp_concepts
-        requires(is_constructible_v<value_type, const value_type&> &&
+        requires(is_default_constructible_v<error_type> && is_constructible_v<error_type, const error_type&> &&
                  is_constructible_v<criterion_type, const criterion_type&>)
 #endif
     constexpr auto transform_error(Func&& func) const&
@@ -1649,15 +1662,17 @@ public:
         }
     }
 
-    template<typename Func
+    template<
+        typename Func
 #ifndef __cpp_concepts
-             ,
-             typename = enable_if_t<is_constructible_v<value_type, value_type&&> &&
-                                    is_constructible_v<criterion_type, criterion_type&&>>
+        ,
+        typename = enable_if_t<is_default_constructible_v<error_type> && is_constructible_v<error_type, error_type&&> &&
+                               is_constructible_v<criterion_type, criterion_type&&> && (sizeof(Func) > 0)>
 #endif
-             >
+        >
 #ifdef __cpp_concepts
-        requires(is_constructible_v<value_type, value_type &&> && is_constructible_v<criterion_type, criterion_type &&>)
+        requires(is_default_constructible_v<error_type> && is_constructible_v<error_type, error_type &&> &&
+                 is_constructible_v<criterion_type, criterion_type &&>)
 #endif
     constexpr auto transform_error(Func&& func) &&
     {
@@ -1690,12 +1705,13 @@ public:
     template<typename Func
 #ifndef __cpp_concepts
              ,
-             typename = enable_if_t<is_constructible_v<value_type, const value_type&&> &&
-                                    is_constructible_v<criterion_type, const criterion_type&&>>
+             typename = enable_if_t<is_default_constructible_v<error_type> &&
+                                    is_constructible_v<error_type, const error_type&&> &&
+                                    is_constructible_v<criterion_type, const criterion_type&&> && (sizeof(Func) > 0)>
 #endif
              >
 #ifdef __cpp_concepts
-        requires(is_constructible_v<value_type, const value_type &&> &&
+        requires(is_default_constructible_v<error_type> && is_constructible_v<error_type, const error_type &&> &&
                  is_constructible_v<criterion_type, const criterion_type &&>)
 #endif
     constexpr auto transform_error(Func&& func) const&&
