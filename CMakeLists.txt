@@ -35,6 +35,7 @@ if (CCC_USE_CPP_MODULES)
     target_sources(${PROJECT_NAME} PUBLIC FILE_SET modules TYPE CXX_MODULES FILES
         modules/ccc.ccm
         modules/ccc.utility.ccm
+        modules/ccc.resource_guard.ccm
         modules/ccc.expected.ccm
         modules/ccc.pipe_operator_helper.ccm
     )

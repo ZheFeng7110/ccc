@@ -68,6 +68,7 @@ globSources(GLOB expectedTestSources 14 "expected_test/*.cc")
 target_sources(${PROJECT_NAME} PRIVATE
     ${cccPipeOperatorHelperTestSources}
     ${expectedTestSources}
+    resource_guard_test.cc
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
