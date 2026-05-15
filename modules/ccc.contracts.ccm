@@ -1,0 +1,25 @@
+/**
+ * @file ccc.contracts.ccm
+ * @brief
+ */
+
+module;
+
+#include <cstdint>
+#include <cstdlib>
+
+#include <iostream>
+#include <string_view>
+#include <type_traits>
+#include <utility>
+#include <source_location>
+
+#define CCC_MODULE_INTERFACE_UNIT
+
+export module ccc.contracts;
+
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Winclude-angled-in-module-purview"
+#endif
+
+#include "ccc/contracts.hh"

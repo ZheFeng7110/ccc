@@ -478,6 +478,18 @@ inline CCC_CPP20_CONSTEXPR void destroy_at(T* location)
 #endif
 }
 
+template<typename ForwardIt>
+CCC_CPP20_CONSTEXPR void destroy(ForwardIt first, ForwardIt last)
+{
+#if (__cplusplus < 201703L)
+    for (; first != last; ++first) {
+        destroy_at(std::addressof(*first));
+    }
+#else
+    std::destroy(first, last);
+#endif
+}
+
 template<typename T>
 inline constexpr add_const_t<T>& as_const(T& t) noexcept
 {
