@@ -35,6 +35,7 @@ import ccc.expected;  // import expected component only
 
 ## Documentation
 
+- `ccc.utility` - Utility tools that implement higher-version C++ STL features in lower C++ standards
 - [ccc.pipe_operator_helper](docs/en/pipe_operator_helper.md) - Pipe-style function invocation helpers
 - [ccc.expected](docs/en/expected.md) - Monadic expected with optional criterion support
 
