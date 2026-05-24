@@ -1,0 +1,5 @@
+module;
+
+export module ccc.inplace;
+
+export import ccc.inplace.inplace_vector;

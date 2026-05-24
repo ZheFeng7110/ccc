@@ -39,6 +39,8 @@ if (CCC_USE_CPP_MODULES)
         modules/ccc.resource_guard.ccm
         modules/ccc.expected.ccm
         modules/ccc.pipe_operator_helper.ccm
+        modules/ccc.inplace.ccm
+        modules/ccc.inplace.inplace_vector.ccm
     )
 else ()
     add_library(${PROJECT_NAME} INTERFACE)

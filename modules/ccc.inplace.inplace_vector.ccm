@@ -1,0 +1,26 @@
+module;
+
+#include <cstddef>
+
+#include <algorithm>
+#include <initializer_list>
+#include <iterator>
+#include <memory>
+#include <new>
+#include <stdexcept>
+#include <type_traits>
+#include <utility>
+#include <compare>
+
+#define CCC_MODULE_INTERFACE_UNIT
+
+export module ccc.inplace.inplace_vector;
+
+export import ccc.utility;
+export import ccc.contracts;
+
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Winclude-angled-in-module-purview"
+#endif
+
+#include "ccc/inplace/inplace_vector.hh"

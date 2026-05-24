@@ -65,9 +65,12 @@ endfunction ()
 
 globSources(GLOB_RECURSE cccPipeOperatorHelperTestSources 11 "pipe_operator_helper_test/*.cc")
 globSources(GLOB expectedTestSources 14 "expected_test/*.cc")
+
+globSources(GLOB_RECURSE inplaceVectorTestSources 11 "inplace_vector_test/*.cc")
 target_sources(${PROJECT_NAME} PRIVATE
     ${cccPipeOperatorHelperTestSources}
     ${expectedTestSources}
+    ${inplaceVectorTestSources}
     resource_guard_test.cc
 )
 
