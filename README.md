@@ -35,8 +35,8 @@ import ccc.expected;  // import expected component only
 
 ## Documentation
 
-- [ccc.pipe_operator_helper](./documents/en/pipe_operator_helper.md) - Pipe-style function invocation helpers
-- [ccc.expected](./documents/en/expected.md) - Monadic expected with optional criterion support
+- [ccc.pipe_operator_helper](docs/en/pipe_operator_helper.md) - Pipe-style function invocation helpers
+- [ccc.expected](docs/en/expected.md) - Monadic expected with optional criterion support
 
 ## Building
 
