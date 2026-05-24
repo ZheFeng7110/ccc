@@ -60,24 +60,29 @@ public:
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
 private:
-    using storage_type = typename std::aligned_storage<sizeof(T), alignof(T)>::type;
-    storage_type store_[N];
+    alignas(T) unsigned char store_[sizeof(T) * N];
     size_type size_;
 
     CCC_CPP20_CONSTEXPR pointer ptr_at(size_type i) noexcept
     {
-        return reinterpret_cast<pointer>(&store_[i]);
+        return reinterpret_cast<pointer>(store_ + i * sizeof(T));
     }
     CCC_CPP20_CONSTEXPR const_pointer ptr_at(size_type i) const noexcept
     {
-        return reinterpret_cast<const_pointer>(&store_[i]);
+        return reinterpret_cast<const_pointer>(store_ + i * sizeof(T));
     }
 
 public:
     // ---------- Static capacity ----------
 
-    CCC_NO_DISCARD static constexpr size_type capacity() noexcept { return N; }
-    CCC_NO_DISCARD static constexpr size_type max_size() noexcept { return N; }
+    CCC_NO_DISCARD static constexpr size_type capacity() noexcept
+    {
+        return N;
+    }
+    CCC_NO_DISCARD static constexpr size_type max_size() noexcept
+    {
+        return N;
+    }
     static CCC_CPP20_CONSTEXPR void reserve(size_type new_cap)
     {
         if (new_cap > N) {
@@ -88,9 +93,18 @@ public:
 
     // ---------- Size ----------
 
-    CCC_NO_DISCARD constexpr size_type size() const noexcept { return size_; }
-    CCC_NO_DISCARD constexpr bool empty() const noexcept { return size_ == 0; }
-    CCC_NO_DISCARD constexpr bool full() const noexcept { return size_ == N; }
+    CCC_NO_DISCARD constexpr size_type size() const noexcept
+    {
+        return size_;
+    }
+    CCC_NO_DISCARD constexpr bool empty() const noexcept
+    {
+        return size_ == 0;
+    }
+    CCC_NO_DISCARD constexpr bool full() const noexcept
+    {
+        return size_ == N;
+    }
 
     // ---------- Element access ----------
 
@@ -138,37 +152,77 @@ public:
         CCC_DETAIL_ASSERT(!empty(), "[ccc.inplace_vector]: back() on empty vector");
         return *ptr_at(size_ - 1);
     }
-    CCC_CPP20_CONSTEXPR pointer data() noexcept { return ptr_at(0); }
-    CCC_CPP20_CONSTEXPR const_pointer data() const noexcept { return ptr_at(0); }
+    CCC_CPP20_CONSTEXPR pointer data() noexcept
+    {
+        return ptr_at(0);
+    }
+    CCC_CPP20_CONSTEXPR const_pointer data() const noexcept
+    {
+        return ptr_at(0);
+    }
 
     // ---------- Iterators ----------
 
-    CCC_CPP20_CONSTEXPR iterator begin() noexcept { return ptr_at(0); }
-    CCC_CPP20_CONSTEXPR const_iterator begin() const noexcept { return ptr_at(0); }
-    CCC_CPP20_CONSTEXPR const_iterator cbegin() const noexcept { return ptr_at(0); }
-    CCC_CPP20_CONSTEXPR iterator end() noexcept { return ptr_at(size_); }
-    CCC_CPP20_CONSTEXPR const_iterator end() const noexcept { return ptr_at(size_); }
-    CCC_CPP20_CONSTEXPR const_iterator cend() const noexcept { return ptr_at(size_); }
+    CCC_CPP20_CONSTEXPR iterator begin() noexcept
+    {
+        return ptr_at(0);
+    }
+    CCC_CPP20_CONSTEXPR const_iterator begin() const noexcept
+    {
+        return ptr_at(0);
+    }
+    CCC_CPP20_CONSTEXPR const_iterator cbegin() const noexcept
+    {
+        return ptr_at(0);
+    }
+    CCC_CPP20_CONSTEXPR iterator end() noexcept
+    {
+        return ptr_at(size_);
+    }
+    CCC_CPP20_CONSTEXPR const_iterator end() const noexcept
+    {
+        return ptr_at(size_);
+    }
+    CCC_CPP20_CONSTEXPR const_iterator cend() const noexcept
+    {
+        return ptr_at(size_);
+    }
 
-    reverse_iterator rbegin() noexcept { return reverse_iterator(end()); }
-    const_reverse_iterator rbegin() const noexcept { return const_reverse_iterator(end()); }
-    const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(cend()); }
-    reverse_iterator rend() noexcept { return reverse_iterator(begin()); }
-    const_reverse_iterator rend() const noexcept { return const_reverse_iterator(begin()); }
-    const_reverse_iterator crend() const noexcept { return const_reverse_iterator(cbegin()); }
+    reverse_iterator rbegin() noexcept
+    {
+        return reverse_iterator(end());
+    }
+    const_reverse_iterator rbegin() const noexcept
+    {
+        return const_reverse_iterator(end());
+    }
+    const_reverse_iterator crbegin() const noexcept
+    {
+        return const_reverse_iterator(cend());
+    }
+    reverse_iterator rend() noexcept
+    {
+        return reverse_iterator(begin());
+    }
+    const_reverse_iterator rend() const noexcept
+    {
+        return const_reverse_iterator(begin());
+    }
+    const_reverse_iterator crend() const noexcept
+    {
+        return const_reverse_iterator(cbegin());
+    }
 
     // ---------- Constructors / destructor ----------
 
     constexpr inplace_vector() noexcept : size_(0) {}
 
-    CCC_CPP20_CONSTEXPR inplace_vector(const inplace_vector& other)
-        : size_(other.size_)
+    CCC_CPP20_CONSTEXPR inplace_vector(const inplace_vector& other) : size_(other.size_)
     {
         std::uninitialized_copy(other.begin(), other.end(), ptr_at(0));
     }
 
-    CCC_CPP20_CONSTEXPR inplace_vector(inplace_vector&& other) noexcept(
-        std::is_nothrow_move_constructible<T>::value)
+    CCC_CPP20_CONSTEXPR inplace_vector(inplace_vector&& other) noexcept(std::is_nothrow_move_constructible<T>::value)
         : size_(other.size_)
     {
         std::uninitialized_copy(std::make_move_iterator(other.begin()),
@@ -176,8 +230,7 @@ public:
                                 ptr_at(0));
     }
 
-    CCC_CPP20_CONSTEXPR inplace_vector(std::initializer_list<T> ilist)
-        : size_(ilist.size())
+    CCC_CPP20_CONSTEXPR inplace_vector(std::initializer_list<T> ilist) : size_(ilist.size())
     {
         if (ilist.size() > N) {
             throw std::bad_alloc();
@@ -202,8 +255,7 @@ public:
     }
 
     CCC_CPP20_CONSTEXPR inplace_vector& operator=(inplace_vector&& other) noexcept(
-        std::is_nothrow_move_constructible<T>::value &&
-        std::is_nothrow_move_assignable<T>::value)
+        std::is_nothrow_move_constructible<T>::value && std::is_nothrow_move_assignable<T>::value)
     {
         if (this == &other) {
             return *this;
@@ -246,8 +298,7 @@ public:
         size_ = count;
     }
 
-    template<typename InputIt,
-             typename = ccc::enable_if_t<!std::is_integral<InputIt>::value>>
+    template<typename InputIt, typename = ccc::enable_if_t<!std::is_integral<InputIt>::value>>
     CCC_CPP20_CONSTEXPR void assign(InputIt first, InputIt last)
     {
         const size_type count = static_cast<size_type>(std::distance(first, last));
@@ -493,8 +544,7 @@ public:
 
     // ---------- insert (range) ----------
 
-    template<typename InputIt,
-             typename = ccc::enable_if_t<!std::is_integral<InputIt>::value>>
+    template<typename InputIt, typename = ccc::enable_if_t<!std::is_integral<InputIt>::value>>
     CCC_CPP20_CONSTEXPR iterator insert(const_iterator pos, InputIt first, InputIt last)
     {
         const auto index = static_cast<size_type>(std::distance(cbegin(), pos));
@@ -522,9 +572,7 @@ public:
             std::copy_n(first, fill_existing, ptr_at(index));
         }
         if (count > fill_existing) {
-            std::uninitialized_copy(std::next(first, static_cast<difference_type>(fill_existing)),
-                                    last,
-                                    ptr_at(size_));
+            std::uninitialized_copy(std::next(first, static_cast<difference_type>(fill_existing)), last, ptr_at(size_));
         }
 
         size_ += count;
@@ -586,9 +634,8 @@ public:
 
     // ---------- swap ----------
 
-    CCC_CPP20_CONSTEXPR void swap(inplace_vector& other) noexcept(
-        ccc::is_nothrow_swappable<T>::value &&
-        std::is_nothrow_move_constructible<T>::value)
+    CCC_CPP20_CONSTEXPR void swap(inplace_vector& other) noexcept(ccc::is_nothrow_swappable<T>::value &&
+                                                                  std::is_nothrow_move_constructible<T>::value)
     {
         using std::swap;
         const size_type common = (std::min)(size_, other.size_);
@@ -658,8 +705,7 @@ public:
 // ---------- Non-member swap ----------
 
 template<typename T, std::size_t N>
-CCC_CPP20_CONSTEXPR void swap(inplace_vector<T, N>& a, inplace_vector<T, N>& b) noexcept(
-    noexcept(a.swap(b)))
+CCC_CPP20_CONSTEXPR void swap(inplace_vector<T, N>& a, inplace_vector<T, N>& b) noexcept(noexcept(a.swap(b)))
 {
     a.swap(b);
 }
@@ -689,4 +735,3 @@ CCC_MODULE_EXPORT_END
 }  // namespace ccc
 
 #endif  // !CCC_INPLACE_VECTOR_HH
-
