@@ -41,6 +41,7 @@ if (CCC_USE_CPP_MODULES)
         modules/ccc.pipe_operator_helper.ccm
         modules/ccc.inplace.ccm
         modules/ccc.inplace.inplace_vector.ccm
+        modules/ccc.inplace.inplace_map.ccm
     )
 else ()
     add_library(${PROJECT_NAME} INTERFACE)

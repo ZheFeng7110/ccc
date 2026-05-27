@@ -67,10 +67,12 @@ globSources(GLOB_RECURSE cccPipeOperatorHelperTestSources 11 "pipe_operator_help
 globSources(GLOB expectedTestSources 14 "expected_test/*.cc")
 
 globSources(GLOB_RECURSE inplaceVectorTestSources 11 "inplace_vector_test/*.cc")
+globSources(GLOB_RECURSE inplaceMapTestSources 11 "inplace_map_test/*.cc")
 target_sources(${PROJECT_NAME} PRIVATE
     ${cccPipeOperatorHelperTestSources}
     ${expectedTestSources}
     ${inplaceVectorTestSources}
+    ${inplaceMapTestSources}
     resource_guard_test.cc
 )
 

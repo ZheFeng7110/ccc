@@ -2,4 +2,5 @@ module;
 
 export module ccc.inplace;
 
+export import ccc.inplace.inplace_map;
 export import ccc.inplace.inplace_vector;
