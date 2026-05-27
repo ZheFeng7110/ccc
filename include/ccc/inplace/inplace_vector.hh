@@ -13,6 +13,7 @@
 
 #ifndef CCC_MODULE_INTERFACE_UNIT
 #include <cstddef>
+#include <cassert>
 
 #include <algorithm>
 #include <initializer_list>
@@ -28,13 +29,7 @@
 
 #include "ccc/utility.hh"
 
-#if (__cplusplus >= 202002L)
-#include "ccc/contracts.hh"
 #endif
-
-#endif
-
-#include "ccc/detail/assertions.hh"
 
 namespace ccc {
 
@@ -110,12 +105,12 @@ public:
 
     CCC_CPP20_CONSTEXPR reference operator[](size_type i) noexcept
     {
-        CCC_DETAIL_ASSERT(i < size_, "[ccc.inplace_vector]: index out of range");
+        assert(i < size_ && "[ccc.inplace_vector]: index out of range");
         return *ptr_at(i);
     }
     CCC_CPP20_CONSTEXPR const_reference operator[](size_type i) const noexcept
     {
-        CCC_DETAIL_ASSERT(i < size_, "[ccc.inplace_vector]: index out of range");
+        assert(i < size_ && "[ccc.inplace_vector]: index out of range");
         return *ptr_at(i);
     }
     CCC_CPP20_CONSTEXPR reference at(size_type i)
@@ -134,22 +129,22 @@ public:
     }
     CCC_CPP20_CONSTEXPR reference front() noexcept
     {
-        CCC_DETAIL_ASSERT(!empty(), "[ccc.inplace_vector]: front() on empty vector");
+        assert(!empty() && "[ccc.inplace_vector]: front() on empty vector");
         return *ptr_at(0);
     }
     CCC_CPP20_CONSTEXPR const_reference front() const noexcept
     {
-        CCC_DETAIL_ASSERT(!empty(), "[ccc.inplace_vector]: front() on empty vector");
+        assert(!empty() && "[ccc.inplace_vector]: front() on empty vector");
         return *ptr_at(0);
     }
     CCC_CPP20_CONSTEXPR reference back() noexcept
     {
-        CCC_DETAIL_ASSERT(!empty(), "[ccc.inplace_vector]: back() on empty vector");
+        assert(!empty() && "[ccc.inplace_vector]: back() on empty vector");
         return *ptr_at(size_ - 1);
     }
     CCC_CPP20_CONSTEXPR const_reference back() const noexcept
     {
-        CCC_DETAIL_ASSERT(!empty(), "[ccc.inplace_vector]: back() on empty vector");
+        assert(!empty() && "[ccc.inplace_vector]: back() on empty vector");
         return *ptr_at(size_ - 1);
     }
     CCC_CPP20_CONSTEXPR pointer data() noexcept
@@ -472,7 +467,7 @@ public:
     CCC_CPP20_CONSTEXPR iterator emplace(const_iterator pos, Args&&... args)
     {
         const auto index = static_cast<size_type>(std::distance(cbegin(), pos));
-        CCC_DETAIL_ASSERT(cbegin() <= pos && pos <= cend(), "[ccc.inplace_vector]: iterator out of range");
+        assert(cbegin() <= pos && pos <= cend() && "[ccc.inplace_vector]: iterator out of range");
         if (full()) {
             throw std::bad_alloc();
         }
@@ -509,7 +504,7 @@ public:
     CCC_CPP20_CONSTEXPR iterator insert(const_iterator pos, size_type count, const value_type& value)
     {
         const auto index = static_cast<size_type>(std::distance(cbegin(), pos));
-        CCC_DETAIL_ASSERT(cbegin() <= pos && pos <= cend(), "[ccc.inplace_vector]: iterator out of range");
+        assert(cbegin() <= pos && pos <= cend() && "[ccc.inplace_vector]: iterator out of range");
         if (count == 0) {
             return ptr_at(index);
         }
@@ -548,7 +543,7 @@ public:
     CCC_CPP20_CONSTEXPR iterator insert(const_iterator pos, InputIt first, InputIt last)
     {
         const auto index = static_cast<size_type>(std::distance(cbegin(), pos));
-        CCC_DETAIL_ASSERT(cbegin() <= pos && pos <= cend(), "[ccc.inplace_vector]: iterator out of range");
+        assert(cbegin() <= pos && pos <= cend() && "[ccc.inplace_vector]: iterator out of range");
         const auto count = static_cast<size_type>(std::distance(first, last));
         if (count == 0) {
             return ptr_at(index);
@@ -618,8 +613,8 @@ public:
 
     CCC_CPP20_CONSTEXPR iterator erase(const_iterator first, const_iterator last)
     {
-        CCC_DETAIL_ASSERT(cbegin() <= first && first <= last && last <= cend(),
-                          "[ccc.inplace_vector]: erase range out of range");
+        assert(cbegin() <= first && first <= last && last <= cend() &&
+               "[ccc.inplace_vector]: erase range out of range");
         const auto first_idx = static_cast<size_type>(std::distance(cbegin(), first));
         const auto last_idx = static_cast<size_type>(std::distance(cbegin(), last));
         if (first_idx == last_idx) {

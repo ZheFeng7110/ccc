@@ -1,6 +1,7 @@
 module;
 
 #include <cstddef>
+#include <cassert>
 
 #include <algorithm>
 #include <initializer_list>
@@ -16,8 +17,7 @@ module;
 
 export module ccc.inplace.inplace_vector;
 
-export import ccc.utility;
-export import ccc.contracts;
+import ccc.utility;
 
 #ifdef __clang__
 #pragma clang diagnostic ignored "-Winclude-angled-in-module-purview"

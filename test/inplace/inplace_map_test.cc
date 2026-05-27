@@ -149,7 +149,16 @@ TEST(InplaceMap, SelfAssignment)
 {
     ccc::inplace_map<int, std::string, 5> m;
     m[1] = "one";
+
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wself-assign-overloaded"
+#endif
     m = m;
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+
     EXPECT_EQ(1u, m.size());
     EXPECT_EQ("one", m[1]);
 }

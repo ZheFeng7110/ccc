@@ -52,4 +52,13 @@
 
 #endif  // !CCC_MODULE_INTERFACE_UNIT
 
+#ifdef _MSC_VER
+#define CCC_WARNING(msg) __pragma(message(msg))
+#elif (defined(__clang__) || defined(__GNUC__))
+#define CCC_DETAIL_WARNING_TO_STRING_(x) #x
+#define CCC_WARNING(msg)                 _Pragma(CCC_DETAIL_WARNING_TO_STRING_(GCC warning msg))
+#else
+#define CCC_WARNING(msg) static_assert(false, msg);
+#endif
+
 #endif  // !CCC_DETAIL_CONFIG_HH

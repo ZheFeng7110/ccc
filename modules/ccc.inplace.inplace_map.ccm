@@ -15,8 +15,8 @@ module;
 
 export module ccc.inplace.inplace_map;
 
-export import ccc.utility;
-export import ccc.inplace.inplace_vector;
+import ccc.utility;
+import ccc.inplace.inplace_vector;
 
 #ifdef __clang__
 #pragma clang diagnostic ignored "-Winclude-angled-in-module-purview"

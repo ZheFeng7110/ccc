@@ -317,7 +317,14 @@ TEST(InplaceVector, SelfAssignment)
     v.push_back(1);
     v.push_back(2);
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wself-assign-overloaded"
+#endif
     v = v;
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
     EXPECT_EQ(2u, v.size());
     EXPECT_EQ(1, v[0]);
