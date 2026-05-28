@@ -42,6 +42,10 @@ if (CCC_USE_CPP_MODULES)
         modules/ccc.inplace.inplace_vector.ccm
         modules/ccc.inplace.inplace_map.ccm
     )
+
+    if (MSVC)
+        target_compile_options(${PROJECT_NAME} PRIVATE /Zc:__cplusplus)
+    endif ()
 else ()
     add_library(${PROJECT_NAME} INTERFACE)
 
