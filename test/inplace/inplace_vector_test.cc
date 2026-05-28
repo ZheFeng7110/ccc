@@ -922,3 +922,89 @@ TEST(InplaceVector, ConstexprStaticMembers)
     EXPECT_EQ(5u, cap);
     EXPECT_EQ(5u, ms);
 }
+
+// ====================================================================
+// Compile-time tests (consteval + static_assert)
+// ====================================================================
+
+#if (__cpp_constexpr >= 202406L)
+
+// Static member functions are always constexpr
+static_assert(ccc::inplace_vector<int, 5>::capacity() == 5);
+static_assert(ccc::inplace_vector<int, 5>::max_size() == 5);
+
+// Default construction and basic state queries
+consteval bool test_constexpr_default_construct()
+{
+    ccc::inplace_vector<int, 5> v;
+    return v.empty() && !v.full() && v.size() == 0 && v.begin() == v.end();
+}
+static_assert(test_constexpr_default_construct());
+
+// Reserve/shrink_to_fit with valid sizes
+consteval bool test_constexpr_reserve_valid()
+{
+    ccc::inplace_vector<int, 5> v;
+    v.reserve(3);
+    v.reserve(5);
+    v.shrink_to_fit();
+    return true;
+}
+static_assert(test_constexpr_reserve_valid());
+
+// Move construction of default-constructed vector
+consteval bool test_constexpr_move_default()
+{
+    ccc::inplace_vector<int, 5> v;
+    ccc::inplace_vector<int, 5> v2(std::move(v));
+    return v2.empty() && v2.size() == 0;
+}
+static_assert(test_constexpr_move_default());
+
+// Copy construction of default-constructed vector
+consteval bool test_constexpr_copy_default()
+{
+    ccc::inplace_vector<int, 5> v;
+    ccc::inplace_vector<int, 5> v2(v);
+    return v2.empty() && v2.size() == 0;
+}
+static_assert(test_constexpr_copy_default());
+
+// Clear on default-constructed vector (no-op)
+consteval bool test_constexpr_clear_default()
+{
+    ccc::inplace_vector<int, 5> v;
+    v.clear();
+    return v.empty();
+}
+static_assert(test_constexpr_clear_default());
+
+// Equality of default-constructed vectors
+consteval bool test_constexpr_equality_default()
+{
+    ccc::inplace_vector<int, 5> a;
+    ccc::inplace_vector<int, 5> b;
+    return a == b;
+}
+static_assert(test_constexpr_equality_default());
+
+// Swap of default-constructed vectors
+consteval bool test_constexpr_swap_default()
+{
+    ccc::inplace_vector<int, 5> a;
+    ccc::inplace_vector<int, 5> b;
+    a.swap(b);
+    return a.empty() && b.empty();
+}
+static_assert(test_constexpr_swap_default());
+
+// consteval bool test_constexpr_swap()
+//{
+//     ccc::inplace_vector<int, 5> a{1, 2, 3};
+//     ccc::inplace_vector<int, 5> b{9, 8};
+//     a.swap(b);
+//     return (b == ccc::inplace_vector<int, 5>{1, 2, 3}) && (a == ccc::inplace_vector<int, 5>{9, 8});
+// }
+// static_assert(test_constexpr_swap());
+
+#endif  // (__cpp_constexpr >= 202406L)

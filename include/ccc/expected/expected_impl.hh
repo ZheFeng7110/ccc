@@ -1058,7 +1058,7 @@ public:
     {
         emplace_preprocess_();
         criterion_ = criterion_type();
-        return *construct_at(std::addressof(value_), il, std::forward<Args>(args)...);
+        return *ccc::construct_at(std::addressof(value_), il, std::forward<Args>(args)...);
     }
 
     template<typename Cr,

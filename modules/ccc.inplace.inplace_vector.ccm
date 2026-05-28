@@ -1,7 +1,7 @@
 module;
 
 #include <cstddef>
-#include <cassert>
+#include "ccc/detail/assertions.hh"
 
 #include <algorithm>
 #include <initializer_list>

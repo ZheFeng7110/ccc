@@ -61,4 +61,15 @@
 #define CCC_WARNING(msg) static_assert(false, msg);
 #endif
 
+#if (__cplusplus >= 202302L)
+#define CCC_IF_IN_CONSTEVAL     if consteval
+#define CCC_IF_NOT_IN_CONSTEVAL if !consteval
+#elif (__cplusplus >= 202002L)
+#define CCC_IF_IN_CONSTEVAL     if (std::is_constant_evaluated())
+#define CCC_IF_NOT_IN_CONSTEVAL if (!std::is_constant_evaluated())
+#else
+#define CCC_IF_IN_CONSTEVAL     if (false)
+#define CCC_IF_NOT_IN_CONSTEVAL if (true)
+#endif
+
 #endif  // !CCC_DETAIL_CONFIG_HH

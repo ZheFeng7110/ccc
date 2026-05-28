@@ -479,7 +479,7 @@ inline CCC_CPP20_CONSTEXPR void destroy_at(T* location)
 }
 
 template<typename ForwardIt>
-CCC_CPP20_CONSTEXPR void destroy(ForwardIt first, ForwardIt last)
+inline CCC_CPP20_CONSTEXPR void destroy(ForwardIt first, ForwardIt last)
 {
 #if (__cplusplus < 201703L)
     for (; first != last; ++first) {
@@ -487,6 +487,93 @@ CCC_CPP20_CONSTEXPR void destroy(ForwardIt first, ForwardIt last)
     }
 #else
     std::destroy(first, last);
+#endif
+}
+
+// ---------- Constexpr-friendly uninitialized memory algorithms ----------
+// C++26 (if (__cpp_lib_raw_memory_algorithms >= 202411L)): std algorithms are constexpr; forward directly.
+// C++20/23: use if consteval/is_constant_evaluated with hand-rolled construct_at.
+// C++11-17: forward to std (no constexpr context possible).
+
+template<typename InputIt, typename ForwardIt>
+inline CCC_CPP20_CONSTEXPR ForwardIt uninitialized_copy(InputIt first, InputIt last, ForwardIt d_first)
+{
+#if (__cpp_lib_raw_memory_algorithms >= 202411L)
+    return std::uninitialized_copy(first, last, d_first);
+#elif (__cplusplus >= 202002L)
+    CCC_IF_IN_CONSTEVAL
+    {
+        ForwardIt current = d_first;
+        for (; first != last; ++first, (void)++current) {
+            ccc::construct_at(std::addressof(*current), *first);
+        }
+        return current;
+    }
+    else
+    {
+        return std::uninitialized_copy(first, last, d_first);
+    }
+#else
+    return std::uninitialized_copy(first, last, d_first);
+#endif
+}
+
+template<typename ForwardIt, typename Size, typename Val>
+inline CCC_CPP20_CONSTEXPR void uninitialized_fill_n(ForwardIt first, Size n, const Val& value)
+{
+#if (__cpp_lib_raw_memory_algorithms >= 202411L)
+    std::uninitialized_fill_n(first, n, value);
+#elif (__cplusplus >= 202002L)
+    CCC_IF_IN_CONSTEVAL
+    {
+        ForwardIt current = first;
+        for (Size i = 0; i < n; ++i, (void)++current) {
+            ccc::construct_at(std::addressof(*current), value);
+        }
+    }
+    else
+    {
+        std::uninitialized_fill_n(first, n, value);
+    }
+#else
+    std::uninitialized_fill_n(first, n, value);
+#endif
+}
+
+CCC_MODULE_EXPORT_END
+
+namespace detail {
+
+template<typename ForwardIt, typename Size>
+inline CCC_CPP20_CONSTEXPR ForwardIt uninitialized_default_construct_n_impl(ForwardIt first, Size n)
+{
+    ForwardIt current = first;
+    for (Size i = 0; i < n; ++i, (void)++current) {
+        ccc::construct_at(std::addressof(*current));
+    }
+    return current;
+}
+
+}  // namespace detail
+
+CCC_MODULE_EXPORT_BEGIN
+
+template<typename ForwardIt, typename Size>
+inline CCC_CPP20_CONSTEXPR ForwardIt uninitialized_default_construct_n(ForwardIt first, Size n)
+{
+#if (__cpp_lib_raw_memory_algorithms >= 202411L)
+    return std::uninitialized_default_construct_n(first, n);
+#elif (__cplusplus >= 202002L)
+    CCC_IF_IN_CONSTEVAL
+    {
+        return detail::uninitialized_default_construct_n_impl(first, n);
+    }
+    else
+    {
+        return std::uninitialized_default_construct_n(first, n);
+    }
+#else
+    return detail::uninitialized_default_construct_n_impl(first, n);
 #endif
 }
 

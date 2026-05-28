@@ -252,7 +252,7 @@ private:
     friend class detail::inplace_map_iterator<Key, T, N, Compare, KeyContainer, MappedContainer, false>;
     friend class detail::inplace_map_iterator<Key, T, N, Compare, KeyContainer, MappedContainer, true>;
 
-    CCC_CPP20_CONSTEXPR const_iterator lower_bound_impl(const key_type& key) const
+    CCC_CPP20_CONSTEXPR const_iterator lower_bound_impl_(const key_type& key) const
     {
         return const_iterator(
             this,
@@ -260,25 +260,25 @@ private:
                 std::distance(keys_.cbegin(), std::lower_bound(keys_.cbegin(), keys_.cend(), key, comp_))));
     }
 
-    CCC_CPP20_CONSTEXPR iterator lower_bound_impl(const key_type& key)
+    CCC_CPP20_CONSTEXPR iterator lower_bound_impl_(const key_type& key)
     {
         return iterator(this,
                         static_cast<size_type>(
                             std::distance(keys_.cbegin(), std::lower_bound(keys_.cbegin(), keys_.cend(), key, comp_))));
     }
 
-    CCC_CPP20_CONSTEXPR const_iterator find_impl(const key_type& key) const
+    CCC_CPP20_CONSTEXPR const_iterator find_impl_(const key_type& key) const
     {
-        auto it = lower_bound_impl(key);
+        auto it = lower_bound_impl_(key);
         if (it != cend() && !comp_(key, keys_[it.index()])) {
             return it;
         }
         return cend();
     }
 
-    CCC_CPP20_CONSTEXPR iterator find_impl(const key_type& key)
+    CCC_CPP20_CONSTEXPR iterator find_impl_(const key_type& key)
     {
-        auto it = lower_bound_impl(key);
+        auto it = lower_bound_impl_(key);
         if (it != end() && !comp_(key, keys_[it.index()])) {
             return it;
         }
@@ -379,7 +379,7 @@ public:
 
     CCC_CPP20_CONSTEXPR mapped_type& at(const key_type& key)
     {
-        auto it = find_impl(key);
+        auto it = find_impl_(key);
         if (it == end()) {
             throw std::out_of_range("[ccc.inplace_map]: key not found");
         }
@@ -388,7 +388,7 @@ public:
 
     CCC_CPP20_CONSTEXPR const mapped_type& at(const key_type& key) const
     {
-        auto it = find_impl(key);
+        auto it = find_impl_(key);
         if (it == cend()) {
             throw std::out_of_range("[ccc.inplace_map]: key not found");
         }
@@ -397,7 +397,7 @@ public:
 
     CCC_CPP20_CONSTEXPR mapped_type& operator[](const key_type& key)
     {
-        auto it = lower_bound_impl(key);
+        auto it = lower_bound_impl_(key);
         const auto idx = it.index();
         if (idx < keys_.size() && !comp_(key, keys_[idx])) {
             return values_[idx];
@@ -412,7 +412,7 @@ public:
 
     CCC_CPP20_CONSTEXPR mapped_type& operator[](key_type&& key)
     {
-        auto it = lower_bound_impl(key);
+        auto it = lower_bound_impl_(key);
         const auto idx = it.index();
         if (idx < keys_.size() && !comp_(key, keys_[idx])) {
             return values_[idx];
@@ -482,22 +482,22 @@ public:
 
     CCC_CPP20_CONSTEXPR std::pair<iterator, bool> insert(const value_type& value)
     {
-        return insert_impl(value.first, value.second);
+        return insert_impl_(value.first, value.second);
     }
 
     CCC_CPP20_CONSTEXPR std::pair<iterator, bool> insert(value_type&& value)
     {
-        return insert_impl(std::move(value.first), std::move(value.second));
+        return insert_impl_(std::move(value.first), std::move(value.second));
     }
 
     CCC_CPP20_CONSTEXPR iterator insert(const_iterator hint, const value_type& value)
     {
-        return insert_hint_impl(hint, value.first, value.second);
+        return insert_hint_impl_(hint, value.first, value.second);
     }
 
     CCC_CPP20_CONSTEXPR iterator insert(const_iterator hint, value_type&& value)
     {
-        return insert_hint_impl(hint, std::move(value.first), std::move(value.second));
+        return insert_hint_impl_(hint, std::move(value.first), std::move(value.second));
     }
 
     template<typename InputIt>
@@ -515,7 +515,7 @@ public:
 
     CCC_CPP20_CONSTEXPR std::pair<iterator, bool> insert_or_assign(const key_type& key, mapped_type&& value)
     {
-        auto it = lower_bound_impl(key);
+        auto it = lower_bound_impl_(key);
         const auto idx = it.index();
         if (idx < keys_.size() && !comp_(key, keys_[idx])) {
             values_[idx] = std::move(value);
@@ -531,7 +531,7 @@ public:
 
     CCC_CPP20_CONSTEXPR std::pair<iterator, bool> insert_or_assign(key_type&& key, mapped_type&& value)
     {
-        auto it = lower_bound_impl(key);
+        auto it = lower_bound_impl_(key);
         const auto idx = it.index();
         if (idx < keys_.size() && !comp_(key, keys_[idx])) {
             values_[idx] = std::move(value);
@@ -548,7 +548,7 @@ public:
     template<typename... Args>
     CCC_CPP20_CONSTEXPR std::pair<iterator, bool> emplace(key_type&& key, Args&&... args)
     {
-        auto it = lower_bound_impl(key);
+        auto it = lower_bound_impl_(key);
         const auto idx = it.index();
         if (idx < keys_.size() && !comp_(key, keys_[idx])) {
             return {iterator(this, idx), false};
@@ -585,7 +585,7 @@ public:
     template<typename... Args>
     CCC_CPP20_CONSTEXPR std::pair<iterator, bool> try_emplace(const key_type& key, Args&&... args)
     {
-        auto it = lower_bound_impl(key);
+        auto it = lower_bound_impl_(key);
         const auto idx = it.index();
         if (idx < keys_.size() && !comp_(key, keys_[idx])) {
             return {iterator(this, idx), false};
@@ -601,7 +601,7 @@ public:
     template<typename... Args>
     CCC_CPP20_CONSTEXPR std::pair<iterator, bool> try_emplace(key_type&& key, Args&&... args)
     {
-        auto it = lower_bound_impl(key);
+        auto it = lower_bound_impl_(key);
         const auto idx = it.index();
         if (idx < keys_.size() && !comp_(key, keys_[idx])) {
             return {iterator(this, idx), false};
@@ -658,7 +658,7 @@ public:
 
     CCC_CPP20_CONSTEXPR size_type erase(const key_type& key)
     {
-        auto it = find_impl(key);
+        auto it = find_impl_(key);
         if (it == end()) {
             return 0;
         }
@@ -711,29 +711,29 @@ public:
 
     CCC_CPP20_CONSTEXPR bool contains(const key_type& key) const
     {
-        return find_impl(key) != cend();
+        return find_impl_(key) != cend();
     }
 
     CCC_CPP20_CONSTEXPR iterator find(const key_type& key)
     {
-        return find_impl(key);
+        return find_impl_(key);
     }
     CCC_CPP20_CONSTEXPR const_iterator find(const key_type& key) const
     {
-        return find_impl(key);
+        return find_impl_(key);
     }
     CCC_CPP20_CONSTEXPR iterator lower_bound(const key_type& key)
     {
-        return lower_bound_impl(key);
+        return lower_bound_impl_(key);
     }
     CCC_CPP20_CONSTEXPR const_iterator lower_bound(const key_type& key) const
     {
-        return lower_bound_impl(key);
+        return lower_bound_impl_(key);
     }
 
     CCC_CPP20_CONSTEXPR iterator upper_bound(const key_type& key)
     {
-        auto it = lower_bound_impl(key);
+        auto it = lower_bound_impl_(key);
         if (it != end() && !comp_(key, keys_[it.index()])) {
             ++it;
         }
@@ -742,7 +742,7 @@ public:
 
     CCC_CPP20_CONSTEXPR const_iterator upper_bound(const key_type& key) const
     {
-        auto it = lower_bound_impl(key);
+        auto it = lower_bound_impl_(key);
         if (it != cend() && !comp_(key, keys_[it.index()])) {
             ++it;
         }
@@ -834,9 +834,9 @@ public:
 
 private:
     template<typename K, typename V>
-    CCC_CPP20_CONSTEXPR std::pair<iterator, bool> insert_impl(K&& key, V&& value)
+    CCC_CPP20_CONSTEXPR std::pair<iterator, bool> insert_impl_(K&& key, V&& value)
     {
-        auto it = lower_bound_impl(key);
+        auto it = lower_bound_impl_(key);
         const auto idx = it.index();
         if (idx < keys_.size() && !comp_(key, keys_[idx])) {
             return {iterator(this, idx), false};
@@ -850,7 +850,7 @@ private:
     }
 
     template<typename K, typename V>
-    CCC_CPP20_CONSTEXPR iterator insert_hint_impl(const_iterator hint, K&& key, V&& value)
+    CCC_CPP20_CONSTEXPR iterator insert_hint_impl_(const_iterator hint, K&& key, V&& value)
     {
         if (hint != cend()) {
             const auto h_idx = hint.index();
@@ -866,7 +866,7 @@ private:
                 throw std::bad_alloc();
             }
         }
-        return insert_impl(std::forward<K>(key), std::forward<V>(value)).first;
+        return insert_impl_(std::forward<K>(key), std::forward<V>(value)).first;
     }
 };
 
