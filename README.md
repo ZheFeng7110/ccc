@@ -38,6 +38,8 @@ import ccc.expected;  // import expected component only
 - `ccc.utility` - Utility tools that implement higher-version C++ STL features in lower C++ standards
 - [ccc.pipe_operator_helper](docs/en/pipe_operator_helper.md) - Pipe-style function invocation helpers
 - [ccc.expected](docs/en/expected.md) - Monadic expected with optional criterion support
+- [ccc.inplace](docs/en/inplace/inplace.md) - Stack-allocated, compile-time fixed-capacity "in-place" containers
+- [ccc.resource_guard](docs/en/resource_guard.md) - RAII-based resource management with defer, try_finally, and with patterns
 
 ## Building
 
