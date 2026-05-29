@@ -30,11 +30,11 @@ jobs:
       - name: Install build tools
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y ninja-build g++-14 clang-14 libc++-14-dev libc++abi-14-dev
+          sudo apt-get install -y ninja-build g++-15 clang-14 libc++-14-dev libc++abi-14-dev
 
-      - name: Test — GCC 14
+      - name: Test — GCC 15
         shell: pwsh
-        run: ./scripts/Run-UnitTest.ps1 -Toolchains gcc -CcOverride gcc-14 -CxxOverride g++-14
+        run: ./scripts/Run-UnitTest.ps1 -Toolchains gcc -CcOverride gcc-15 -CxxOverride g++-15
 
       - name: Test — Clang 14 (libc++)
         shell: pwsh
@@ -62,11 +62,11 @@ jobs:
 
       - name: Install build tools
         run: |
-          brew install ninja gcc@14
+          brew install ninja gcc@15
 
-      - name: Test — GCC 14
+      - name: Test — GCC 15
         shell: pwsh
-        run: ./scripts/Run-UnitTest.ps1 -Toolchains gcc -CcOverride gcc-14 -CxxOverride g++-14
+        run: ./scripts/Run-UnitTest.ps1 -Toolchains gcc -CcOverride gcc-15 -CxxOverride g++-15
 
       - name: Test — Apple Clang (libc++)
         shell: pwsh
@@ -93,6 +93,6 @@ jobs:
           key: cpm-windows-${{ hashFiles('test/get_cpm.cmake') }}
           restore-keys: cpm-windows-
 
-      - name: Test — MSVC (VS 2026)
+      - name: Test — MSVC (VS 2022)
         shell: pwsh
         run: ./scripts/Run-UnitTest.ps1

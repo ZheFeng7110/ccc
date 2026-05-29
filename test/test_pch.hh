@@ -12,7 +12,9 @@
 // C11 Annex K (<sys/_types/_rsize_t.h>), but GCC's libstdc++ does not set
 // __STDC_WANT_LIB_EXT1__ in C++20+ mode.  Define it here before any
 // system header is pulled in (this PCH is injected via -include).
+#ifndef __STDC_WANT_LIB_EXT1__
 #define __STDC_WANT_LIB_EXT1__ 1
+#endif
 #endif
 
 #ifdef __cplusplus
