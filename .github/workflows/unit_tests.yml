@@ -30,11 +30,25 @@ jobs:
       - name: Install build tools
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y ninja-build g++-15 clang-14 libc++-14-dev libc++abi-14-dev
+          sudo apt-get install -y ninja-build clang-14 libc++-14-dev libc++abi-14-dev wget xz-utils
+
+      - name: Build GCC 15 from source
+        run: |
+          GCC_VERSION=15.1.0
+          GCC_SRC="gcc-${GCC_VERSION}"
+          wget -q "https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/${GCC_SRC}.tar.xz"
+          tar xf "${GCC_SRC}.tar.xz"
+          cd "${GCC_SRC}"
+          ./contrib/download_prerequisites
+          mkdir build && cd build
+          ../configure --enable-languages=c,c++ --disable-bootstrap --disable-multilib --prefix=/usr/local/gcc-15
+          make -j$(nproc)
+          sudo make install
+          echo "/usr/local/gcc-15/bin" >> "$GITHUB_PATH"
 
       - name: Test — GCC 15
         shell: pwsh
-        run: ./scripts/Run-UnitTest.ps1 -Toolchains gcc -CcOverride gcc-15 -CxxOverride g++-15
+        run: ./scripts/Run-UnitTest.ps1 -Toolchains gcc -CcOverride /usr/local/gcc-15/bin/gcc -CxxOverride /usr/local/gcc-15/bin/g++
 
       - name: Test — Clang 14 (libc++)
         shell: pwsh
