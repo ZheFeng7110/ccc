@@ -62,7 +62,7 @@ class inplace_map_iterator
     template<typename, typename, std::size_t, typename, typename, typename, bool>
     friend class inplace_map_iterator;
 
-    using map_ptr =
+    using map_ptr_ =
         typename ccc::conditional_t<IsConst,
                                     const ccc::inplace_map<Key, T, N, Compare, KeyContainer, MappedContainer>*,
                                     ccc::inplace_map<Key, T, N, Compare, KeyContainer, MappedContainer>*>;
@@ -74,11 +74,13 @@ public:
     using reference = std::pair<const Key&, typename ccc::conditional_t<IsConst, const T&, T&>>;
     using pointer = inplace_map_arrow_proxy<value_type>;
 
+    using ptr_type = map_ptr_;
+
 private:
-    map_ptr map_;
+    map_ptr_ map_;
     std::size_t idx_;
 
-    CCC_CPP20_CONSTEXPR inplace_map_iterator(map_ptr m, std::size_t i) noexcept : map_(m), idx_(i) {}
+    CCC_CPP20_CONSTEXPR inplace_map_iterator(map_ptr_ m, std::size_t i) noexcept : map_(m), idx_(i) {}
 
 public:
     CCC_CPP20_CONSTEXPR inplace_map_iterator() noexcept : map_(nullptr), idx_(0) {}
@@ -86,7 +88,7 @@ public:
     template<bool OtherConst, typename = ccc::enable_if_t<IsConst && !OtherConst>>
     CCC_CPP20_CONSTEXPR inplace_map_iterator(
         const inplace_map_iterator<Key, T, N, Compare, KeyContainer, MappedContainer, OtherConst>& other) noexcept
-        : map_(other.map_), idx_(other.idx_)
+        : map_(other.ptr()), idx_(other.index())
     {
     }
 
@@ -187,6 +189,11 @@ public:
     CCC_CPP20_CONSTEXPR bool operator>=(const inplace_map_iterator& o) const noexcept
     {
         return idx_ >= o.idx_;
+    }
+
+    CCC_CPP20_CONSTEXPR ptr_type ptr() const noexcept
+    {
+        return map_;
     }
 
     CCC_CPP20_CONSTEXPR std::size_t index() const noexcept
