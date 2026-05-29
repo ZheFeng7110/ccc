@@ -348,8 +348,8 @@ function Invoke-ToolchainSuite
     $compilerEnv = & $EnvSetupScript
     if ($null -eq $compilerEnv)
     {
-        Write-Host "  SKIPPED -- toolchain not available on this system." -ForegroundColor Yellow
-        return
+        Write-Host ("  WARNING -- Toolchain was not found on this system enviroment. " +
+            "Will let CMake to find it automatically.") -ForegroundColor Yellow
     }
 
     foreach ($std in $Standards)
