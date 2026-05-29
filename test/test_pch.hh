@@ -8,11 +8,11 @@
 #define CCC_TEST_TEST_PCH_HH
 
 #if defined(__APPLE__) && defined(__GNUC__) && !defined(__clang__)
-// Workaround: GCC on macOS with SDK >= 15 — <string.h> references rsize_t
-// from Annex K which GCC's libstdc++ does not declare.  Including
-// <sys/types.h> forces the type chain to resolve before gtest pulls in
-// <string.h> via its portability header.
-#include <sys/types.h>
+// Workaround: GCC on macOS with SDK >= 15 — <string.h> uses rsize_t from
+// C11 Annex K (<sys/_types/_rsize_t.h>), but GCC's libstdc++ does not set
+// __STDC_WANT_LIB_EXT1__ in C++20+ mode.  Define it here before any
+// system header is pulled in (this PCH is injected via -include).
+#define __STDC_WANT_LIB_EXT1__ 1
 #endif
 
 #ifdef __cplusplus
