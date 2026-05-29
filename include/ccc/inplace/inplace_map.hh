@@ -59,9 +59,6 @@ class inplace_map_iterator
 {
     friend class ccc::inplace_map<Key, T, N, Compare, KeyContainer, MappedContainer>;
 
-    template<typename, typename, std::size_t, typename, typename, typename, bool>
-    friend class inplace_map_iterator;
-
     using map_ptr_ =
         typename ccc::conditional_t<IsConst,
                                     const ccc::inplace_map<Key, T, N, Compare, KeyContainer, MappedContainer>*,

@@ -82,7 +82,9 @@ if (NOT MSVC AND (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang"))
     target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
 endif ()
 
-target_precompile_headers(${PROJECT_NAME} PRIVATE test_pch.hh)
+if (NOT APPLE)
+    target_precompile_headers(${PROJECT_NAME} PRIVATE test_pch.hh)
+endif ()
 
 get_target_property(cccCppStandard ${PROJECT_NAME} CXX_STANDARD)
 if ((${cccCppStandard} GREATER_EQUAL 20) AND (CCC_USE_CPP_MODULES))

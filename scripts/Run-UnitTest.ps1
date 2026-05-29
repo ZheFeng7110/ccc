@@ -107,84 +107,10 @@ function Write-Subheading
     Write-Host "  $Text"
     Write-Host ("-" * 48)
 }
+
 # ----------------------------------------------------------------------
 # Environment setup helpers
 # ----------------------------------------------------------------------
-
-function Import-VsEnvironment
-{
-    <#
-    .SYNOPSIS
-        Locate Visual Studio 2026 and import its environment into the current
-        PowerShell session so that cl.exe, Ninja, and CMake all work together.
-        Returns $true on success.
-    #>
-    # Quick check: is MSVC already configured?
-    if (Get-Command cl.exe -ErrorAction SilentlyContinue)
-    {
-        Write-Host "    MSVC environment already active (cl.exe in PATH)."
-        return $true
-    }
-
-    # Try vswhere first
-    $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
-    $vsPath = $null
-    if (Test-Path $vswhere)
-    {
-        $vsPath = & $vswhere -latest -version "[18.0,19.0)" -property installationPath 2> $null
-    }
-
-    # Fallback: common paths
-    if (-not $vsPath)
-    {
-        $candidates = @(
-            "${env:ProgramFiles}\Microsoft Visual Studio\2026\Enterprise",
-            "${env:ProgramFiles}\Microsoft Visual Studio\2026\Professional",
-            "${env:ProgramFiles}\Microsoft Visual Studio\2026\Community"
-        )
-        foreach ($c in $candidates)
-        {
-            if (Test-Path "$c\VC\Auxiliary\Build\vcvarsall.bat")
-            {
-                $vsPath = $c
-                break
-            }
-        }
-    }
-
-    if (-not $vsPath)
-    {
-        Write-Host "    Visual Studio 2026 not found." -ForegroundColor Yellow
-        Write-Host "    Searched via vswhere and common install paths." -ForegroundColor Yellow
-        return $false
-    }
-
-    Write-Host "    Found Visual Studio 2026 at: $vsPath"
-    $vcvarsBat = "$vsPath\VC\Auxiliary\Build\vcvarsall.bat"
-
-    # Capture the full environment after running vcvarsall x64
-    Write-Host "    Importing VS environment (vcvarsall x64)..."
-    $captured = cmd /c "`"$vcvarsBat`" x64 > nul 2>&1 && set" 2> $null
-
-    foreach ($line in $captured)
-    {
-        if ($line -match '^([^=]+)=(.*)$')
-        {
-            $name = $Matches[1]
-            $value = $Matches[2]
-            # Skip internal variables that are noisy or harmful
-            if ($name -in @('_', 'ERRORLEVEL', 'PROMPT', 'PWD', 'OLDPWD'))
-            {
-                continue
-            }
-            [Environment]::SetEnvironmentVariable($name, $value)
-        }
-    }
-
-    Write-Host "    VS environment imported."
-    return $true
-}
-
 function Find-Compiler
 {
     param(
@@ -201,10 +127,10 @@ function Find-Compiler
     }
     return $null
 }
+
 # ----------------------------------------------------------------------
 # Core build-and-test function
 # ----------------------------------------------------------------------
-
 function Invoke-BuildAndTest
 {
     param(
@@ -463,16 +389,6 @@ foreach ($tc in $activeToolchains)
     {
         "msvc" {
             $setup = {
-                if (-not (Import-VsEnvironment))
-                {
-                    if ($userCC -and $userCXX)
-                    {
-                        Write-Host "    Using user-specified compiler: $userCXX"
-                        return @{ CC = $userCC; CXX = $userCXX }
-                    }
-                    Write-Host "    MSVC toolchain not available." -ForegroundColor Yellow
-                    return $null
-                }
                 if ($userCC -and $userCXX)
                 {
                     return @{ CC = $userCC; CXX = $userCXX }

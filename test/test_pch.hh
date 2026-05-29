@@ -9,11 +9,11 @@
 
 #if defined(__APPLE__) && defined(__GNUC__) && !defined(__clang__)
 // Workaround: GCC on macOS with SDK >= 15 — <string.h> uses rsize_t from
-// C11 Annex K (<sys/_types/_rsize_t.h>) via _DARWIN_C_SOURCE, but GCC's libstdc++ does not set
-// _DARWIN_C_SOURCE in C++20+ mode.  Define it here before any
+// C11 Annex K (<sys/_types/_rsize_t.h>), but GCC's libstdc++ does not set
+// __STDC_WANT_LIB_EXT1__ in C++20+ mode.  Define it here before any
 // system header is pulled in (this PCH is injected via -include).
-#ifndef _DARWIN_C_SOURCE
-#define _DARWIN_C_SOURCE 1
+#ifndef __STDC_WANT_LIB_EXT1__
+#define __STDC_WANT_LIB_EXT1__ 1
 #endif
 #endif
 
