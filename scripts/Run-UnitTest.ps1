@@ -308,18 +308,8 @@ if ($Platform -eq "windows")
 # --- GCC and Clang (macOS / Linux) ---
 if ($Platform -in @("macos", "linux"))
 {
-    if ($Platform -eq "macos")
-    {
-        # On macOS, GNU GCC is often installed via Homebrew as gcc-14 / g++-14
-        $gccCandidates = @("gcc-14", "gcc-13", "gcc-12", "gcc-11", "gcc")
-        $gxxCandidates = @("g++-14", "g++-13", "g++-12", "g++-11", "g++")
-    }
-    else
-    {
-        # Linux: prefer versioned names
-        $gccCandidates = @("gcc-14", "gcc-13", "gcc-12", "gcc-11", "gcc")
-        $gxxCandidates = @("g++-14", "g++-13", "g++-12", "g++-11", "g++")
-    }
+    $gccCandidates = @("gcc-16", "gcc-15", "gcc-14", "gcc")
+    $gxxCandidates = @("g++-16", "g++-15", "g++-14", "g++")
 
     $clangCandidates = @("clang-18", "clang-17", "clang-16", "clang-15", "clang")
     $clangxxCandidates = @("clang++-18", "clang++-17", "clang++-16", "clang++-15", "clang++")

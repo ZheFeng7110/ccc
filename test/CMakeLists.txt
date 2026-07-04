@@ -17,6 +17,7 @@ if ((${CCC_TEST_CPP_STANDARD} LESS 20) AND (CCC_USE_CPP_MODULES))
 endif ()
 
 include("get_cpm.cmake")
+message(STATUS "[${PROJECT_NAME}]: CPM: CPM_SOURCE_CACHE: ${CPM_SOURCE_CACHE}")
 block (SCOPE_FOR POLICIES)
     cmake_policy(VERSION 3.28...4.0)
 
