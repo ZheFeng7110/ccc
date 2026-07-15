@@ -34,10 +34,12 @@ jobs:
 
       - name: Build GCC 16 from source
         uses: ZheFeng7110/linux-build-gcc@v1
+        with: 
+          gcc-version: 16.1.0
 
       - name: Test — GCC 16
         shell: pwsh
-        run: ./scripts/Run-UnitTest.ps1 -Toolchains gcc -CcOverride /usr/local/gcc-16/bin/gcc -CxxOverride /usr/local/gcc-16/bin/g++
+        run: ./scripts/Run-UnitTest.ps1 -Toolchains gcc -CcOverride /usr/local/gcc-16.1.0/bin/gcc -CxxOverride /usr/local/gcc-16.1.0/bin/g++
 
       - name: Test — Clang 19 (libc++)
         shell: pwsh
