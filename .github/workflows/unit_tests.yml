@@ -33,7 +33,7 @@ jobs:
           sudo apt-get install -y cmake ninja-build clang-19 clang-tools-19 libc++-19-dev libc++abi-19-dev wget xz-utils
 
       - name: Build GCC 16 from source
-        uses: ZheFeng7110/linux-build-gcc
+        uses: ZheFeng7110/linux-build-gcc@v1
 
       - name: Test — GCC 16
         shell: pwsh
