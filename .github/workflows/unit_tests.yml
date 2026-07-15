@@ -30,21 +30,10 @@ jobs:
       - name: Install build tools
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y ninja-build clang-19 libc++-19-dev libc++abi-19-dev wget xz-utils
+          sudo apt-get install -y cmake ninja-build clang-19 clang-tools-19 libc++-19-dev libc++abi-19-dev wget xz-utils
 
       - name: Build GCC 16 from source
-        run: |
-          GCC_VERSION=16.1.0
-          GCC_SRC="gcc-${GCC_VERSION}"
-          wget -q "https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/${GCC_SRC}.tar.xz"
-          tar xf "${GCC_SRC}.tar.xz"
-          cd "${GCC_SRC}"
-          ./contrib/download_prerequisites
-          mkdir build && cd build
-          ../configure --enable-languages=c,c++ --disable-bootstrap --disable-multilib --prefix=/usr/local/gcc-16
-          make -j$(nproc)
-          sudo make install
-          echo "/usr/local/gcc-16/bin" >> "$GITHUB_PATH"
+        uses: ZheFeng7110/linux-build-gcc
 
       - name: Test — GCC 16
         shell: pwsh
