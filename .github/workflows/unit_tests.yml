@@ -30,29 +30,29 @@ jobs:
       - name: Install build tools
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y ninja-build clang-14 libc++-14-dev libc++abi-14-dev wget xz-utils
+          sudo apt-get install -y ninja-build clang-18 libc++-18-dev libc++abi-18-dev wget xz-utils
 
-      - name: Build GCC 15 from source
+      - name: Build GCC 16 from source
         run: |
-          GCC_VERSION=15.1.0
+          GCC_VERSION=16.1.0
           GCC_SRC="gcc-${GCC_VERSION}"
           wget -q "https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/${GCC_SRC}.tar.xz"
           tar xf "${GCC_SRC}.tar.xz"
           cd "${GCC_SRC}"
           ./contrib/download_prerequisites
           mkdir build && cd build
-          ../configure --enable-languages=c,c++ --disable-bootstrap --disable-multilib --prefix=/usr/local/gcc-15
+          ../configure --enable-languages=c,c++ --disable-bootstrap --disable-multilib --prefix=/usr/local/gcc-16
           make -j$(nproc)
           sudo make install
-          echo "/usr/local/gcc-15/bin" >> "$GITHUB_PATH"
+          echo "/usr/local/gcc-16/bin" >> "$GITHUB_PATH"
 
-      - name: Test — GCC 15
+      - name: Test — GCC 16
         shell: pwsh
-        run: ./scripts/Run-UnitTest.ps1 -Toolchains gcc -CcOverride /usr/local/gcc-15/bin/gcc -CxxOverride /usr/local/gcc-15/bin/g++
+        run: ./scripts/Run-UnitTest.ps1 -Toolchains gcc -CcOverride /usr/local/gcc-16/bin/gcc -CxxOverride /usr/local/gcc-16/bin/g++
 
-      - name: Test — Clang 14 (libc++)
+      - name: Test — Clang 18 (libc++)
         shell: pwsh
-        run: ./scripts/Run-UnitTest.ps1 -Toolchains clang -CcOverride clang-14 -CxxOverride clang++-14
+        run: ./scripts/Run-UnitTest.ps1 -Toolchains clang -CcOverride clang-18 -CxxOverride clang++-18
 
   macos:
     name: macOS

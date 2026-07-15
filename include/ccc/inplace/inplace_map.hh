@@ -206,7 +206,8 @@ public:
 };
 
 template<typename Iter>
-class inplace_map_reverse_iterator : public std::reverse_iterator<Iter> {
+class inplace_map_reverse_iterator : public std::reverse_iterator<Iter>
+{
     using base_type = std::reverse_iterator<Iter>;
 
 public:
@@ -214,11 +215,11 @@ public:
 
     inplace_map_reverse_iterator() noexcept : base_type() {}
 
-    CCC_CPP20_CONSTEXPR explicit inplace_map_reverse_iterator(Iter x) noexcept : base_type(x) {}
+    explicit CCC_CPP20_CONSTEXPR inplace_map_reverse_iterator(Iter x) noexcept : base_type(x) {}
 
     CCC_CPP20_CONSTEXPR pointer operator->() const
     {
-        Iter tmp = this->base_type::base();
+        Iter tmp = base_type::base();
         --tmp;
         return tmp.operator->();
     }
