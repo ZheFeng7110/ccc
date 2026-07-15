@@ -424,7 +424,7 @@ foreach ($tc in $activeToolchains)
     }
     if ($setup)
     {
-        $gen = if ($tc -eq "msvc") { "Visual Studio 17 2022" } else { "Ninja" }
+        $gen = if ($tc -eq "msvc") { "Visual Studio 18 2026" } else { "Ninja" }
         Invoke-ToolchainSuite -Generator $gen -Name $tc -EnvSetupScript $setup -ExtraCmakeArgs $extra
     }
 }
