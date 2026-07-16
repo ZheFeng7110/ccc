@@ -29,7 +29,7 @@ jobs:
       - name: Create CPM cache dir
         run: |
           mkdir -p ~/.cpm_cache
-          echo "CPM_SOURCE_CACHE=${{ env.HOME }}/.cpm_cache" >> "$GITHUB_ENV"
+          echo "CPM_SOURCE_CACHE=~/.cpm_cache" >> "$GITHUB_ENV"
 
       - name: Restore CPM cache
         uses: actions/cache@v4
@@ -50,7 +50,7 @@ jobs:
 
       - name: Test — GCC 16
         shell: pwsh
-        run: ./scripts/Run-UnitTest.ps1 -Toolchains gcc -CcOverride ${{ env.HOME }}/.local/gcc-16.1.0/bin/gcc -CxxOverride ${{ env.HOME }}/.local/gcc-16.1.0/bin/g++
+        run: ./scripts/Run-UnitTest.ps1 -Toolchains gcc -CcOverride ~/.local/gcc-16.1.0/bin/gcc -CxxOverride ~/.local/gcc-16.1.0/bin/g++
 
       - name: Test — Clang 19 (libc++)
         shell: pwsh
@@ -67,7 +67,7 @@ jobs:
       - name: Create CPM cache dir
         run: |
           mkdir -p ~/.cpm_cache
-          echo "CPM_SOURCE_CACHE=${{ env.HOME }}/.cpm_cache" >> "$GITHUB_ENV"
+          echo "CPM_SOURCE_CACHE=~/.cpm_cache" >> "$GITHUB_ENV"
 
       - name: Restore CPM cache
         uses: actions/cache@v4
@@ -100,7 +100,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p ~/.cpm_cache
-          echo "CPM_SOURCE_CACHE=${{ env.HOME }}/.cpm_cache" >> "$GITHUB_ENV"
+          echo "CPM_SOURCE_CACHE=~/.cpm_cache" >> "$GITHUB_ENV"
 
       - name: Restore CPM cache
         uses: actions/cache@v4
