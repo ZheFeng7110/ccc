@@ -205,6 +205,26 @@ public:
     }
 };
 
+template<typename Iter>
+class inplace_map_reverse_iterator : public std::reverse_iterator<Iter>
+{
+    using base_type = std::reverse_iterator<Iter>;
+
+public:
+    using pointer = typename base_type::pointer;
+
+    inplace_map_reverse_iterator() noexcept : base_type() {}
+
+    explicit CCC_CPP20_CONSTEXPR inplace_map_reverse_iterator(Iter x) noexcept : base_type(x) {}
+
+    CCC_CPP20_CONSTEXPR pointer operator->() const
+    {
+        Iter tmp = base_type::base();
+        --tmp;
+        return tmp.operator->();
+    }
+};
+
 }  // namespace detail
 
 CCC_MODULE_EXPORT_BEGIN
@@ -230,8 +250,8 @@ public:
     using difference_type = std::ptrdiff_t;
     using iterator = detail::inplace_map_iterator<Key, T, N, Compare, KeyContainer, MappedContainer, false>;
     using const_iterator = detail::inplace_map_iterator<Key, T, N, Compare, KeyContainer, MappedContainer, true>;
-    using reverse_iterator = std::reverse_iterator<iterator>;
-    using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+    using reverse_iterator = detail::inplace_map_reverse_iterator<iterator>;
+    using const_reverse_iterator = detail::inplace_map_reverse_iterator<const_iterator>;
     using key_container_type = KeyContainer;
     using mapped_container_type = MappedContainer;
 

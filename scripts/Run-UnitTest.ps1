@@ -199,18 +199,18 @@ function Invoke-BuildAndTest
             if ($CompilerEnv.ContainsKey('CC') -and $CompilerEnv['CC'])
             {
                 $env:CC = $CompilerEnv['CC']
-                Write-Host "    CC         = $( $CompilerEnv['CC'] )"
+                Write-Host "    CC         = $env:CC"
             }
             if ($CompilerEnv.ContainsKey('CXX') -and $CompilerEnv['CXX'])
             {
                 $env:CXX = $CompilerEnv['CXX']
-                Write-Host "    CXX        = $( $CompilerEnv['CXX'] )"
+                Write-Host "    CXX        = $env:CXX"
             }
         }
 
         # --- Configure ---
         Write-Host "    Configuring..."
-        $cfgOutput = & cmake @cmakeConfigArgs 2>&1
+        $cfgOutput = & cmake @cmakeConfigArgs -DCMAKE_C_COMPILER="$env:CC" -DCMAKE_CXX_COMPILER="$env:CXX" 2>&1
         if ($LASTEXITCODE -ne 0)
         {
             $msg = ($cfgOutput | Out-String).Trim()
@@ -308,21 +308,11 @@ if ($Platform -eq "windows")
 # --- GCC and Clang (macOS / Linux) ---
 if ($Platform -in @("macos", "linux"))
 {
-    if ($Platform -eq "macos")
-    {
-        # On macOS, GNU GCC is often installed via Homebrew as gcc-14 / g++-14
-        $gccCandidates = @("gcc-14", "gcc-13", "gcc-12", "gcc-11", "gcc")
-        $gxxCandidates = @("g++-14", "g++-13", "g++-12", "g++-11", "g++")
-    }
-    else
-    {
-        # Linux: prefer versioned names
-        $gccCandidates = @("gcc-14", "gcc-13", "gcc-12", "gcc-11", "gcc")
-        $gxxCandidates = @("g++-14", "g++-13", "g++-12", "g++-11", "g++")
-    }
+    $gccCandidates = @("gcc-16", "gcc-15", "gcc-14", "gcc")
+    $gxxCandidates = @("g++-16", "g++-15", "g++-14", "g++")
 
-    $clangCandidates = @("clang-18", "clang-17", "clang-16", "clang-15", "clang")
-    $clangxxCandidates = @("clang++-18", "clang++-17", "clang++-16", "clang++-15", "clang++")
+    $clangCandidates = @("clang-19", "clang-18", "clang-17", "clang-16", "clang-15", "clang")
+    $clangxxCandidates = @("clang++-19", "clang++-18", "clang++-17", "clang++-16", "clang++-15", "clang++")
 
     $SupportedToolchains += "gcc"
     $SupportedToolchains += "clang"
@@ -434,7 +424,7 @@ foreach ($tc in $activeToolchains)
     }
     if ($setup)
     {
-        $gen = if ($tc -eq "msvc") { "Visual Studio 17 2022" } else { "Ninja" }
+        $gen = if ($tc -eq "msvc") { "Visual Studio 18 2026" } else { "Ninja" }
         Invoke-ToolchainSuite -Generator $gen -Name $tc -EnvSetupScript $setup -ExtraCmakeArgs $extra
     }
 }

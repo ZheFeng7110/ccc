@@ -6,6 +6,12 @@
 #error "Library `ccc` requires C++11 or higher."
 #endif
 
+#if (__cpp_constexpr >= 202400L)
+#define CCC_CPP26_CONSTEXPR constexpr
+#else
+#define CCC_CPP26_CONSTEXPR
+#endif
+
 #if (__cplusplus >= 202002L)
 #define CCC_CPP20_CONSTEXPR constexpr
 #else
