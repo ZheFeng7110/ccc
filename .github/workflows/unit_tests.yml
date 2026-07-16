@@ -10,6 +10,9 @@ jobs:
   linux-cache-gcc:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - uses: ZheFeng7110/linux-build-gcc@develop
         with:
           gcc-version: 16.1.0
