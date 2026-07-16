@@ -47,7 +47,7 @@ jobs:
 
       - name: Test — GCC 16
         shell: pwsh
-        run: ./scripts/Run-UnitTest.ps1 -Toolchains gcc -CcOverride /usr/local/gcc-16.1.0/bin/gcc -CxxOverride /usr/local/gcc-16.1.0/bin/g++
+        run: ./scripts/Run-UnitTest.ps1 -Toolchains gcc -CcOverride $HOME/.local/gcc-16.1.0/bin/gcc -CxxOverride $HOME/.local/gcc-16.1.0/bin/g++
 
       - name: Test — Clang 19 (libc++)
         shell: pwsh
