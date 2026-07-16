@@ -7,6 +7,13 @@ on:
     branches: [develop]
 
 jobs:
+  linux-setup-gcc:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: ZheFeng7110/linux-build-gcc@develop
+        with:
+          gcc-version: 16.1.0
+
   linux:
     name: Linux
     runs-on: ubuntu-24.04
@@ -32,8 +39,8 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y cmake ninja-build clang-19 clang-tools-19 libc++-19-dev libc++abi-19-dev wget xz-utils
 
-      - name: Build GCC 16 from source
-        uses: ZheFeng7110/linux-build-gcc@v1
+      - name: Load GCC 16 from cache
+        uses: ZheFeng7110/linux-build-gcc/restore-cache@develop
         with: 
           gcc-version: 16.1.0
 
