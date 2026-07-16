@@ -13,7 +13,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - uses: ZheFeng7110/linux-build-gcc@develop
+      - uses: ZheFeng7110/linux-build-gcc@v1
         with:
           gcc-version: 16.1.0
 
@@ -39,7 +39,7 @@ jobs:
           restore-keys: cpm-linux-
 
       - name: Load GCC 16 from cache
-        uses: ZheFeng7110/linux-build-gcc/restore-cache@develop
+        uses: ZheFeng7110/linux-build-gcc/restore-cache@v1
         with:
           gcc-version: 16.1.0
 
