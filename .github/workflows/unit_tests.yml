@@ -17,6 +17,7 @@ jobs:
   linux:
     name: Linux
     runs-on: ubuntu-24.04
+    needs: linux-setup-gcc
 
     steps:
       - name: Checkout
@@ -40,7 +41,7 @@ jobs:
           sudo apt-get install -y cmake ninja-build clang-19 clang-tools-19 libc++-19-dev libc++abi-19-dev wget xz-utils
 
       - name: Load GCC 16 from cache
-        uses: ZheFeng7110/linux-build-gcc/restore-cache@develop
+        uses: ZheFeng7110/linux-build-gcc/restore-cache.yml@develop
         with: 
           gcc-version: 16.1.0
 
