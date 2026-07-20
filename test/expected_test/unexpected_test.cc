@@ -11,6 +11,7 @@
 #include <algorithm>
 
 #ifdef TEST_USE_MODULE
+import ccc.utility;
 import ccc.expected;
 #endif
 

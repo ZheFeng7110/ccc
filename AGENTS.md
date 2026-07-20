@@ -23,16 +23,15 @@ ccc 是一个跨平台的 C++ 实用功能库，提供一系列现代 C++ 工具
 每个库组件必须同时支持 `#include` 和 `import` 两种引入方式。具体模式参见 skill 文件 `.agents/skills/cpp-lib-headers-modules-both-supports/SKILL.md`。
 
 速查要点：
-- 配置宏位于 `include/ccc/detail/config.hh`。使用 `CCC_MODULE_INTERFACE_UNIT` 控制模块专属行为，使用 `CCC_MODULE_EXPORT` / `CCC_MODULE_EXPORT_BEGIN` / `CCC_MODULE_EXPORT_END` 标记导出符号。
-- 头文件放在 `include/ccc/` 下，使用 `#pragma once` + `#ifndef`/`#define` 双重包含保护。
+- 头文件放在 `include/ccc/` 下，使用 `#pragma once` + `#ifndef`/`#define` 双重包含保护。头文件为纯 C++ 代码，不含 `export` 关键字或模块相关宏，所有 `#include`（标准库和项目依赖）均为无条件。
 - 模块接口单元（`.ccm`）放在 `modules/` 目录下。
 - 模块名与头文件路径对应：`include/ccc/foo/bar.hh` 对应 `export module ccc.foo.bar;`
-- 标准库头文件的 `#include` 放在头文件中 `#ifndef CCC_MODULE_INTERFACE_UNIT` 守卫之外；在 `.ccm` 文件中则放在全局模块片段（`module;` 之后）。
-- 组件间存在依赖时，`.ccm` 文件需 `import` 被依赖的模块（若被依赖模块也是对外 API 的一部分，则使用 `export import`）。
+- `.ccm` 文件中，所有 `#include`（标准库和项目头文件）均放在全局模块片段（`module;` 之后、`export module` 之前）。
+- `.ccm` 文件使用 `export namespace ccc { using ::ccc::xxx; }` 选择性导出符号。不需要 `import` 其他项目模块——依赖由头文件的 `#include` 隐式提供。
 
 ### 命名空间与模块导出
 
-- 面向用户的功能定义在 `ccc` 命名空间内，并通过模块 `CCC_MODULE_EXPORT` / `CCC_MODULE_EXPORT_BEGIN` / `CCC_MODULE_EXPORT_END` 导出。
+- 面向用户的功能定义在 `ccc` 命名空间内，通过在 `.ccm` 文件中使用 `export namespace ccc { using ::ccc::xxx; }` 导出。
 - 内部实现细节定义在 `ccc::detail` 命名空间内，**不**通过模块导出（不在 `.ccm` 文件的 `export` 块内）。
 
 ### 函数约束：SFINAE / Concepts

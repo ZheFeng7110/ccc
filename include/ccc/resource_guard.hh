@@ -9,12 +9,9 @@
 
 #include "ccc/detail/config.hh"
 
-#ifndef CCC_MODULE_INTERFACE_UNIT
 #include <type_traits>
 #include <utility>
-#endif
 
-CCC_MODULE_EXPORT
 namespace ccc {
 
 template<typename Func>

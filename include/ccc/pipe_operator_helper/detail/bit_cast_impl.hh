@@ -11,20 +11,18 @@
 
 #include "ccc/pipe_operator_helper/detail/config.hh"
 
-#ifndef CCC_PIPE_OPERATOR_HELPER_MODULE_INTERFACE_UNIT
 #if (__cplusplus >= 202002L)  // C++20
 #include <bit>
 #else
 #include <cstring>
 #include <type_traits>
 #endif
-#endif
 
 namespace ccc {
 namespace pipe_operator_helper::detail {
 
 template<typename To, typename From>
-inline CCC_PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR To bit_cast_impl(const From& from) noexcept
+inline CCC_CPP20_CONSTEXPR To bit_cast_impl(const From& from) noexcept
 {
 #if (__cplusplus >= 202002L)  // C++20
     return std::bit_cast<To>(from);

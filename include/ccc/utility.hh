@@ -7,18 +7,14 @@
 
 #include "ccc/detail/config.hh"
 
-#ifndef CCC_MODULE_INTERFACE_UNIT
 #include <cstddef>
 
 #include <utility>
 #include <tuple>
 #include <type_traits>
 #include <memory>
-#endif
 
 namespace ccc {
-
-CCC_MODULE_EXPORT_BEGIN
 
 // C++17 in_place_t tag
 #if (__cplusplus < 201703L)
@@ -28,7 +24,7 @@ struct in_place_t {
 constexpr in_place_t in_place{};
 #else
 using in_place_t = std::in_place_t;
-constexpr in_place_t in_place{std::in_place};
+inline constexpr in_place_t in_place{std::in_place};
 #endif
 
 // C++17 void_t
@@ -140,7 +136,6 @@ using is_nothrow_swappable_with = std::is_nothrow_swappable_with<T, U>;
 template<typename T>
 using is_nothrow_swappable = std::is_nothrow_swappable<T>;
 #else
-CCC_MODULE_EXPORT_END
 
 namespace detail {
 namespace swappable_impl {
@@ -171,8 +166,6 @@ struct is_nothrow_swappable_with_impl<T, U, true>
 
 }  // namespace swappable_impl
 }  // namespace detail
-
-CCC_MODULE_EXPORT_BEGIN
 
 template<typename T, typename U>
 using is_swappable_with = detail::swappable_impl::is_swappable_with_impl<T, U>;
@@ -413,8 +406,6 @@ constexpr std::size_t tuple_size_v = std::tuple_size<Tuple>::value;
 template<std::size_t I, typename Tuple>
 using tuple_element_t = typename std::tuple_element<I, Tuple>::type;
 
-CCC_MODULE_EXPORT_END
-
 #if (__cplusplus < 202002L)
 namespace detail {
 
@@ -447,8 +438,6 @@ inline T* construct_at(construct_at_is_not_array_type_tag, T* location, Args&&..
 
 }  // namespace detail
 #endif  // (__cplusplus < 202002L)
-
-CCC_MODULE_EXPORT_BEGIN
 
 template<typename T, typename... Args>
 inline CCC_CPP20_CONSTEXPR T* construct_at(T* location,
@@ -540,8 +529,6 @@ inline CCC_CPP20_CONSTEXPR void uninitialized_fill_n(ForwardIt first, Size n, co
 #endif
 }
 
-CCC_MODULE_EXPORT_END
-
 namespace detail {
 
 template<typename ForwardIt, typename Size>
@@ -555,8 +542,6 @@ inline CCC_CPP20_CONSTEXPR ForwardIt uninitialized_default_construct_n_impl(Forw
 }
 
 }  // namespace detail
-
-CCC_MODULE_EXPORT_BEGIN
 
 template<typename ForwardIt, typename Size>
 inline CCC_CPP20_CONSTEXPR ForwardIt uninitialized_default_construct_n(ForwardIt first, Size n)
@@ -585,8 +570,6 @@ inline constexpr add_const_t<T>& as_const(T& t) noexcept
 
 template<typename T>
 inline constexpr add_const_t<T>& as_const(const T&& t) noexcept = delete;
-
-CCC_MODULE_EXPORT_END
 
 }  // namespace ccc
 

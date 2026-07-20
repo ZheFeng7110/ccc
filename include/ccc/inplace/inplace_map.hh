@@ -9,7 +9,6 @@
 
 #include "ccc/detail/config.hh"
 
-#ifndef CCC_MODULE_INTERFACE_UNIT
 #include <cstddef>
 #include <algorithm>
 #include <functional>
@@ -25,11 +24,8 @@
 
 #include "ccc/utility.hh"
 #include "ccc/inplace/inplace_vector.hh"
-#endif
 
 namespace ccc {
-
-CCC_MODULE_EXPORT
 template<typename Key, typename T, std::size_t N, typename Compare, typename KeyContainer, typename MappedContainer>
 class inplace_map;
 
@@ -226,8 +222,6 @@ public:
 };
 
 }  // namespace detail
-
-CCC_MODULE_EXPORT_BEGIN
 
 template<typename Key,
          typename T,
@@ -893,8 +887,6 @@ private:
         return insert_impl_(std::forward<K>(key), std::forward<V>(value)).first;
     }
 };
-
-CCC_MODULE_EXPORT_END
 
 }  // namespace ccc
 

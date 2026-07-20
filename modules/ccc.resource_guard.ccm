@@ -1,19 +1,13 @@
-/**
- * @file ccc.resource_guard.ccm
- * @brief
- */
-
 module;
 
 #include <type_traits>
 #include <utility>
-
-#define CCC_MODULE_INTERFACE_UNIT
+#include "ccc/resource_guard.hh"
 
 export module ccc.resource_guard;
 
-#ifdef __clang__
-#pragma clang diagnostic ignored "-Winclude-angled-in-module-purview"
-#endif
-
-#include "ccc/resource_guard.hh"
+export namespace ccc {
+    using ::ccc::defer;
+    using ::ccc::try_finally;
+    using ::ccc::with;
+}

@@ -13,14 +13,26 @@ module;
 #include <compare>
 #include <concepts>
 
-#define CCC_MODULE_INTERFACE_UNIT
+#include "ccc/expected.hh"
 
 export module ccc.expected;
 
-export import ccc.utility;
-
-#ifdef __clang__
-#pragma clang diagnostic ignored "-Winclude-angled-in-module-purview"
+export namespace ccc {
+    using ::ccc::unexpected;
+    using ::ccc::operator==;
+    using ::ccc::unexpect_t;
+    using ::ccc::unexpect;
+    using ::ccc::bad_expected_access;
+#if (__cplusplus >= 202002L)
+    using ::ccc::operator<=>;
+#else
+    using ::ccc::operator!=;
+    using ::ccc::operator<;
+    using ::ccc::operator<=;
+    using ::ccc::operator>;
+    using ::ccc::operator>=;
 #endif
-
-#include "ccc/expected.hh"
+    using ::ccc::is_criterion_v;
+    using ::ccc::default_criterion;
+    using ::ccc::expected;
+}

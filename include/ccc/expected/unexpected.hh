@@ -14,8 +14,6 @@
 
 namespace ccc {
 
-CCC_MODULE_EXPORT_BEGIN
-
 template<typename E>
 class unexpected
 {
@@ -145,9 +143,11 @@ inline constexpr bool operator>=(const unexpected<E>& lhs, const unexpected<E>& 
 struct unexpect_t {
     unexpect_t() = default;
 };
+#if (__cplusplus >= 201703L)
+inline constexpr unexpect_t unexpect{};
+#else
 constexpr unexpect_t unexpect{};
-
-CCC_MODULE_EXPORT_END
+#endif
 
 namespace detail {
 
@@ -167,8 +167,6 @@ constexpr bool can_be_unexpected_v = std::is_object<E>::value && (!std::is_array
                                      (!std::is_const<E>::value) && (!std::is_volatile<E>::value);
 
 }  // namespace detail
-
-CCC_MODULE_EXPORT_BEGIN
 
 template<typename E>
 class bad_expected_access;
@@ -224,8 +222,6 @@ public:
         return std::move(error_);
     }
 };
-
-CCC_MODULE_EXPORT_END
 
 }  // namespace ccc
 

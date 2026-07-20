@@ -42,21 +42,9 @@
 #define CCC_MAYBE_UNUSED
 #endif
 
-#ifdef CCC_MODULE_INTERFACE_UNIT
-
-/* clang-format off */
-#define CCC_MODULE_EXPORT       export
-#define CCC_MODULE_EXPORT_BEGIN export {
-#define CCC_MODULE_EXPORT_END   }
-/* clang-format on */
-
-#else  // CCC_MODULE_INTERFACE_UNIT
-
-#define CCC_MODULE_EXPORT
-#define CCC_MODULE_EXPORT_BEGIN
-#define CCC_MODULE_EXPORT_END
-
-#endif  // !CCC_MODULE_INTERFACE_UNIT
+#ifndef CCC_USE_MODULES
+#define CCC_USE_MODULES 0
+#endif
 
 #ifdef _MSC_VER
 #define CCC_WARNING(msg) __pragma(message(msg))

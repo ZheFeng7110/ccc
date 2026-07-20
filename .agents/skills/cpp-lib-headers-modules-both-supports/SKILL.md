@@ -3,48 +3,31 @@ name: cpp-lib-headers-modules-both-supports
 description: Design and implement a C++ library that supports both traditional header inclusion and C++20 modules simultaneously. Use when building a C++ library that needs to be consumable via `#include` (headers) and `import` (modules) from the same source, with patterns for config macros, pure-header libraries, component dependencies, and libraries with source files.
 ---
 
-# C++ Library: Headers & Modules
+# C++ Library: Headers & Modules (Implicit Include Pattern)
 
 指导如何设计一个 C++ 库，使其能同时通过头文件 (`#include`) 和 C++20 模块 (`import`) 两种方式被使用。
 
+核心思路：**头文件为纯 C++ 代码（无 `export` 关键字），无条件包含所有依赖，`.cppm` 中使用 `export namespace { using }` 选择性导出符号。**
+
 ## 配置头文件
 
-将配置头文件放在 `include/project_name/detail/config.hpp` 路径下，定义以下宏：
+将配置头文件放在 `include/project_name/detail/config.hpp` 路径下，定义 `PROJECT_NAME_USE_MODULES` 宏：
 
 ```cpp
-#ifdef PROJECT_NAME_MODULE_INTERFACE_UNIT
+#pragma once
+#ifndef PROJECT_NAME_DETAIL_CONFIG_HPP
+#define PROJECT_NAME_DETAIL_CONFIG_HPP
 
-#define PROJECT_NAME_MODULE_EXPORT       export
-#define PROJECT_NAME_MODULE_EXPORT_BEGIN export {
-#define PROJECT_NAME_MODULE_EXPORT_END   }
-
-#else
-
-#define PROJECT_NAME_MODULE_EXPORT
-#define PROJECT_NAME_MODULE_EXPORT_BEGIN
-#define PROJECT_NAME_MODULE_EXPORT_END
-
+#ifndef PROJECT_NAME_USE_MODULES
+#define PROJECT_NAME_USE_MODULES 0
 #endif
+
+#endif  // !PROJECT_NAME_DETAIL_CONFIG_HPP
 ```
 
-该头文件必须在每一个库头文件中包含，以确保在模块单元中正确导出符号，在非模块单元中忽略 export。
-
-在头文件中使用宏标记导出：
-
-```cpp
-#include "project_name/detail/config.hpp"
-
-PROJECT_NAME_MODULE_EXPORT
-namespace project_name { /* ... */ }
-
-PROJECT_NAME_MODULE_EXPORT_BEGIN
-/* 需要导出的类、函数或变量 */
-PROJECT_NAME_MODULE_EXPORT_END
-```
+本模式仅需 `PROJECT_NAME_USE_MODULES` 一个配置宏，头文件代码无需 `export` 等模块关键字。
 
 ## 纯头文件库
-
-如果库的实现是纯头文件的（例如全是模板），按以下模式设计。
 
 ### 头文件 (`lib.hpp`)
 
@@ -53,15 +36,20 @@ PROJECT_NAME_MODULE_EXPORT_END
 #ifndef LIB_HPP
 #define LIB_HPP
 
-#include "project_name/detail/config.hpp"
+#include <cstddef>                        // 标准库头文件：无条件包含
+#include "lib/b.hpp"                      // 项目模块依赖：无条件包含（隐式）
 
-#ifndef PROJECT_NAME_MODULE_INTERFACE_UNIT
-// 在此处包含需要的 C/C++ 标准库头文件
-#endif
+namespace lib::detail {
+    // 不导出的实现细节
+}
 
-/* 库的实现，用 PROJECT_NAME_MODULE_EXPORT 标记导出 */
+namespace lib {
+    int func(int a) { return a; }         // 无需 export 宏
+    struct Type {};
+    struct UnExportedType {};             // 不导出
+}
 
-#endif // !LIB_HPP
+#endif  // !LIB_HPP
 ```
 
 ### 模块接口单元 (`lib.cppm`)
@@ -69,90 +57,76 @@ PROJECT_NAME_MODULE_EXPORT_END
 ```cpp
 module;
 
-// 在此处包含需要的 C/C++ 标准库头文件
+#include "lib.hpp"                        // 头文件在全局模块段
 
-#define PROJECT_NAME_MODULE_INTERFACE_UNIT
+export module lib;
 
-export module lib;  // 模块名称与头文件名称相同
+// 无需 import 项目模块，依赖已由头文件隐式包含
 
-#ifdef __clang__
-#pragma clang diagnostic ignored "-Winclude-angled-in-module-purview"
-#endif
-
-#include "lib.hpp"
+export namespace lib {                    // 选择性导出
+    using ::lib::func;
+    using ::lib::Type;
+    // UnExportedType 不列出，不导出
+}
 ```
 
-头文件嵌套路径与模块名称的对应关系：头文件 `lib/component.hpp` 对应模块名 `lib.component`。
-
-### 组件依赖模式
+## 组件依赖模式
 
 如果 `lib/a.hpp` 依赖 `lib/b.hpp`，且两者都提供模块：
 
-#### `lib/b.hpp` 及对应模块
-按上述纯头文件模式设计。
-
-#### `lib/a.hpp`
+### `lib/a.hpp`
 
 ```cpp
 #pragma once
 #ifndef LIB_A_HPP
 #define LIB_A_HPP
 
-#include "project_name/detail/config.hpp"
+#include <cstddef>
+#include "lib/b.hpp"                      // 无条件包含（隐式）
 
-#ifndef PROJECT_NAME_MODULE_INTERFACE_UNIT
-// 在此处包含需要的 C/C++ 标准库头文件
-#include "lib/b.hpp"  // 依赖的头文件
+namespace lib {
+    void funcA();
+}
+
 #endif
-
-/* 库的实现 */
-
-#endif // !LIB_A_HPP
 ```
 
-#### `lib.a.cppm`
+### `lib.a.cppm`
 
 ```cpp
 module;
 
-// 在此处包含需要的 C/C++ 标准库头文件
-
-#define PROJECT_NAME_MODULE_INTERFACE_UNIT
+#include "lib/a.hpp"
 
 export module lib.a;
 
-import lib.b;  // 导入依赖的模块（可以视情况 `export import`）
+// 无需 import lib.b，依赖已由头文件隐式包含
 
-#ifdef __clang__
-#pragma clang diagnostic ignored "-Winclude-angled-in-module-purview"
-#endif
-
-#include "lib/a.hpp"
+export namespace lib {
+    using ::lib::funcA;
+}
 ```
 
 ## 存在源文件的库
 
-如果库的实现存在 `.cpp` 源文件，对外提供头文件：
+**头文件**：与纯头文件库模式相同。
 
-- **头文件**：参考上述纯头文件模式设计
-- **源文件**作为模块实现单元：
+**源文件（`lib.cpp`）**：使用 `PROJECT_NAME_USE_MODULES` 进行条件编译：
 
 ```cpp
-// lib.cpp
-
-#ifdef PROJECT_NAME_USE_MODULES
+#if (defined(PROJECT_NAME_USE_MODULES) && PROJECT_NAME_USE_MODULES)
 module;
-
-// 在此处包含需要的 C/C++ 标准库头文件
-
-module lib;  // 与模块接口单元名称相同
-
-// 在此处 import 依赖的其他模块（如果有）
+#include <cstddef>                        // 全局模块段包含标准库头文件
+module lib;                               // 模块实现单元
+import lib.b;                             // import 替代 #include
 #else
-#include "lib.hpp"  // 包含自己对应的头文件
-
-// 在此处包含需要的 C/C++ 标准库头文件和其他依赖
+#include "lib.hpp"                        // 头文件模式
 #endif
 
-// 源文件实现...
+// 实现代码...
 ```
+
+## 隐式包含规则
+
+在 `.hpp` 文件中，所有 `#include` 均无条件包含。
+`.cppm` 文件不 `import` 项目模块，项目依赖完全由头文件的 `#include` 隐式提供。

@@ -13,14 +13,14 @@ module;
 #include <utility>
 #include <compare>
 
-#define CCC_MODULE_INTERFACE_UNIT
+#include "ccc/utility.hh"
+#include "ccc/inplace/inplace_vector.hh"
 
 export module ccc.inplace.inplace_vector;
 
-import ccc.utility;
-
-#ifdef __clang__
-#pragma clang diagnostic ignored "-Winclude-angled-in-module-purview"
-#endif
-
-#include "ccc/inplace/inplace_vector.hh"
+export namespace ccc {
+    using ::ccc::inplace_vector;
+    using ::ccc::swap;
+    using ::ccc::erase;
+    using ::ccc::erase_if;
+}

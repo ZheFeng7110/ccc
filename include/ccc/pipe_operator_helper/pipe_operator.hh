@@ -11,16 +11,12 @@
 
 #include "ccc/pipe_operator_helper/detail/config.hh"
 
-#ifndef CCC_PIPE_OPERATOR_HELPER_MODULE_INTERFACE_UNIT
 #include <utility>
 #include <type_traits>
 #include <functional>
-#endif
 
 namespace ccc {
 namespace pipe_operator_helper {
-
-CCC_PIPE_OPERATOR_HELPER_MODULE_EXPORT_BEGIN
 
 template<typename Callable>
 class pipe_tag
@@ -68,8 +64,6 @@ inline constexpr decltype(auto) operator|(FirstArg&& first_arg, pipe_tag<RemainC
 
 }  // namespace pipe_operators
 }  // namespace operators
-
-CCC_PIPE_OPERATOR_HELPER_MODULE_EXPORT_END
 
 }  // namespace pipe_operator_helper
 }  // namespace ccc

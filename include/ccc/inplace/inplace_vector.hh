@@ -11,7 +11,6 @@
 
 #include "ccc/detail/config.hh"
 
-#ifndef CCC_MODULE_INTERFACE_UNIT
 #include <cstddef>
 #include "ccc/detail/assertions.hh"
 
@@ -29,11 +28,7 @@
 
 #include "ccc/utility.hh"
 
-#endif
-
 namespace ccc {
-
-CCC_MODULE_EXPORT_BEGIN
 
 template<typename T, std::size_t N>
 class inplace_vector
@@ -725,8 +720,6 @@ CCC_CPP26_CONSTEXPR typename inplace_vector<T, N>::size_type erase_if(inplace_ve
     c.erase(it, c.end());
     return r;
 }
-
-CCC_MODULE_EXPORT_END
 
 }  // namespace ccc
 

@@ -9,7 +9,6 @@
 
 #include "ccc/detail/config.hh"
 
-#ifndef CCC_MODULE_INTERFACE_UNIT
 #include "ccc/utility.hh"
 
 #include <cstddef>
@@ -26,7 +25,6 @@
 #if (__cplusplus >= 202002L)
 #include <compare>
 #include <concepts>
-#endif
 #endif
 
 #endif  // !CCC_EXPECTED_BASE_HH

@@ -73,14 +73,10 @@ inline constexpr bool default_error_init_has_not_value() noexcept
 }  // namespace is_criterion_impl
 }  // namespace detail
 
-CCC_MODULE_EXPORT_BEGIN
-
 template<typename T>
 constexpr bool is_criterion_v =
     detail::is_criterion_impl::is_valid_criterion_type_v<T> && detail::is_criterion_impl::default_init_has_value<T>() &&
     detail::is_criterion_impl::default_error_init_has_not_value<T>();
-
-CCC_MODULE_EXPORT_END
 
 }  // namespace ccc
 

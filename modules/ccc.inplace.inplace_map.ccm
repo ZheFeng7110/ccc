@@ -11,15 +11,13 @@ module;
 #include <utility>
 #include <compare>
 
-#define CCC_MODULE_INTERFACE_UNIT
+#include "ccc/utility.hh"
+#include "ccc/inplace/inplace_vector.hh"
+#include "ccc/inplace/inplace_map.hh"
 
 export module ccc.inplace.inplace_map;
 
-import ccc.utility;
-import ccc.inplace.inplace_vector;
-
-#ifdef __clang__
-#pragma clang diagnostic ignored "-Winclude-angled-in-module-purview"
-#endif
-
-#include "ccc/inplace/inplace_map.hh"
+export namespace ccc {
+    using ::ccc::inplace_map;
+    using ::ccc::swap;
+}

@@ -12,10 +12,8 @@
 #include "ccc/pipe_operator_helper/detail/config.hh"
 #include "ccc/pipe_operator_helper/detail/bit_cast_impl.hh"
 
-#ifndef CCC_PIPE_OPERATOR_HELPER_MODULE_INTERFACE_UNIT
 #include <utility>
 #include <type_traits>
-#endif
 
 namespace ccc {
 namespace pipe_operator_helper {
@@ -57,8 +55,6 @@ struct forward_to_tag {
 
 }  // namespace detail
 
-CCC_PIPE_OPERATOR_HELPER_MODULE_EXPORT_BEGIN
-
 template<typename ToType>
 inline constexpr detail::static_cast_to_tag<ToType> static_cast_to() noexcept
 {
@@ -90,7 +86,7 @@ inline detail::reinterpret_cast_to_tag<ToType> reinterpret_cast_to() noexcept
 }
 
 template<typename ToType>
-inline CCC_PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR detail::bit_cast_to_tag<ToType> bit_cast_to() noexcept
+inline CCC_CPP20_CONSTEXPR detail::bit_cast_to_tag<ToType> bit_cast_to() noexcept
 {
     return detail::bit_cast_to_tag<ToType>{};
 }
@@ -134,7 +130,7 @@ inline ToType operator>(const FromType& from, const detail::reinterpret_cast_to_
 }
 
 template<typename FromType, typename ToType>
-inline CCC_PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR ToType operator>(const FromType& from,
+inline CCC_CPP20_CONSTEXPR ToType operator>(const FromType& from,
                                                                  const detail::bit_cast_to_tag<ToType>&) noexcept
 {
     return detail::bit_cast_impl<ToType>(from);
@@ -154,8 +150,6 @@ inline constexpr decltype(auto) operator>(FromType&& from, const detail::forward
 
 }  // namespace type_cast_operators
 }  // namespace operators
-
-CCC_PIPE_OPERATOR_HELPER_MODULE_EXPORT_END
 
 }  // namespace pipe_operator_helper
 }  // namespace ccc

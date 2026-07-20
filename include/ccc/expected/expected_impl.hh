@@ -14,8 +14,6 @@
 
 namespace ccc {
 
-CCC_MODULE_EXPORT_BEGIN
-
 class default_criterion
 {
 public:
@@ -50,8 +48,6 @@ static_assert(is_criterion_v<default_criterion>, "default_criterion must satisfy
 template<typename T, typename E, typename Criterion>
 class expected;
 
-CCC_MODULE_EXPORT_END
-
 namespace detail {
 
 template<typename>
@@ -75,10 +71,10 @@ using result = remove_cvref_t<std::invoke_result_t<Func&&, T&&, Cr&&>>;
 template<typename Func, typename T, typename Cr>
 using result_xform = remove_cv_t<std::invoke_result_t<Func&&, T&&, Cr&&>>;
 
-constexpr struct in_place_invoke_tag {
+inline constexpr struct in_place_invoke_tag {
 } in_place_invoke;
 
-constexpr struct unexpect_invoke_tag {
+inline constexpr struct unexpect_invoke_tag {
 } unexpect_invoke;
 
 template<typename>
@@ -100,7 +96,7 @@ struct is_transform_func_return_2values<std::array<T, 2>> : std::true_type {
 template<typename T>
 constexpr bool is_transform_func_return_2values_v = is_transform_func_return_2values<T>::value;
 
-constexpr struct transform_func_return_2values_tag {
+inline constexpr struct transform_func_return_2values_tag {
 } transform_func_return_2_values;
 
 #endif  // (__cplusplus >= 201703L)
@@ -179,8 +175,6 @@ CCC_CPP20_CONSTEXPR void reinit(NewType* new_addr,
 }  // namespace expected_impl
 
 }  // namespace detail
-
-CCC_MODULE_EXPORT_BEGIN
 
 template<typename T, typename E, typename Criterion = default_criterion>
 class expected
@@ -1743,8 +1737,6 @@ public:
     }
 #endif  // (__cplusplus >= 201703L)
 };
-
-CCC_MODULE_EXPORT_END
 
 }  // namespace ccc
 
