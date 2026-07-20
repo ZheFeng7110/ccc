@@ -83,3 +83,23 @@ ccc 是一个跨平台的 C++ 实用功能库，提供一系列现代 C++ 工具
 ### 补充说明
 
 项目级的新约束或编码规范应添加为 `.agents/instructions/` 下的 markdown 文件。Skill 文件统一存放在 `.agents/skills/` 下。
+
+### Git 提交规范
+
+- 提交信息统一使用英文，清晰描述变更内容和原因。
+- 提交信息第一行为一句简洁的总结，基于最近一次提交与当前变更之间的差异概括。
+- 若变更较复杂，可在第一行后空一行，以 `- ` 开头的条目补充原因、内容和影响；简单变更可省略。
+- 提交信息每行首字母大写，不以句号结尾，不使用 Markdown 语法。
+- 最后一行标注 AI 辅助信息，格式为
+  `Assisted-by: AGENT_NAME:MODEL_VERSION[, AGENT_NAME2:MODEL_VERSION2, ...] [TOOL1] [TOOL2]...`
+  - AGENT_NAME：你使用的 AI 工具、框架或智能体的名称（例如 Claude, Copilot, Codex 等）。
+  - MODEL_VERSION：具体调用的模型版本（例如 claude-3-opus, gpt-4 等）。
+  - `[TOOL1]` `[TOOL2]`（可选）：搭配使用的专业代码分析工具（例如 coccinelle, sparse, smatch, clang-tidy 等）。
+  - 若 MODEL_VERSION 包含空格，需用英文双引号将其包裹，例如 "K2.7 Code"。
+  - 若包含多个 AGENT_NAME:MODEL_VERSION，则用逗号分隔。
+  - 示例：
+    - `Assisted-by: Codex:ChatGPT-4.5`
+    - `Assisted-by: OpenCode:deepseek-v4-pro clang-tidy`
+    - `Assisted-by: Claude:claude-3-opus coccinelle sparse`
+    - `Assisted-by: Kimi Code:"K2.7 Code", OpenCode:GLM-5.1 clang-tidy`
+- 多行提交信息使用多个 `-m` 参数分行，不要用 `\n` 内嵌换行。

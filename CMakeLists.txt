@@ -18,6 +18,13 @@ message(STATUS "CCC_BUILD_SHARED: ${CCC_BUILD_SHARED}")
 
 if (CCC_BUILD_TESTS)
     enable_testing()
+
+    if (MSVC)
+        add_compile_options(/WX)
+    else ()
+        add_compile_options(-Werror)
+    endif ()
+
     add_subdirectory(test)
 endif ()
 

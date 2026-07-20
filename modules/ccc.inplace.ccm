@@ -1,13 +1,6 @@
 module;
 
-#include "ccc/inplace.hh"
-
 export module ccc.inplace;
 
-export namespace ccc {
-    using ::ccc::inplace_vector;
-    using ::ccc::swap;
-    using ::ccc::erase;
-    using ::ccc::erase_if;
-    using ::ccc::inplace_map;
-}
+export import ccc.inplace.inplace_map;
+export import ccc.inplace.inplace_vector;

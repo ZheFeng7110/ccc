@@ -7,7 +7,7 @@ module;
 export module ccc.resource_guard;
 
 export namespace ccc {
-    using ::ccc::defer;
-    using ::ccc::try_finally;
-    using ::ccc::with;
-}
+using ::ccc::defer;
+using ::ccc::try_finally;
+using ::ccc::with;
+}  // namespace ccc
