@@ -30,7 +30,7 @@ concept is_valid_criterion_type_v =
         { v.has_value() } -> std::convertible_to<bool>;
         T::default_error_value;
         { v == v } -> std::convertible_to<bool>;
-    } && is_nothrow_default_constructible_v<T> && is_nothrow_constructible_v<T, typename T::value_type> &&
+    } && std::is_nothrow_default_constructible<T>::value && std::is_nothrow_constructible<T, typename T::value_type>::value &&
     criterion_type_is_nothrow_callable<T>();
 
 #else
@@ -46,9 +46,9 @@ struct is_valid_criterion_type<
            decltype(std::declval<T>().has_value()),
            decltype(T::default_error_value),
            decltype(std::declval<T>() == std::declval<T>())>,
-    enable_if_t<is_nothrow_default_constructible_v<T> && is_nothrow_constructible_v<T, typename T::value_type> &&
-                is_convertible_v<decltype(std::declval<T>().has_value()), bool> &&
-                is_convertible_v<decltype(std::declval<T>() == std::declval<T>()), bool> &&
+    enable_if_t<std::is_nothrow_default_constructible<T>::value && std::is_nothrow_constructible<T, typename T::value_type>::value &&
+                std::is_convertible<decltype(std::declval<T>().has_value()), bool>::value &&
+                std::is_convertible<decltype(std::declval<T>() == std::declval<T>()), bool>::value &&
                 criterion_type_is_nothrow_callable<T>()> > : std::true_type {
 };
 

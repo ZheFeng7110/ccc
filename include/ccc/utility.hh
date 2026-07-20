@@ -82,14 +82,8 @@ template<typename B>
 using negation = std::negation<B>;
 #endif
 
-template<typename... Bs>
-constexpr bool conjunction_v = conjunction<Bs...>::value;
 
-template<typename... Bs>
-constexpr bool disjunction_v = disjunction<Bs...>::value;
 
-template<typename Bs>
-constexpr bool negation_v = negation<Bs>::value;
 
 #if (__cplusplus >= 202002L)
 template<typename T>
@@ -258,151 +252,9 @@ template<typename... Ts>
 using common_type_t = typename std::common_type<Ts...>::type;
 template<typename T>
 using underlying_type_t = typename std::underlying_type<T>::type;
-
 template<typename T>
 using type_identity_t = typename type_identity<T>::type;
 
-template<typename T>
-constexpr bool is_void_v = std::is_void<T>::value;
-template<typename T>
-constexpr bool is_null_pointer_v = std::is_null_pointer<T>::value;
-template<typename T>
-constexpr bool is_integral_v = std::is_integral<T>::value;
-template<typename T>
-constexpr bool is_floating_point_v = std::is_floating_point<T>::value;
-template<typename T>
-constexpr bool is_array_v = std::is_array<T>::value;
-template<typename T>
-constexpr bool is_enum_v = std::is_enum<T>::value;
-template<typename T>
-constexpr bool is_union_v = std::is_union<T>::value;
-template<typename T>
-constexpr bool is_class_v = std::is_class<T>::value;
-template<typename T>
-constexpr bool is_function_v = std::is_function<T>::value;
-template<typename T>
-constexpr bool is_pointer_v = std::is_pointer<T>::value;
-template<typename T>
-constexpr bool is_lvalue_reference_v = std::is_lvalue_reference<T>::value;
-template<typename T>
-constexpr bool is_rvalue_reference_v = std::is_rvalue_reference<T>::value;
-template<typename T>
-constexpr bool is_member_object_pointer_v = std::is_member_object_pointer<T>::value;
-template<typename T>
-constexpr bool is_member_function_pointer_v = std::is_member_function_pointer<T>::value;
-
-template<typename T>
-constexpr bool is_fundamental_v = std::is_fundamental<T>::value;
-template<typename T>
-constexpr bool is_arithmetic_v = std::is_arithmetic<T>::value;
-template<typename T>
-constexpr bool is_scalar_v = std::is_scalar<T>::value;
-template<typename T>
-constexpr bool is_object_v = std::is_object<T>::value;
-template<typename T>
-constexpr bool is_compound_v = std::is_compound<T>::value;
-template<typename T>
-constexpr bool is_reference_v = std::is_reference<T>::value;
-template<typename T>
-constexpr bool is_member_pointer_v = std::is_member_pointer<T>::value;
-
-template<typename T>
-constexpr bool is_const_v = std::is_const<T>::value;
-template<typename T>
-constexpr bool is_volatile_v = std::is_volatile<T>::value;
-template<typename T>
-constexpr bool is_trivial_v = std::is_trivial<T>::value;
-template<typename T>
-constexpr bool is_trivially_copyable_v = std::is_trivially_copyable<T>::value;
-template<typename T>
-constexpr bool is_standard_layout_v = std::is_standard_layout<T>::value;
-template<typename T>
-constexpr bool is_empty_v = std::is_empty<T>::value;
-template<typename T>
-constexpr bool is_polymorphic_v = std::is_polymorphic<T>::value;
-template<typename T>
-constexpr bool is_abstract_v = std::is_abstract<T>::value;
-template<typename T>
-constexpr bool is_final_v = std::is_final<T>::value;
-template<typename T>
-constexpr bool is_signed_v = std::is_signed<T>::value;
-template<typename T>
-constexpr bool is_unsigned_v = std::is_unsigned<T>::value;
-template<typename T>
-constexpr bool is_bounded_array_v = is_bounded_array<T>::value;
-template<typename T>
-constexpr bool is_unbounded_array_v = is_unbounded_array<T>::value;
-
-template<typename T, typename... Args>
-constexpr bool is_constructible_v = std::is_constructible<T, Args...>::value;
-template<typename T, typename... Args>
-constexpr bool is_trivially_constructible_v = std::is_trivially_constructible<T, Args...>::value;
-template<typename T, typename... Args>
-constexpr bool is_nothrow_constructible_v = std::is_nothrow_constructible<T, Args...>::value;
-template<typename T>
-constexpr bool is_default_constructible_v = std::is_default_constructible<T>::value;
-template<typename T>
-constexpr bool is_trivially_default_constructible_v = std::is_trivially_default_constructible<T>::value;
-template<typename T>
-constexpr bool is_nothrow_default_constructible_v = std::is_nothrow_default_constructible<T>::value;
-template<typename T>
-constexpr bool is_copy_constructible_v = std::is_copy_constructible<T>::value;
-template<typename T>
-constexpr bool is_trivially_copy_constructible_v = std::is_trivially_copy_constructible<T>::value;
-template<typename T>
-constexpr bool is_nothrow_copy_constructible_v = std::is_nothrow_copy_constructible<T>::value;
-template<typename T>
-constexpr bool is_move_constructible_v = std::is_move_constructible<T>::value;
-template<typename T>
-constexpr bool is_trivially_move_constructible_v = std::is_trivially_move_constructible<T>::value;
-template<typename T>
-constexpr bool is_nothrow_move_constructible_v = std::is_nothrow_move_constructible<T>::value;
-template<typename Left, typename Right>
-constexpr bool is_assignable_v = std::is_assignable<Left, Right>::value;
-template<typename Left, typename Right>
-constexpr bool is_trivially_assignable_v = std::is_trivially_assignable<Left, Right>::value;
-template<typename Left, typename Right>
-constexpr bool is_nothrow_assignable_v = std::is_nothrow_assignable<Left, Right>::value;
-template<typename T>
-constexpr bool is_copy_assignable_v = std::is_copy_assignable<T>::value;
-template<typename T>
-constexpr bool is_trivially_copy_assignable_v = std::is_trivially_copy_assignable<T>::value;
-template<typename T>
-constexpr bool is_nothrow_copy_assignable_v = std::is_nothrow_copy_assignable<T>::value;
-template<typename T>
-constexpr bool is_move_assignable_v = std::is_move_assignable<T>::value;
-template<typename T>
-constexpr bool is_trivially_move_assignable_v = std::is_trivially_move_assignable<T>::value;
-template<typename T>
-constexpr bool is_nothrow_move_assignable_v = std::is_nothrow_move_assignable<T>::value;
-template<typename T>
-constexpr bool is_destructible_v = std::is_destructible<T>::value;
-template<typename T>
-constexpr bool is_trivially_destructible_v = std::is_trivially_destructible<T>::value;
-template<typename T>
-constexpr bool is_nothrow_destructible_v = std::is_nothrow_destructible<T>::value;
-template<typename T>
-constexpr bool has_virtual_destructor_v = std::has_virtual_destructor<T>::value;
-template<typename T, typename U>
-constexpr bool is_swappable_with_v = is_swappable_with<T, U>::value;
-template<typename T>
-constexpr bool is_swappable_v = is_swappable<T>::value;
-template<typename T, typename U>
-constexpr bool is_nothrow_swappable_with_v = is_nothrow_swappable_with<T, U>::value;
-template<typename T>
-constexpr bool is_nothrow_swappable_v = is_nothrow_swappable<T>::value;
-
-template<typename T, typename U>
-constexpr bool is_same_v = std::is_same<T, U>::value;
-template<typename Base, typename Derived>
-constexpr bool is_base_of_v = std::is_base_of<Base, Derived>::value;
-template<typename From, typename To>
-constexpr bool is_convertible_v = std::is_convertible<From, To>::value;
-template<typename From, typename To>
-constexpr bool is_nothrow_convertible_v = is_nothrow_convertible<From, To>::value;
-
-template<typename Tuple>
-constexpr std::size_t tuple_size_v = std::tuple_size<Tuple>::value;
 template<std::size_t I, typename Tuple>
 using tuple_element_t = typename std::tuple_element<I, Tuple>::type;
 
@@ -445,8 +297,8 @@ inline CCC_CPP20_CONSTEXPR T* construct_at(T* location,
                                                                                  T(std::declval<Args>()...)))
 {
 #if (__cplusplus < 202002L)
-    static_assert(!is_unbounded_array_v<T>, "construct_at does not support unbounded array types");
-    return detail::construct_at(conditional_t<is_array_v<T>,
+    static_assert(!is_unbounded_array<T>::value, "construct_at does not support unbounded array types");
+    return detail::construct_at(conditional_t<std::is_array<T>::value,
                                               detail::construct_at_is_array_type_tag,
                                               detail::construct_at_is_not_array_type_tag>{},
                                 location,

@@ -327,7 +327,7 @@ public:
             throw std::out_of_range("[ccc.inplace_vector]: new_size too large");
         }
         if (new_size > size_) {
-            if CCC_CPP17_CONSTEXPR (!is_trivially_default_constructible_v<value_type>) {
+            if CCC_CPP17_CONSTEXPR (!std::is_trivially_default_constructible<value_type>::value) {
 #if (__cplusplus >= 201703L)
                 ccc::uninitialized_default_construct_n(ptr_at(size_), new_size - size_);
 #else
