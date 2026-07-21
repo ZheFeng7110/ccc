@@ -40,6 +40,7 @@ import ccc.expected;  // 仅引入 expected 组件
 - [ccc.expected](docs/zh/expected.md) - 支持可选 Criterion 的单子 expected
 - [ccc.inplace](docs/zh/inplace/inplace.md) - 栈上分配、编译期固定容量的“就地”容器
 - [ccc.resource_guard](docs/zh/resource_guard.md) - 基于 RAII 的资源管理工具，支持 defer、try_finally、with 模式
+- [ccc.when](docs/zh/when.md) - 仿照 Kotlin when 表达式设计的通用化 switch 替代方案
 
 ## 构建
 
