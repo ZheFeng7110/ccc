@@ -1108,9 +1108,9 @@ public:  // operator==
         })
 #else
         -> enable_if_t<!std::is_void<T2>::value &&
-                           std::is_void<void_t<decltype(**this == *rhs), decltype(this->error() == rhs.error())>::value> &&
+                           std::is_void<void_t<decltype(**this == *rhs), decltype(this->error() == rhs.error())>>::value &&
                            std::is_convertible<decltype(**this == *rhs), bool>::value &&
-                           std::is_convertible<decltype(this->::valueerror() == rhs.error()), bool>,
+                           std::is_convertible<decltype(this->error() == rhs.error()), bool>::value,
                        bool>
 #endif
     {
@@ -1129,8 +1129,8 @@ public:  // operator==
             { e.error() == u.error() } -> std::convertible_to<bool>;
         })
 #else
-        -> enable_if_t<std::is_void<void_t<decltype(this->error() == unexp.error())>::value> &&
-                           std::is_convertible<decltype(this->::valueerror() == unexp.error()), bool>,
+        -> enable_if_t<std::is_void<void_t<decltype(this->error() == unexp.error())>>::value &&
+                           std::is_convertible<decltype(this->error() == unexp.error()), bool>::value,
                        bool>
 #endif
     {
