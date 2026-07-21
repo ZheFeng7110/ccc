@@ -50,11 +50,11 @@ jobs:
 
       - name: Test — GCC 16
         shell: pwsh
-        run: ./scripts/Run-UnitTest.ps1 -Toolchains gcc -CcOverride $HOME/.local/gcc-16.1.0/bin/gcc -CxxOverride $HOME/.local/gcc-16.1.0/bin/g++
+        run: ./scripts/Run-UnitTest.ps1 -CcOverride $HOME/.local/gcc-16.1.0/bin/gcc -CxxOverride $HOME/.local/gcc-16.1.0/bin/g++
 
       - name: Test — Clang 19 (libc++)
         shell: pwsh
-        run: ./scripts/Run-UnitTest.ps1 -Toolchains clang -CcOverride clang-19 -CxxOverride clang++-19
+        run: ./scripts/Run-UnitTest.ps1 -UseLibCXX -CcOverride clang-19 -CxxOverride clang++-19
 
   macos:
     name: macOS
@@ -82,11 +82,11 @@ jobs:
 
       - name: Test — GCC 15
         shell: pwsh
-        run: ./scripts/Run-UnitTest.ps1 -Toolchains gcc -CcOverride gcc-15 -CxxOverride g++-15
+        run: ./scripts/Run-UnitTest.ps1 -CcOverride gcc-15 -CxxOverride g++-15
 
       - name: Test — Apple Clang (libc++)
         shell: pwsh
-        run: ./scripts/Run-UnitTest.ps1 -Toolchains clang -CcOverride clang -CxxOverride clang++
+        run: ./scripts/Run-UnitTest.ps1 -UseLibCXX -CcOverride clang -CxxOverride clang++
 
   windows:
     name: Windows

@@ -8,10 +8,8 @@
     Builds and runs unit tests across all major C++ standards (11-23).
     For C++20 and above, tests both header-only and C++20 module configurations.
 
-    Toolchain matrix:
-        Windows  : MSVC (Visual Studio 2026) + Ninja
-        macOS    : GCC (libstdc++) + Ninja, Clang (libc++) + Ninja
-        Linux    : GCC (libstdc++) + Ninja, Clang (libc++) + Ninja
+    CMake automatically detects the toolchain. Use CcOverride and CxxOverride
+    to override the C and C++ compilers respectively.
 
     CMake variables used:
         CCC_BUILD_TESTS=ON
@@ -30,15 +28,14 @@
 .PARAMETER BuildType
     CMake build type (default: Release).
 
-.PARAMETER Toolchains
-    Specific toolchains to test. If empty, auto-detects based on platform.
-    Valid values: msvc, gcc, clang.
-
 .PARAMETER CcOverride
-    Override C compiler path (sets CC environment variable).
+    Override C compiler path (sets -DCMAKE_C_COMPILER).
 
 .PARAMETER CxxOverride
-    Override C++ compiler path (sets CXX environment variable).
+    Override C++ compiler path (sets -DCMAKE_CXX_COMPILER).
+
+.PARAMETER UseLibCXX
+    Add -stdlib=libc++ to the C++ compiler flags.
 #>
 
 [CmdletBinding()]
@@ -49,13 +46,13 @@ param(
     [switch]$Clean,
     [ValidateSet("Debug", "Release", "RelWithDebInfo", "MinSizeRel")]
     [string]$BuildType = "Release",
-    [ValidateSet("msvc", "gcc", "clang")]
-    [string[]]$Toolchains = @(),
     [string]$CcOverride = "",
-    [string]$CxxOverride = ""
+    [string]$CxxOverride = "",
+    [switch]$UseLibCXX
 )
 
 $ErrorActionPreference = "Stop"
+
 # ----------------------------------------------------------------------
 # Paths
 # ----------------------------------------------------------------------
@@ -109,46 +106,26 @@ function Write-Subheading
 }
 
 # ----------------------------------------------------------------------
-# Environment setup helpers
-# ----------------------------------------------------------------------
-function Find-Compiler
-{
-    param(
-        [string[]]$CcNames,
-        [string[]]$CxxNames
-    )
-    for ($i = 0; $i -lt [Math]::Min($CcNames.Count, $CxxNames.Count); $i++) {
-        $cc = Get-Command $CcNames[$i]  -ErrorAction SilentlyContinue
-        $cxx = Get-Command $CxxNames[$i] -ErrorAction SilentlyContinue
-        if ($cc -and $cxx)
-        {
-            return @{ CC = $cc.Source; CXX = $cxx.Source }
-        }
-    }
-    return $null
-}
-
-# ----------------------------------------------------------------------
 # Core build-and-test function
 # ----------------------------------------------------------------------
 function Invoke-BuildAndTest
 {
     param(
         [string]$Generator,
-        [string]$Toolchain,
         [string]$CppStandard,
         [bool]$UseModules,
-        [hashtable]$CompilerEnv,
-        [string[]]$ExtraCmakeArgs
+        [string]$CcOverride,
+        [string]$CxxOverride,
+        [switch]$UseLibCXX
     )
 
-    $label = "$Toolchain / C++$CppStandard"
+    $label = "C++$CppStandard"
     if ($UseModules)
     {
         $label += " (modules)"
     }
 
-    $dirname = "$Toolchain-cpp$CppStandard"
+    $dirname = "cpp$CppStandard"
     if ($UseModules)
     {
         $dirname += "-modules"
@@ -184,157 +161,61 @@ function Invoke-BuildAndTest
     {
         $cmakeConfigArgs += "-DCCC_USE_CPP_MODULES=ON"
     }
-    if ($ExtraCmakeArgs)
+    if ($CcOverride -and $CxxOverride)
     {
-        $cmakeConfigArgs += $ExtraCmakeArgs
+        $cmakeConfigArgs += "-DCMAKE_C_COMPILER=$CcOverride"
+        $cmakeConfigArgs += "-DCMAKE_CXX_COMPILER=$CxxOverride"
+        Write-Host "    CC         = $CcOverride"
+        Write-Host "    CXX        = $CxxOverride"
+    }
+    if ($UseLibCXX)
+    {
+        $cmakeConfigArgs += "-DCMAKE_CXX_FLAGS=-stdlib=libc++"
+        Write-Host "    CXXFLAGS   = -stdlib=libc++"
     }
 
-    # Set CC / CXX env vars for this invocation (only when non-empty)
-    $prevCC = $env:CC
-    $prevCXX = $env:CXX
-    try
+    # --- Configure ---
+    Write-Host "    Configuring..."
+    $cfgOutput = & cmake @cmakeConfigArgs 2>&1
+    if ($LASTEXITCODE -ne 0)
     {
-        if ($CompilerEnv)
-        {
-            if ($CompilerEnv.ContainsKey('CC') -and $CompilerEnv['CC'])
-            {
-                $env:CC = $CompilerEnv['CC']
-                Write-Host "    CC         = $env:CC"
-            }
-            if ($CompilerEnv.ContainsKey('CXX') -and $CompilerEnv['CXX'])
-            {
-                $env:CXX = $CompilerEnv['CXX']
-                Write-Host "    CXX        = $env:CXX"
-            }
-        }
-
-        # --- Configure ---
-        Write-Host "    Configuring..."
-        $cfgOutput = & cmake @cmakeConfigArgs -DCMAKE_C_COMPILER="$env:CC" -DCMAKE_CXX_COMPILER="$env:CXX" 2>&1
-        if ($LASTEXITCODE -ne 0)
-        {
-            $msg = ($cfgOutput | Out-String).Trim()
-            $short = if ($msg.Length -gt 200) { $msg.Substring(0, 200) + "..." } else { $msg }
-            Write-Host "    CONFIGURE FAILED" -ForegroundColor Red
-            Write-Host $msg -ForegroundColor Red
-            Add-Result -Config $label -Passed $false -Message "configure: $short"
-            return
-        }
-
-        # --- Build ---
-        Write-Host "    Building..."
-        $bldOutput = & cmake --build $buildDir --config $BuildType 2>&1
-        if ($LASTEXITCODE -ne 0)
-        {
-            $msg = ($bldOutput | Out-String).Trim()
-            $short = if ($msg.Length -gt 200) { $msg.Substring(0, 200) + "..." } else { $msg }
-            Write-Host "    BUILD FAILED" -ForegroundColor Red
-            Write-Host $msg -ForegroundColor Red
-            Add-Result -Config $label -Passed $false -Message "build: $short"
-            return
-        }
-
-        # --- Test ---
-        Write-Host "    Testing..."
-        $tstOutput = & ctest --test-dir $buildDir -C $BuildType --output-on-failure 2>&1
-        if ($LASTEXITCODE -ne 0)
-        {
-            $msg = ($tstOutput | Out-String).Trim()
-            $short = if ($msg.Length -gt 200) { $msg.Substring(0, 200) + "..." } else { $msg }
-            Write-Host "    TESTS FAILED" -ForegroundColor Red
-            Write-Host $msg -ForegroundColor Red
-            Add-Result -Config $label -Passed $false -Message "tests: $short"
-            return
-        }
-
-        Write-Host "    PASSED" -ForegroundColor Green
-        Add-Result -Config $label -Passed $true -Message ""
-    }
-    finally
-    {
-        $env:CC = $prevCC
-        $env:CXX = $prevCXX
-    }
-}
-# ----------------------------------------------------------------------
-# Per-toolchain runner
-# ----------------------------------------------------------------------
-
-function Invoke-ToolchainSuite
-{
-    param(
-        [string]$Generator,
-        [string]$Name,
-        [scriptblock]$EnvSetupScript,
-        [string[]]$ExtraCmakeArgs
-    )
-
-    Write-Heading "Toolchain: $Name"
-
-    $compilerEnv = & $EnvSetupScript
-    if ($null -eq $compilerEnv)
-    {
-        Write-Host ("  WARNING -- Toolchain was not found on this system enviroment. " +
-            "Will let CMake to find it automatically.") -ForegroundColor Yellow
+        $msg = ($cfgOutput | Out-String).Trim()
+        $short = if ($msg.Length -gt 200) { $msg.Substring(0, 200) + "..." } else { $msg }
+        Write-Host "    CONFIGURE FAILED" -ForegroundColor Red
+        Write-Host $msg -ForegroundColor Red
+        Add-Result -Config $label -Passed $false -Message "configure: $short"
+        return
     }
 
-    foreach ($std in $Standards)
+    # --- Build ---
+    Write-Host "    Building..."
+    $bldOutput = & cmake --build $buildDir --config $BuildType 2>&1
+    if ($LASTEXITCODE -ne 0)
     {
-        # All standards: header-only mode
-        Invoke-BuildAndTest -Generator $Generator -Toolchain $Name -CppStandard $std -UseModules $false `
-            -CompilerEnv $compilerEnv -ExtraCmakeArgs $ExtraCmakeArgs
-
-        # C++20+: also test module mode
-        if ([int]$std -ge 20)
-        {
-            Invoke-BuildAndTest -Generator $Generator -Toolchain $Name -CppStandard $std -UseModules $true `
-                -CompilerEnv $compilerEnv -ExtraCmakeArgs $ExtraCmakeArgs
-        }
+        $msg = ($bldOutput | Out-String).Trim()
+        $short = if ($msg.Length -gt 200) { $msg.Substring(0, 200) + "..." } else { $msg }
+        Write-Host "    BUILD FAILED" -ForegroundColor Red
+        Write-Host $msg -ForegroundColor Red
+        Add-Result -Config $label -Passed $false -Message "build: $short"
+        return
     }
-}
 
-# ----------------------------------------------------------------------
-# Toolchain definitions
-# ----------------------------------------------------------------------
-
-$SupportedToolchains = @()
-
-# --- MSVC (Windows only) ---
-if ($Platform -eq "windows")
-{
-    $SupportedToolchains += "msvc"
-}
-
-# --- GCC and Clang (macOS / Linux) ---
-if ($Platform -in @("macos", "linux"))
-{
-    $gccCandidates = @("gcc-16", "gcc-15", "gcc-14", "gcc")
-    $gxxCandidates = @("g++-16", "g++-15", "g++-14", "g++")
-
-    $clangCandidates = @("clang-19", "clang-18", "clang-17", "clang-16", "clang-15", "clang")
-    $clangxxCandidates = @("clang++-19", "clang++-18", "clang++-17", "clang++-16", "clang++-15", "clang++")
-
-    $SupportedToolchains += "gcc"
-    $SupportedToolchains += "clang"
-}
-# Apply toolchain filter if specified
-if ($Toolchains.Count -gt 0)
-{
-    $activeToolchains = $Toolchains | Where-Object { $_ -in $SupportedToolchains }
-    $skipped = $Toolchains | Where-Object { $_ -notin $SupportedToolchains }
-    if ($skipped)
+    # --- Test ---
+    Write-Host "    Testing..."
+    $tstOutput = & ctest --test-dir $buildDir -C $BuildType --output-on-failure 2>&1
+    if ($LASTEXITCODE -ne 0)
     {
-        Write-Host "WARNING: Requested toolchains not available on $Platform : $( $skipped -join ', ' )" -ForegroundColor Yellow
+        $msg = ($tstOutput | Out-String).Trim()
+        $short = if ($msg.Length -gt 200) { $msg.Substring(0, 200) + "..." } else { $msg }
+        Write-Host "    TESTS FAILED" -ForegroundColor Red
+        Write-Host $msg -ForegroundColor Red
+        Add-Result -Config $label -Passed $false -Message "tests: $short"
+        return
     }
-}
-else
-{
-    $activeToolchains = $SupportedToolchains
-}
 
-# Apply overrides
-$userCC = if ($CcOverride) { $CcOverride } else { "" }
-$userCXX = if ($CxxOverride) { $CxxOverride } else { "" }
+    Write-Host "    PASSED" -ForegroundColor Green
+    Add-Result -Config $label -Passed $true -Message ""
+}
 
 # ----------------------------------------------------------------------
 # Entry point
@@ -346,7 +227,19 @@ Write-Host "  Project   : $ProjectRoot"
 Write-Host "  Platform  : $Platform"
 Write-Host "  Standards : $( $Standards -join ', ' )"
 Write-Host "  BuildType : $BuildType"
-Write-Host "  Toolchains: $( $activeToolchains -join ', ' )"
+if ($CcOverride -or $CxxOverride)
+{
+    Write-Host "  CC override  : $CcOverride"
+    Write-Host "  CXX override : $CxxOverride"
+    if (-not ($CcOverride -and $CxxOverride))
+    {
+        Write-Host "  WARNING: Both CcOverride and CxxOverride must be specified; compiler override will be ignored." -ForegroundColor Yellow
+    }
+}
+if ($UseLibCXX)
+{
+    Write-Host "  Use libc++ : yes"
+}
 Write-Host ""
 
 # Check prerequisites
@@ -367,67 +260,29 @@ if ($Platform -ne "windows")
 
 Write-Host "  cmake : $( cmake --version | Select-Object -First 1 )"
 Write-Host ""
+
 # ----------------------------------------------------------------------
-# Run all toolchain suites
+# Run all configured standards
 # ----------------------------------------------------------------------
 
-foreach ($tc in $activeToolchains)
+Write-Heading "Running test suites"
+
+$Generator = if ($Platform -eq "windows") { "Visual Studio 18 2026" } else { "Ninja" }
+
+foreach ($std in $Standards)
 {
-    $setup = $null
-    $extra = @()
-    switch ($tc)
+    # All standards: header-only mode
+    Invoke-BuildAndTest -Generator $Generator -CppStandard $std -UseModules $false `
+        -CcOverride $CcOverride -CxxOverride $CxxOverride -UseLibCXX:$UseLibCXX
+
+    # C++20+: also test module mode
+    if ([int]$std -ge 20)
     {
-        "msvc" {
-            $setup = {
-                if ($userCC -and $userCXX)
-                {
-                    return @{ CC = $userCC; CXX = $userCXX }
-                }
-                return @{ }
-            }
-        }
-        "gcc" {
-            $setup = {
-                if ($userCC -and $userCXX)
-                {
-                    Write-Host "    Using user-specified compiler: $userCXX"
-                    return @{ CC = $userCC; CXX = $userCXX }
-                }
-                $info = Find-Compiler -CcNames $gccCandidates -CxxNames $gxxCandidates
-                if (-not $info)
-                {
-                    Write-Host "    GCC not found." -ForegroundColor Yellow
-                    return $null
-                }
-                Write-Host "    Found GCC: $( $info.CXX )"
-                return $info
-            }
-        }
-        "clang" {
-            $setup = {
-                if ($userCC -and $userCXX)
-                {
-                    Write-Host "    Using user-specified compiler: $userCXX"
-                    return @{ CC = $userCC; CXX = $userCXX }
-                }
-                $info = Find-Compiler -CcNames $clangCandidates -CxxNames $clangxxCandidates
-                if (-not $info)
-                {
-                    Write-Host "    Clang not found." -ForegroundColor Yellow
-                    return $null
-                }
-                Write-Host "    Found Clang: $( $info.CXX )"
-                return $info
-            }
-            $extra = @("-DCMAKE_CXX_FLAGS=-stdlib=libc++")
-        }
-    }
-    if ($setup)
-    {
-        $gen = if ($tc -eq "msvc") { "Visual Studio 18 2026" } else { "Ninja" }
-        Invoke-ToolchainSuite -Generator $gen -Name $tc -EnvSetupScript $setup -ExtraCmakeArgs $extra
+        Invoke-BuildAndTest -Generator $Generator -CppStandard $std -UseModules $true `
+            -CcOverride $CcOverride -CxxOverride $CxxOverride -UseLibCXX:$UseLibCXX
     }
 }
+
 # ----------------------------------------------------------------------
 # Summary
 # ----------------------------------------------------------------------
