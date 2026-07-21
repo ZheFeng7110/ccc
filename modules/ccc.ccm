@@ -7,3 +7,4 @@ export import ccc.utility;
 export import ccc.resource_guard;
 export import ccc.pipe_operator_helper;
 export import ccc.expected;
+export import ccc.when;

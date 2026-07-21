@@ -48,6 +48,7 @@ if (CCC_USE_CPP_MODULES)
         modules/ccc.inplace.ccm
         modules/ccc.inplace.inplace_vector.ccm
         modules/ccc.inplace.inplace_map.ccm
+        modules/ccc.when.ccm
     )
 
     if (MSVC)

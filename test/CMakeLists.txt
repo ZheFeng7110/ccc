@@ -56,9 +56,13 @@ set(CMAKE_CXX_STANDARD "${CCC_TEST_CPP_STANDARD}"
 add_executable(${PROJECT_NAME})
 
 function (globSources cmd variable cxxStdRequired)
-    if (${cxxStdRequired} LESS_EQUAL CMAKE_CXX_STANDARD)
-        file(${cmd} tmpSources ${ARGN})
-        set(${variable} ${tmpSources} PARENT_SCOPE)
+    if (CMAKE_CXX_STANDARD GREATER_EQUAL ${cxxStdRequired})
+        if (${cmd} STREQUAL "FILES")
+            set(${variable} ${ARGN} PARENT_SCOPE)
+        else ()
+            file(${cmd} tmpSources ${ARGN})
+            set(${variable} ${tmpSources} PARENT_SCOPE)
+        endif ()
     else ()
         set(${variable} "" PARENT_SCOPE)
     endif ()
@@ -68,10 +72,12 @@ globSources(GLOB_RECURSE cccPipeOperatorHelperTestSources 11 "pipe_operator_help
 globSources(GLOB expectedTestSources 14 "expected_test/*.cc")
 
 globSources(GLOB_RECURSE inplaceTestSources 11 "inplace/*.cc")
+globSources(FILES whenTestSources 17 when_test.cc)
 target_sources(${PROJECT_NAME} PRIVATE
     ${cccPipeOperatorHelperTestSources}
     ${expectedTestSources}
     ${inplaceTestSources}
+    ${whenTestSources}
     resource_guard_test.cc
 )
 

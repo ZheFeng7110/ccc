@@ -1,0 +1,11 @@
+module;
+
+#include "ccc/when.hh"
+
+export module ccc.when;
+
+export namespace ccc {
+using ::ccc::default_tag;
+using ::ccc::default_tag_t;
+using ::ccc::when;
+}  // namespace ccc

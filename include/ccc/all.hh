@@ -12,5 +12,6 @@
 #include "ccc/utility.hh"
 #include "ccc/expected.hh"
 #include "ccc/pipe_operator_helper.hh"
+#include "ccc/when.hh"
 
 #endif  // !CCC_ALL_HH
