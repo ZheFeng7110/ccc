@@ -82,9 +82,6 @@ template<typename B>
 using negation = std::negation<B>;
 #endif
 
-
-
-
 #if (__cplusplus >= 202002L)
 template<typename T>
 using type_identity = std::type_identity<T>;

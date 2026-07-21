@@ -18,6 +18,7 @@ English | [简体中文](../../zh/inplace/inplace.md)
 | Component | Module Name                                       | Description |
 |-----------|---------------------------------------------------|-------------|
 | `inplace_vector<T, N>` | [ccc.inplace.inplace_vector](./inplace_vector.md) | A lower-version implementation of C++26 `std::inplace_vector` |
+| `inplace_map<Key, T, N>` | [ccc.inplace.inplace_map](./inplace_map.md) | Fixed-capacity ordered associative container |
 
 ## Quick Start
 
@@ -33,10 +34,17 @@ Or include only inplace_vector:
 #include "ccc/inplace/inplace_vector.hh"
 ```
 
+Or include only inplace_map:
+
+```cpp
+#include "ccc/inplace/inplace_map.hh"
+```
+
 When using C++20 modules:
 
 ```cpp
 import ccc.inplace;                  // import all inplace components
 import ccc.inplace.inplace_vector;   // import inplace_vector only
+import ccc.inplace.inplace_map;      // import inplace_map only
 ```
 
