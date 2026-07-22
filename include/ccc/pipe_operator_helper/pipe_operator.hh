@@ -9,7 +9,9 @@
 #ifndef CPP_PIPE_OPERATOR_HELPER_PIPE_OPERATOR_HH
 #define CPP_PIPE_OPERATOR_HELPER_PIPE_OPERATOR_HH
 
-#include "ccc/pipe_operator_helper/detail/config.hh"
+#include "ccc/detail/config.hh"
+
+#if (__cplusplus >= 201703L)
 
 #include <utility>
 #include <type_traits>
@@ -105,5 +107,13 @@ inline constexpr decltype(auto) operator|(FirstArg&& first_arg,
 
 }  // namespace pipe_operator_helper
 }  // namespace ccc
+
+#else  // (__cplusplus >= 201703L)
+
+#ifndef CCC_SUPRESS_WARNINGS
+CCC_WARNING("ccc::pipe_operator_helper requires C++17 or later")
+#endif
+
+#endif  // !(__cplusplus >= 201703L)
 
 #endif  // !CPP_PIPE_OPERATOR_HELPER_PIPE_OPERATOR_HH

@@ -9,7 +9,7 @@
 #ifndef CCC_PIPE_OPERATOR_HELPER_BIT_CAST_IMPL_HH
 #define CCC_PIPE_OPERATOR_HELPER_BIT_CAST_IMPL_HH
 
-#include "ccc/pipe_operator_helper/detail/config.hh"
+#include "ccc/detail/config.hh"
 
 #if (__cplusplus >= 202002L)  // C++20
 #include <bit>
