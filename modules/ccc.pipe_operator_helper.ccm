@@ -12,6 +12,8 @@ using ::ccc::pipe_operator_helper::dynamic_cast_to;
 using ::ccc::pipe_operator_helper::forward_to;
 using ::ccc::pipe_operator_helper::move_to;
 using ::ccc::pipe_operator_helper::pipe_operator;
+using ::ccc::pipe_operator_helper::is_pipe_operator;
+using ::ccc::pipe_operator_helper::is_pipe_operator_v;
 using ::ccc::pipe_operator_helper::pipe_operator_base;
 using ::ccc::pipe_operator_helper::reinterpret_cast_to;
 using ::ccc::pipe_operator_helper::static_cast_to;

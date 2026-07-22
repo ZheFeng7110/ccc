@@ -68,6 +68,10 @@
         - `v > pipe_operator_helper::move_to()` 与 `std::move(v)` 效果相同。
         - `v > pipe_operator_helper::forward_to<T>()` 与 `std::forward<T>(v)` 效果相同。
 
+## 类型特征
+
+- `is_pipe_operator<T>` 和 `is_pipe_operator_v<T>`：编译期类型特征，用于检查类型 `T` 是否是（派生自）管道算子类型。对于任何继承自 `pipe_operator_base` 的类型（包括 `pipe_operator<Derived, Arity>` 和用户自定义类型）返回 `true`。
+
 ## 注意事项与提示
 
 - 该库同时支持纯头文件使用和模块使用。如果你的工具链支持 C++20 模块，并且项目配置为构建模块

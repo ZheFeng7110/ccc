@@ -69,6 +69,10 @@ This can make some call-chains and transformations read left-to-right in a more 
         - `v > pipe_operator_helper::move_to()` has same effect with `std::move(v)`.
         - `v > pipe_operator_helper::forward_to<T>()` has same effect with `std::forward<T>(v)`.
 
+## Type Traits
+
+- `is_pipe_operator<T>` and `is_pipe_operator_v<T>`: compile-time type traits that check whether a type `T` is (derived from) a pipe operator type. Returns `true` for any type that inherits from `pipe_operator_base` (including `pipe_operator<Derived, Arity>` and user-defined types).
+
 ## Notes & Tips
 
 - The library exposes both header-only and module-only usage. If your toolchain supports C++20 modules and the project

@@ -21,6 +21,13 @@ namespace pipe_operator_helper {
 struct pipe_operator_base {
 };
 
+template<typename T>
+struct is_pipe_operator : std::is_base_of<pipe_operator_base, T> {
+};
+
+template<typename T>
+inline constexpr bool is_pipe_operator_v = is_pipe_operator<T>::value;
+
 namespace detail {
 
 template<typename Callee, typename... BoundArgs>
