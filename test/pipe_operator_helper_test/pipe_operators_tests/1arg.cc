@@ -35,15 +35,15 @@ namespace {
 namespace pipe_ = ccc::pipe_operator_helper;
 
 // Example function with 1 argument
-CCC_PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR bool logic_not(const bool b) noexcept
-{
-    return !b;
-}
+struct logic_not_t : pipe_::pipe_operator<logic_not_t, 1> {
+    using pipe_::pipe_operator<logic_not_t, 1>::operator();
 
-CCC_PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR auto logic_not() noexcept
-{
-    return pipe_::pipe_tag{[](const bool b) noexcept { return logic_not(b); }};
-}
+    CCC_PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR bool operator()(const bool b) const noexcept
+    {
+        return !b;
+    }
+};
+inline constexpr logic_not_t logic_not{};
 
 }  // namespace
 
@@ -72,15 +72,15 @@ TEST(Pipe1ArgTest, TypicalLogicNot)
 namespace {
 
 // Example function with reference
-CCC_PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR void add1(int& v) noexcept
-{
-    ++v;
-}
+struct add1_t : pipe_::pipe_operator<add1_t, 1> {
+    using pipe_::pipe_operator<add1_t, 1>::operator();
 
-CCC_PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR auto add1() noexcept
-{
-    return pipe_::pipe_tag{[](int& v) noexcept { add1(v); }};
-}
+    CCC_PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR void operator()(int& v) const noexcept
+    {
+        ++v;
+    }
+};
+inline constexpr add1_t add1{};
 
 #ifdef TEST_IS_CPP20_OR_HIGHER
 consteval bool test_() noexcept
@@ -109,6 +109,7 @@ TEST(Pipe1ArgTest, ReferenceTest)
     int a = 0;
 
     EXPECT_TRUE(noexcept(add1(a)));
+    EXPECT_TRUE(noexcept(a | add1()));
 
     add1(a);
     EXPECT_EQ(a, 1);
@@ -120,18 +121,18 @@ TEST(Pipe1ArgTest, ReferenceTest)
 // tests for exceptions
 namespace {
 
-CCC_PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR bool could_not_past_zero(int v)
-{
-    if (v == 0) {
-        throw std::logic_error("could not past zero");
-    }
-    return true;
-}
+struct could_not_past_zero_t : pipe_::pipe_operator<could_not_past_zero_t, 1> {
+    using pipe_::pipe_operator<could_not_past_zero_t, 1>::operator();
 
-CCC_PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR auto could_not_past_zero()
-{
-    return pipe_::pipe_tag{[](int v) { return could_not_past_zero(v); }};
-}
+    CCC_PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR bool operator()(const int v) const
+    {
+        if (v == 0) {
+            throw std::logic_error("could not past zero");
+        }
+        return true;
+    }
+};
+inline constexpr could_not_past_zero_t could_not_past_zero{};
 
 }  // namespace
 
@@ -152,17 +153,15 @@ TEST(Pipe1ArgTest, ExceptionTest)
 // callable object
 namespace {
 
-CCC_PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR struct Increment {
+struct Increment : pipe_::pipe_operator<Increment, 1> {
+    using pipe_::pipe_operator<Increment, 1>::operator();
+
     CCC_PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR int operator()(const int v) const noexcept
     {
         return v + 1;
     }
-
-    CCC_PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR auto operator()() const noexcept
-    {
-        return pipe_::pipe_tag{[this](const int v) noexcept { return this->operator()(v); }};
-    }
-} increment;
+};
+inline constexpr Increment increment{};
 
 }  // namespace
 

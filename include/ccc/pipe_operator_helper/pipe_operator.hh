@@ -13,53 +13,84 @@
 
 #include <utility>
 #include <type_traits>
-#include <functional>
+#include <tuple>
 
 namespace ccc {
 namespace pipe_operator_helper {
 
-template<typename Callable>
-class pipe_tag
+struct pipe_operator_base {
+};
+
+namespace detail {
+
+template<typename Callee, typename... BoundArgs>
+class pipe_partial
 {
 public:
-    using callable_type = Callable;
+    using callee_type = Callee;
 
 private:
-    callable_type callable_;
+    const callee_type& callee_;
+    std::tuple<BoundArgs...> bound_;
+
+    template<typename Lhs, std::size_t... Is>
+    constexpr decltype(auto) invoke_(Lhs&& lhs, std::index_sequence<Is...>) const
+        noexcept(noexcept(callee_(std::forward<Lhs>(lhs), std::get<Is>(bound_)...)))
+    {
+        return callee_(std::forward<Lhs>(lhs), std::get<Is>(bound_)...);
+    }
 
 public:
-    explicit constexpr pipe_tag(Callable&& callable) noexcept : callable_(std::forward<Callable>(callable)) {}
+    template<typename... Init>
+    constexpr explicit pipe_partial(const callee_type& callee,
+                                    Init&&... init) noexcept((std::is_nothrow_constructible<BoundArgs, Init>::value &&
+                                                              ...))
+        : callee_(callee), bound_(std::forward<Init>(init)...)
+    {
+    }
 
-    constexpr const callable_type& get_callable() const& noexcept
+    template<typename Lhs>
+    constexpr decltype(auto) operator()(Lhs&& lhs) const
+        noexcept(noexcept(invoke_(std::forward<Lhs>(lhs), std::index_sequence_for<BoundArgs...>{})))
     {
-        return callable_;
+        return invoke_(std::forward<Lhs>(lhs), std::index_sequence_for<BoundArgs...>{});
     }
-    constexpr callable_type& get_callable() & noexcept
+};
+
+}  // namespace detail
+
+template<typename Derived, std::size_t Arity>
+class pipe_operator : public pipe_operator_base
+{
+public:
+    template<typename... Bound
+#ifndef __cpp_concepts
+             ,
+             typename = std::enable_if_t<(sizeof...(Bound) < Arity)>
+#endif
+             >
+#ifdef __cpp_concepts
+        requires(sizeof...(Bound) < Arity)
+#endif
+    constexpr auto operator()(Bound&&... bound) const
+        noexcept(noexcept(detail::pipe_partial<Derived, Bound...>(static_cast<const Derived&>(*this),
+                                                                  std::forward<Bound>(bound)...)))
+            -> detail::pipe_partial<Derived, Bound...>
     {
-        return callable_;
-    }
-    constexpr callable_type&& get_callable() && noexcept
-    {
-        return std::move(callable_);
+        return detail::pipe_partial<Derived, Bound...>(static_cast<const Derived&>(*this),
+                                                       std::forward<Bound>(bound)...);
     }
 };
 
 inline namespace operators {
 inline namespace pipe_operators {
 
-template<typename FirstArg, typename RemainCallable>
-inline constexpr decltype(auto)
-operator|(FirstArg&& first_arg, const pipe_tag<RemainCallable>& remain_callable) noexcept(
-    std::is_nothrow_invocable_v<decltype(remain_callable.get_callable()), decltype(std::forward<FirstArg>(first_arg))>)
+template<typename FirstArg, typename Callee, typename... BoundArgs>
+inline constexpr decltype(auto) operator|(FirstArg&& first_arg,
+                                          const detail::pipe_partial<Callee, BoundArgs...>&
+                                              partial) noexcept(noexcept(partial(std::forward<FirstArg>(first_arg))))
 {
-    return std::invoke(remain_callable.get_callable(), std::forward<FirstArg>(first_arg));
-}
-template<typename FirstArg, typename RemainCallable>
-inline constexpr decltype(auto) operator|(FirstArg&& first_arg, pipe_tag<RemainCallable>&& remain_callable) noexcept(
-    std::is_nothrow_invocable_v<decltype(std::move(remain_callable).get_callable()),
-                                decltype(std::forward<FirstArg>(first_arg))>)
-{
-    return std::invoke(std::move(remain_callable).get_callable(), std::forward<FirstArg>(first_arg));
+    return partial(std::forward<FirstArg>(first_arg));
 }
 
 }  // namespace pipe_operators

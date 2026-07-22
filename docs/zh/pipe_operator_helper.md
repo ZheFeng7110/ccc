@@ -22,7 +22,7 @@
 
 ## 特性
 
-- 管道风格函数调用辅助工具（支持自由函数和模板）。
+- 管道风格函数调用辅助工具（支持函数对象和模板）。
 - 管道风格类型转换：`static_cast_to`、`dynamic_cast_to`、`const_cast_to`、`reinterpret_cast_to`、`bit_cast_to`，
   以及 `move_to` 和 `forward_to` 辅助工具。
 - 设计为可作为单一头文件使用（也可在配置模块构建时作为模块使用）。
@@ -36,24 +36,28 @@
 
   或在使用 C++ 模块时（如果已配置）：
 
-  `import pipe_operator_helper;`
+  `import ccc.pipe_operator_helper;`
 
 - 函数管道：
-    - 定义一个普通函数（例如 `int add(int a, int b)`），然后提供一个返回 `pipe_tag` 的辅助重载，
-      `pipe_tag` 包装一个接受左侧参数的可调用对象。
+    - 定义一个派生自 `pipe_operator_helper::pipe_operator<Derived, Arity>` 的可调用类型（`Arity` 为函数参数个数），
+      将实际调用实现为 `operator()`，并通过 `using` 声明重新暴露基类的部分应用 `operator()`。然后创建一个
+      `inline constexpr` 实例。
 
     ```C++
-    constexpr int add(const int a, const int b) noexcept { return a + b; }
+    struct add_t : pipe_operator_helper::pipe_operator<add_t, 2> {
+        using pipe_operator_helper::pipe_operator<add_t, 2>::operator();
 
-    constexpr auto add(const int b) noexcept
-    {
-        return pipe_operator_helper::pipe_tag{[=](const int a) noexcept { return add(a, b); }};
-    }
+        constexpr int operator()(const int a, const int b) const noexcept { return a + b; }
+    };
+    inline constexpr add_t add{};
     ```
 
     - 然后你可以同时使用 `add(x, y)` 和 `x | add(y)`。
+    - 左侧参数的类型在管道调用处推导，因此模板不再需要显式指定模板参数
+      （例如用 `x | add(y)` 代替 `x | add<T>(y)`）。
     - 相同的模式也适用于引用、模板、`constexpr` 和 `consteval` 辅助工具（参见
-      `test/pipe_operators_tests/1arg.cpp` 和 `test/pipe_operators_tests/2args.cpp`）。
+      `test/pipe_operator_helper_test/pipe_operators_tests/1arg.cc` 和
+      `test/pipe_operator_helper_test/pipe_operators_tests/2args.cc`）。
 
 - 类型转换操作符：
     - 用 `v > pipe_operator_helper::static_cast_to<T>()` 或 `v > pipe_operator_helper::cast_to<T>()` 替代 `static_cast<T>(v)`
@@ -67,12 +71,15 @@
 ## 注意事项与提示
 
 - 该库同时支持纯头文件使用和模块使用。如果你的工具链支持 C++20 模块，并且项目配置为构建模块
-  （`-DCPP_PIPE_OPERATOR_HELPER_USE_MODULES=ON`），你可以 `import pipe_operator_helper` 而不是引入头文件。
+  （`-DCCC_USE_CPP_MODULES=ON`），你可以 `import ccc.pipe_operator_helper` 而不是引入头文件。
+- 若管道版本的可调用对象与已有的函数冲突了，可以统一放入 `pp` 命名空间内，参考
+  `test/pipe_operator_helper_test/pipe_operators_tests/wrap_already_exists.cc`。
 - 最新的使用模式请参阅：
-  - `test/pipe_operators_tests/1arg.cpp`
-  - `test/pipe_operators_tests/2args.cpp`
-  - `test/type_cast_test.cpp`
+  - `test/pipe_operator_helper_test/pipe_operators_tests/1arg.cc`
+  - `test/pipe_operator_helper_test/pipe_operators_tests/2args.cc`
+  - `test/pipe_operator_helper_test/pipe_operators_tests/wrap_already_exists.cc`
+  - `test/pipe_operator_helper_test/type_cast_test.cc`
 
 ## 特别感谢
 
-* v1.x.x 版本的实现受 [wzxzhuxi/cpp-functional-programming](https://github.com/wzxzhuxi/cpp-functional-programming/tree/main/06-composition) 启发。
+* [原始仓库](https://github.com/ZheFeng7110/cpp_pipe_operator_helper) 的 `v1.x.x` 版本的实现受 [wzxzhuxi/cpp-functional-programming](https://github.com/wzxzhuxi/cpp-functional-programming/tree/main/06-composition) 启发。

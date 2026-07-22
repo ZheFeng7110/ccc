@@ -1,14 +1,5 @@
 module;
 
-#if (__cplusplus >= 202002L)
-#include <bit>
-#else
-#include <cstring>
-#endif
-
-#include <utility>
-#include <type_traits>
-#include <functional>
 #include "ccc/pipe_operator_helper.hh"
 
 export module ccc.pipe_operator_helper;
@@ -20,7 +11,8 @@ using ::ccc::pipe_operator_helper::const_cast_to;
 using ::ccc::pipe_operator_helper::dynamic_cast_to;
 using ::ccc::pipe_operator_helper::forward_to;
 using ::ccc::pipe_operator_helper::move_to;
-using ::ccc::pipe_operator_helper::pipe_tag;
+using ::ccc::pipe_operator_helper::pipe_operator;
+using ::ccc::pipe_operator_helper::pipe_operator_base;
 using ::ccc::pipe_operator_helper::reinterpret_cast_to;
 using ::ccc::pipe_operator_helper::static_cast_to;
 }  // namespace ccc::pipe_operator_helper
