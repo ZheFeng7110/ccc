@@ -74,6 +74,8 @@ globSources(GLOB expectedTestSources 14 "expected_test/*.cc")
 globSources(GLOB_RECURSE inplaceTestSources 11 "inplace/*.cc")
 globSources(FILES whenTestSources 17 when_test.cc)
 target_sources(${PROJECT_NAME} PRIVATE
+    gtest_main.cc
+
     ${cccPipeOperatorHelperTestSources}
     ${expectedTestSources}
     ${inplaceTestSources}
@@ -82,7 +84,7 @@ target_sources(${PROJECT_NAME} PRIVATE
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-target_link_libraries(${PROJECT_NAME} PRIVATE ccc GTest::gtest_main)
+target_link_libraries(${PROJECT_NAME} PRIVATE ccc GTest::gtest)
 
 if (NOT MSVC AND (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang"))
     find_package(Threads REQUIRED)

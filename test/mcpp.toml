@@ -1,0 +1,35 @@
+[package]
+name = "ccc-test"
+version = "_"
+
+[build]
+sources = ["**/*.cc"]
+include_dirs = ["."]
+# For some reason, we must use `cxxflags` here instead of `defines`
+cxxflags = ["-DTEST_USE_MODULE=1"]
+
+[targets.ccc_test]
+kind = "bin"
+main = "gtest_main.cc"
+
+[scan_overrides."expected_test/*.cc"]
+imports = ["ccc.utility", "ccc.expected"]
+
+[scan_overrides."inplace/inplace_map_test.cc"]
+imports = ["ccc.inplace.inplace_map"]
+
+[scan_overrides."inplace/inplace_vector_test.cc"]
+imports = ["ccc.inplace.inplace_vector"]
+
+[scan_overrides."pipe_operator_helper_test/**/*.cc"]
+imports = ["ccc.pipe_operator_helper"]
+
+[scan_overrides."resource_guard_test.cc"]
+imports = ["ccc.resource_guard"]
+
+[scan_overrides."when_test.cc"]
+imports = ["ccc.when"]
+
+[dependencies]
+gtest = "1.17.0"
+ccc = { path = ".." }

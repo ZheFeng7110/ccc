@@ -67,6 +67,16 @@ cmake --build build
 cd build && ctest .
 ```
 
+## Building with mcpp
+
+This project can also be built with [mcpp](https://github.com/mcpp-community/mcpp) for C++23 module-based builds:
+
+```bash
+mcpp build         # Build the library (module mode)
+mcpp run -p test   # Build and run all tests
+mcpp pack          # Package the release artifact
+```
+
 ## License
 
 This project is licensed under the MIT License.

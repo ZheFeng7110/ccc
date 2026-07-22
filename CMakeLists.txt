@@ -1,8 +1,11 @@
 cmake_minimum_required(VERSION 3.28...4.0)
 
-file(READ "version.txt" cccVersion)
-string(STRIP "${cccVersion}" cccVersion)
-project(ccc LANGUAGES CXX VERSION ${cccVersion})
+project(ccc
+    LANGUAGES CXX
+    VERSION "0.0.0"
+    DESCRIPTION "A C++ utility library that provides modern C++ tools"
+    HOMEPAGE_URL "https://github.com/ZheFeng7110/ccc"
+)
 
 option(CCC_BUILD_TESTS "Build tests for library `ccc`" OFF)
 option(CCC_USE_CPP_MODULES "Use C++ modules for library `ccc`" OFF)

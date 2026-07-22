@@ -6,3 +6,10 @@
 **/build_*/
 **/cmake-build-*/
 **/out/
+
+# mcpp build artifacts and local sandbox
+target/
+.mcpp/
+generated/
+
+compile_commands.json

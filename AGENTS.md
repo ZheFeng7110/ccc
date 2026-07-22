@@ -73,6 +73,23 @@ ccc 是一个跨平台的 C++ 实用功能库，提供一系列现代 C++ 工具
 - 构建目录（`cmake-build-*`、`build_*`、`build-*`）已加入 `.gitignore`，不应手动修改其中的文件。
 - 启用测试：`-DCCC_BUILD_TESTS=ON`；启用模块构建：`-DCCC_USE_CPP_MODULES=ON`。
 
+### mcpp 构建与测试
+
+除 CMake 外，项目也支持使用 [mcpp](https://github.com/mcpp-community/mcpp) 以 C++ 模块方式构建和运行测试。相关配置位于仓库根目录：
+
+- `mcpp.toml` — 工作空间与 `ccc` 库配置
+- `build.mcpp` — 构建脚本，将 `modules/*.ccm` 生成到 `generated/modules/*.cppm`
+- `test/mcpp.toml` — `ccc-test` 测试包配置
+
+mcpp 会在首次构建时自动安装默认工具链，无需在 CI 中手写安装流程。用法参考 mcpp 仓库的 [`.agents/skills/mcpp-usage/SKILL.md`](https://github.com/mcpp-community/mcpp/blob/main/.agents/skills/mcpp-usage/SKILL.md) 和 [`docs/`](https://github.com/mcpp-community/mcpp/tree/main/docs) 目录。
+
+本地运行测试：
+
+```sh
+mcpp build -p test
+mcpp run -p test
+```
+
 ### 代码风格
 
 - 根目录 `.clang-format` 使用 Google 风格并做了定制（4 空格缩进、120 列宽限制、禁用参数装箱等）。

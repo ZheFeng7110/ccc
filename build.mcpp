@@ -1,0 +1,45 @@
+#include <filesystem>
+#include <fstream>
+
+import mcpp;
+
+namespace fs = std::filesystem;
+
+int main()
+{
+    const fs::path src_dir = "modules";
+    const fs::path dst_dir = "generated/modules";
+    fs::create_directories(dst_dir);
+
+    // 清理已生成的 .cppm shim，防止删除 .ccm 后留下幽灵模块
+    for (const auto& entry : fs::recursive_directory_iterator(dst_dir)) {
+        if (!entry.is_regular_file()) {
+            continue;
+        }
+        const auto& p = entry.path();
+        if (p.extension().string() == ".cppm") {
+            fs::remove(p);
+        }
+    }
+
+    for (const auto& entry : fs::recursive_directory_iterator(src_dir)) {
+        if (!entry.is_regular_file()) {
+            continue;
+        }
+        const auto& src = entry.path();
+        if (src.extension().string() != ".ccm") {
+            continue;
+        }
+        auto rel = fs::relative(src, src_dir);
+        auto dst = dst_dir / rel;
+        dst.replace_extension(".cppm");
+        fs::create_directories(dst.parent_path());
+        {
+            std::ifstream in(src, std::ios::binary);
+            std::ofstream out(dst, std::ios::binary | std::ios::trunc);
+            out << in.rdbuf();
+        }
+        mcpp::rerun_if_changed(src.generic_string().c_str());
+    }
+    return 0;
+}

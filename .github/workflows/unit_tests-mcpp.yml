@@ -1,0 +1,60 @@
+name: Unit Tests (mcpp)
+
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    branches: [develop]
+
+jobs:
+  test:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux
+            os: ubuntu-latest
+            install: |
+              curl -fsSL https://github.com/mcpp-community/mcpp/releases/latest/download/install.sh | bash
+              echo "$HOME/.mcpp/bin" >> "$GITHUB_PATH"
+          - name: macOS
+            os: macos-latest
+            install: |
+              curl -fsSL https://github.com/mcpp-community/mcpp/releases/latest/download/install.sh | bash
+              echo "$HOME/.mcpp/bin" >> "$GITHUB_PATH"
+          - name: Windows
+            os: windows-latest
+            install: |
+              $prefix = "$env:USERPROFILE\.mcpp"
+              $zip = "$env:TEMP\mcpp.zip"
+              Invoke-WebRequest -Uri "https://github.com/mcpp-community/mcpp/releases/latest/download/mcpp-windows-x86_64.zip" -OutFile $zip
+              Expand-Archive -Path $zip -DestinationPath "$env:TEMP\mcpp-extract" -Force
+              $extracted = Get-ChildItem -Path "$env:TEMP\mcpp-extract" -Directory | Select-Object -First 1
+              if (-not $extracted) { throw "mcpp zip did not contain a top-level directory" }
+              New-Item -ItemType Directory -Force -Path $prefix | Out-Null
+              Copy-Item -Path "$($extracted.FullName)\*" -Destination $prefix -Recurse -Force
+              Add-Content -Path $env:GITHUB_PATH -Value "$prefix\bin"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache mcpp toolchains
+        uses: actions/cache@v4
+        with:
+          path: ~/.mcpp
+          key: mcpp-${{ matrix.os }}-${{ hashFiles('mcpp.toml', 'test/mcpp.toml') }}
+          restore-keys: mcpp-${{ matrix.os }}-
+
+      - name: Install mcpp
+        shell: ${{ matrix.os == 'windows-latest' && 'pwsh' || 'bash' }}
+        run: ${{ matrix.install }}
+
+      - name: Build and test
+        shell: ${{ matrix.os == 'windows-latest' && 'pwsh' || 'bash' }}
+        run: |
+          mcpp --version
+          mcpp build -p test --verbose
+          mcpp run -p test

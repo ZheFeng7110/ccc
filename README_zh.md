@@ -67,6 +67,16 @@ cmake --build build
 cd build && ctest .
 ```
 
+## 使用 mcpp 构建
+
+本项目也可以使用 [mcpp](https://github.com/mcpp-community/mcpp) 进行基于 C++23 模块的构建：
+
+```bash
+mcpp build        # 构建库（模块模式）
+mcpp run -p test  # 编译并运行所有测试
+mcpp pack         # 打包发布产物
+```
+
 ## 许可证
 
 本项目采用 MIT 许可证。

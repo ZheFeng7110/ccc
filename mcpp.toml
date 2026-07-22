@@ -1,0 +1,19 @@
+[workspace]
+members  = ["test"]
+
+[package]
+name = "ccc"
+version = "0.0.0"
+description = "A C++ utility library that provides modern C++ tools"
+license = "MIT"
+repo = "https://github.com/ZheFeng7110/ccc"
+
+[build]
+sources = ["generated/modules/**/*.cppm"]
+include_dirs = ["include"]
+
+[lib]
+path = "generated/modules/ccc.cppm"
+
+[targets.ccc]
+kind = "lib"
