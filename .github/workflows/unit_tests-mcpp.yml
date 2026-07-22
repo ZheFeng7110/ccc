@@ -49,11 +49,26 @@ jobs:
           restore-keys: mcpp-${{ matrix.os }}-
 
       - name: Install mcpp
-        shell: ${{ matrix.os == 'windows-latest' && 'pwsh' || 'bash' }}
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: ${{ matrix.install }}
+
+      - name: Install mcpp
+        if: matrix.os != 'windows-latest'
+        shell: bash
         run: ${{ matrix.install }}
 
       - name: Build and test
-        shell: ${{ matrix.os == 'windows-latest' && 'pwsh' || 'bash' }}
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          mcpp --version
+          mcpp build -p test --verbose
+          mcpp run -p test
+
+      - name: Build and test
+        if: matrix.os != 'windows-latest'
+        shell: bash
         run: |
           mcpp --version
           mcpp build -p test --verbose
