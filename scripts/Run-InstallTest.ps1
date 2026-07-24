@@ -60,6 +60,10 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+New-Variable -Name paramVerboseOn `
+    -Value ($PSBoundParameters.ContainsKey('Verbose') -and ($PSBoundParameters['Verbose'] -eq $true)) `
+    -Option ReadOnly
+
 # ----------------------------------------------------------------------
 # Minimal downstream project files (hard-coded raw strings)
 # ----------------------------------------------------------------------
@@ -246,6 +250,7 @@ function Invoke-InstallTest
         Add-Result -Config $label -Passed $false -Message "library configure: $short"
         return
     }
+    if ($paramVerboseOn) { Write-Host ($cfgOutput | Out-String).TrimEnd() }
 
     # --- Build ---
     Write-Host "    Building library..."
@@ -259,10 +264,10 @@ function Invoke-InstallTest
         Add-Result -Config $label -Passed $false -Message "library build: $short"
         return
     }
+    if ($paramVerboseOn) { Write-Host ($bldOutput | Out-String).TrimEnd() }
 
     # --- Install ---
     Write-Host "    Installing library..."
-    $instArgs = @("--install", $buildDir, "--config", $BuildType)
     $instOutput = & cmake @instArgs 2>&1
     if ($LASTEXITCODE -ne 0)
     {
@@ -273,6 +278,7 @@ function Invoke-InstallTest
         Add-Result -Config $label -Passed $false -Message "library install: $short"
         return
     }
+    if ($paramVerboseOn) { Write-Host ($instOutput | Out-String).TrimEnd() }
 
     # ------------------------------------------------------------------
     # Build and run the minimal downstream project
@@ -319,6 +325,7 @@ function Invoke-InstallTest
         Add-Result -Config $label -Passed $false -Message "consumer configure: $short"
         return
     }
+    if ($paramVerboseOn) { Write-Host ($ccfgOutput | Out-String).TrimEnd() }
 
     # --- Consumer build ---
     Write-Host "    Building consumer..."
@@ -332,6 +339,7 @@ function Invoke-InstallTest
         Add-Result -Config $label -Passed $false -Message "consumer build: $short"
         return
     }
+    if ($paramVerboseOn) { Write-Host ($cbldOutput | Out-String).TrimEnd() }
 
     # --- Consumer run ---
     Write-Host "    Running consumer..."
@@ -359,6 +367,7 @@ function Invoke-InstallTest
         Add-Result -Config $label -Passed $false -Message "consumer run: $short"
         return
     }
+    if ($paramVerboseOn) { Write-Host ($runOutput | Out-String).TrimEnd() }
 
     Write-Host "    PASSED" -ForegroundColor Green
     Add-Result -Config $label -Passed $true -Message ""

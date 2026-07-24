@@ -53,6 +53,10 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+New-Variable -Name paramVerboseOn `
+    -Value ($PSBoundParameters.ContainsKey('Verbose') -and ($PSBoundParameters['Verbose'] -eq $true)) `
+    -Option ReadOnly
+
 # ----------------------------------------------------------------------
 # Paths
 # ----------------------------------------------------------------------
@@ -186,6 +190,7 @@ function Invoke-BuildAndTest
         Add-Result -Config $label -Passed $false -Message "configure: $short"
         return
     }
+    if ($paramVerboseOn) { Write-Host ($cfgOutput | Out-String).TrimEnd() }
 
     # --- Build ---
     Write-Host "    Building..."
@@ -199,6 +204,7 @@ function Invoke-BuildAndTest
         Add-Result -Config $label -Passed $false -Message "build: $short"
         return
     }
+    if ($paramVerboseOn) { Write-Host ($bldOutput | Out-String).TrimEnd() }
 
     # --- Test ---
     Write-Host "    Testing..."
@@ -212,6 +218,7 @@ function Invoke-BuildAndTest
         Add-Result -Config $label -Passed $false -Message "tests: $short"
         return
     }
+    if ($paramVerboseOn) { Write-Host ($tstOutput | Out-String).TrimEnd() }
 
     Write-Host "    PASSED" -ForegroundColor Green
     Add-Result -Config $label -Passed $true -Message ""
