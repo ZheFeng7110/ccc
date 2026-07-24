@@ -31,14 +31,14 @@ using namespace pipe_::type_cast_operators;
 
 }  // namespace
 
-TEST(StaticCast, BasicType)
+TEST(PipeOperatorStaticCast, BasicType)
 {
     STATIC_CAST_TEST(123.0f, int);
     STATIC_CAST_TEST(114.514f, double);
     STATIC_CAST_TEST(114514, double);
 }
 
-TEST(StaticCast, Pointer)
+TEST(PipeOperatorStaticCast, Pointer)
 {
     int value = 1919;
     int* ptr = &value;
@@ -51,7 +51,7 @@ TEST(StaticCast, Pointer)
     EXPECT_EQ(value, *(ptr > pipe_::cast_to<void*>() > pipe_::cast_to<int*>()));
 }
 
-TEST(StaticCast, Class)
+TEST(PipeOperatorStaticCast, Class)
 {
     struct Base {
         int a;
@@ -87,7 +87,7 @@ TEST(StaticCast, Class)
 
 #undef STATIC_CAST_TEST
 
-TEST(DynamicCast, Class)
+TEST(PipeOperatorDynamicCast, Class)
 {
     struct Base {
         virtual ~Base() = default;
@@ -142,7 +142,7 @@ TEST(DynamicCast, Class)
     ASSERT_EQ(nullptr, &base > pipe_::dynamic_cast_to<Derived*>());
 }
 
-TEST(ConstCast, BasicType)
+TEST(PipeOperatorConstCast, BasicType)
 {
     int a = 114;
     const int* a_cptr = &a;
@@ -188,7 +188,7 @@ using ptr_store_t =
 
 }  // namespace
 
-TEST(ReinterpretCast, BasicType)
+TEST(PipeOperatorReinterpretCast, BasicType)
 {
     int a = 3;
     int* pa = &a;
@@ -202,7 +202,7 @@ TEST(ReinterpretCast, BasicType)
     EXPECT_EQ(a, *v_to_pa);
 }
 
-TEST(BitCast, BasicType)
+TEST(PipeOperatorBitCast, BasicType)
 {
     int a = 3;
     int* pa = &a;
@@ -240,7 +240,7 @@ public:
 
 }  // namespace
 
-TEST(MoveTo, Class)
+TEST(PipeOperatorMoveTo, Class)
 {
     TestMove t0, t00;
     EXPECT_FALSE(t0.isMoveConstructed());
@@ -283,7 +283,7 @@ constexpr bool forward_to(T&& t) noexcept
 }  // namespace test_forward
 }  // namespace
 
-TEST(ForwardTo, BasicType)
+TEST(PipeOperatorForwardTo, BasicType)
 {
     using namespace test_forward;
 

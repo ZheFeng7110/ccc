@@ -65,7 +65,7 @@ inline constexpr divide_t divide{};
 
 }  // namespace
 
-TEST(PipeWrapAlreadyExistsTest, Add)
+TEST(PipeOperatorWrapAlreadyExistsTest, Add)
 {
 #ifdef TEST_IS_CPP20_OR_HIGHER
     static_assert(2 == pp::add(1, 1));
@@ -85,7 +85,7 @@ TEST(PipeWrapAlreadyExistsTest, Add)
     EXPECT_EQ(114515, 114514 | pp::add(1) | pp::add(0));
 }
 
-TEST(PipeWrapAlreadyExistsTest, Divide)
+TEST(PipeOperatorWrapAlreadyExistsTest, Divide)
 {
 #ifdef TEST_IS_CPP20_OR_HIGHER
     constexpr std::equal_to<int> eq;
@@ -141,7 +141,7 @@ inline constexpr add_t add{};
 }  // namespace tmpl
 }  // namespace
 
-TEST(PipeWrapAlreadyExistsTest, TemplateAdd)
+TEST(PipeOperatorWrapAlreadyExistsTest, TemplateAdd)
 {
 #ifdef TEST_IS_CPP20_OR_HIGHER
     constexpr std::equal_to<double> eq;

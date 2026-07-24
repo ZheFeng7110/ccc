@@ -47,7 +47,7 @@ inline constexpr logic_not_t logic_not{};
 
 }  // namespace
 
-TEST(Pipe1ArgTest, TypicalLogicNot)
+TEST(PipeOperator1ArgTest, TypicalLogicNot)
 {
 #ifdef TEST_IS_CPP20_OR_HIGHER
     constexpr std::equal_to<int> eq;
@@ -104,7 +104,7 @@ static_assert(test_(), "");
 
 }  // namespace
 
-TEST(Pipe1ArgTest, ReferenceTest)
+TEST(PipeOperator1ArgTest, ReferenceTest)
 {
     int a = 0;
 
@@ -136,7 +136,7 @@ inline constexpr could_not_past_zero_t could_not_past_zero{};
 
 }  // namespace
 
-TEST(Pipe1ArgTest, ExceptionTest)
+TEST(PipeOperator1ArgTest, ExceptionTest)
 {
     EXPECT_FALSE(noexcept(could_not_past_zero(1)));
     EXPECT_FALSE(noexcept(1 | could_not_past_zero()));
@@ -165,7 +165,7 @@ inline constexpr Increment increment{};
 
 }  // namespace
 
-TEST(Pipe1ArgTest, CallableObjectTest)
+TEST(PipeOperator1ArgTest, CallableObjectTest)
 {
     EXPECT_TRUE(noexcept(increment(1)));
     EXPECT_TRUE(noexcept(1 | increment()));

@@ -47,7 +47,7 @@ inline constexpr add_t add{};
 
 }  // namespace
 
-TEST(Pipe2ArgsTest, TypicalAdd)
+TEST(PipeOperator2ArgsTest, TypicalAdd)
 {
 #ifdef TEST_IS_CPP20_OR_HIGHER
     static_assert(2 == add(1, 1));
@@ -85,7 +85,7 @@ inline constexpr divide_t divide{};
 
 }  // namespace
 
-TEST(Pipe2ArgsTest, ExceptionTest)
+TEST(PipeOperator2ArgsTest, ExceptionTest)
 {
 #ifdef TEST_IS_CPP20_OR_HIGHER
     constexpr std::equal_to<int> eq;
@@ -135,7 +135,7 @@ inline constexpr add_t add{};
 }  // namespace template_test
 }  // namespace
 
-TEST(Pipe2ArgsTest, TemplateAdd)
+TEST(PipeOperator2ArgsTest, TemplateAdd)
 {
 #ifdef TEST_IS_CPP20_OR_HIGHER
     constexpr std::equal_to<double> eq;
@@ -190,7 +190,7 @@ static_assert(test::eq(0b11, 0b01 | bit_or(0b10)));
 
 }  // namespace
 
-TEST(Pipe2ArgsTest, ConstevalBitOr)
+TEST(PipeOperator2ArgsTest, ConstevalBitOr)
 {
     EXPECT_TRUE(noexcept(bit_or(0b01, 0b10)));
     EXPECT_TRUE(noexcept(0b01 | bit_or(0b10)));
@@ -218,7 +218,7 @@ inline constexpr swap_t swap{};
 
 }  // namespace
 
-TEST(Pipe2ArgsTest, ReferenceTest)
+TEST(PipeOperator2ArgsTest, ReferenceTest)
 {
     int a = 1, b = -1;
 
@@ -246,7 +246,7 @@ inline constexpr Multiply multiply{};
 
 }  // namespace
 
-TEST(Pipe2ArgsTest, CallableObjectTest)
+TEST(PipeOperator2ArgsTest, CallableObjectTest)
 {
 #ifdef TEST_IS_CPP20_OR_HIGHER
     static_assert(6 == multiply(2, 3));

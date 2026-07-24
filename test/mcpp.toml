@@ -27,6 +27,9 @@ imports = ["ccc.pipe_operator_helper"]
 [scan_overrides."resource_guard_test.cc"]
 imports = ["ccc.resource_guard"]
 
+[scan_overrides."utility_test/*.cc"]
+imports = ["ccc.utility"]
+
 [scan_overrides."when_test.cc"]
 imports = ["ccc.when"]
 
