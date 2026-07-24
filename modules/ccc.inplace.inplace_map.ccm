@@ -1,18 +1,5 @@
 module;
 
-#include <cstddef>
-
-#include <algorithm>
-#include <functional>
-#include <initializer_list>
-#include <iterator>
-#include <stdexcept>
-#include <type_traits>
-#include <utility>
-#include <compare>
-
-#include "ccc/utility.hh"
-#include "ccc/inplace/inplace_vector.hh"
 #include "ccc/inplace/inplace_map.hh"
 
 export module ccc.inplace.inplace_map;

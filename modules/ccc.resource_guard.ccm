@@ -1,7 +1,5 @@
 module;
 
-#include <type_traits>
-#include <utility>
 #include "ccc/resource_guard.hh"
 
 export module ccc.resource_guard;

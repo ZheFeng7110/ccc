@@ -71,6 +71,9 @@ $ConsumerCMakeLists = @'
 cmake_minimum_required(VERSION 3.28)
 project(ccc_install_test CXX)
 
+message(STATUS "* CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}")
+message(STATUS "* ccc_DIR=${ccc_DIR}")
+
 find_package(ccc REQUIRED)
 
 add_executable(ccc_install_test main.cc)
@@ -268,6 +271,7 @@ function Invoke-InstallTest
 
     # --- Install ---
     Write-Host "    Installing library..."
+    $instArgs = @("--install", $buildDir, "--config", $BuildType)
     $instOutput = & cmake @instArgs 2>&1
     if ($LASTEXITCODE -ne 0)
     {
@@ -290,12 +294,13 @@ function Invoke-InstallTest
     $consumerBuildDir = Join-Path $consumerDir "build"
     New-Item -ItemType Directory -Force -Path $consumerBuildDir | Out-Null
 
+    $consumerLibPath = Join-Path $installDir "lib" "cmake" "ccc"
     $consumerConfigArgs = @(
         "-G", $Generator,
         "-S", $consumerDir,
         "-B", $consumerBuildDir,
         "-DCMAKE_BUILD_TYPE=$BuildType",
-        "-DCMAKE_PREFIX_PATH=$installDir",
+        "-DCMAKE_PREFIX_PATH=$consumerLibPath",
         "-DCMAKE_CXX_STANDARD=$CppStandard",
         "-DCMAKE_CXX_STANDARD_REQUIRED=ON"
     )

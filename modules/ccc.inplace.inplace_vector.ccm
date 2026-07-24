@@ -1,19 +1,5 @@
 module;
 
-#include <cstddef>
-#include "ccc/detail/assertions.hh"
-
-#include <algorithm>
-#include <initializer_list>
-#include <iterator>
-#include <memory>
-#include <new>
-#include <stdexcept>
-#include <type_traits>
-#include <utility>
-#include <compare>
-
-#include "ccc/utility.hh"
 #include "ccc/inplace/inplace_vector.hh"
 
 export module ccc.inplace.inplace_vector;
