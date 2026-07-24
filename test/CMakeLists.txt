@@ -73,12 +73,14 @@ globSources(GLOB expectedTestSources 14 "expected_test/*.cc")
 
 globSources(GLOB_RECURSE inplaceTestSources 11 "inplace/*.cc")
 globSources(FILES whenTestSources 17 when_test.cc)
+globSources(GLOB_RECURSE utilityTestSources 11 "utility_test/*.cc")
 target_sources(${PROJECT_NAME} PRIVATE
     gtest_main.cc
 
     ${cccPipeOperatorHelperTestSources}
     ${expectedTestSources}
     ${inplaceTestSources}
+    ${utilityTestSources}
     ${whenTestSources}
     resource_guard_test.cc
 )

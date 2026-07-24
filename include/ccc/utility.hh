@@ -52,7 +52,7 @@ struct conjunction<B1> : B1 {
 };
 
 template<typename B1, typename... Bn>
-struct conjunction<B1, Bn...> : std::conditional_t<static_cast<bool>(B1::value), conjunction<Bn...>, B1> {
+struct conjunction<B1, Bn...> : std::conditional<static_cast<bool>(B1::value), conjunction<Bn...>, B1> {
 };
 
 template<typename...>
@@ -64,7 +64,7 @@ struct disjunction<B1> : B1 {
 };
 
 template<typename B1, typename... Bn>
-struct disjunction<B1, Bn...> : std::conditional_t<static_cast<bool>(B1::value), B1, disjunction<Bn...>> {
+struct disjunction<B1, Bn...> : std::conditional<static_cast<bool>(B1::value), B1, disjunction<Bn...>> {
 };
 
 template<typename B>
