@@ -54,7 +54,7 @@ cmake --build build
 如需模块支持，配置时使用：
 
 ```bash
-cmake -DCPP_PIPE_OPERATOR_HELPER_USE_MODULES=ON ..
+cmake -DCCC_USE_CPP_MODULES=ON ..
 ```
 
 ## 测试

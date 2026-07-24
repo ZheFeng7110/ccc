@@ -54,7 +54,7 @@ cmake --build build
 For module support, configure with:
 
 ```bash
-cmake -DCPP_PIPE_OPERATOR_HELPER_USE_MODULES=ON ..
+cmake -DCCC_USE_CPP_MODULES=ON ..
 ```
 
 ## Testing
