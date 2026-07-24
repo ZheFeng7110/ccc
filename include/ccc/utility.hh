@@ -52,7 +52,7 @@ struct conjunction<B1> : B1 {
 };
 
 template<typename B1, typename... Bn>
-struct conjunction<B1, Bn...> : std::conditional<static_cast<bool>(B1::value), conjunction<Bn...>, B1> {
+struct conjunction<B1, Bn...> : std::conditional<static_cast<bool>(B1::value), conjunction<Bn...>, B1>::type {
 };
 
 template<typename...>
@@ -64,7 +64,7 @@ struct disjunction<B1> : B1 {
 };
 
 template<typename B1, typename... Bn>
-struct disjunction<B1, Bn...> : std::conditional<static_cast<bool>(B1::value), B1, disjunction<Bn...>> {
+struct disjunction<B1, Bn...> : std::conditional<static_cast<bool>(B1::value), B1, disjunction<Bn...>>::type {
 };
 
 template<typename B>
@@ -151,8 +151,9 @@ struct is_nothrow_swappable_with_impl : std::false_type {
 
 template<typename T, typename U>
 struct is_nothrow_swappable_with_impl<T, U, true>
-    : std::bool_constant<noexcept(swap(std::declval<T>(), std::declval<U>())) &&
-                         noexcept(swap(std::declval<U>(), std::declval<T>()))> {
+    : std::integral_constant<bool,
+                             noexcept(swap(std::declval<T>(), std::declval<U>())) &&
+                                 noexcept(swap(std::declval<U>(), std::declval<T>()))> {
 };
 
 }  // namespace swappable_impl

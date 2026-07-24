@@ -82,7 +82,7 @@ template<typename Err = E
         return std::move(val_);
     }
 
-    constexpr void swap(unexpected& other) noexcept(std::is_nothrow_swappable<E>::value)
+    constexpr void swap(unexpected& other) noexcept(is_nothrow_swappable<E>::value)
     {
         using std::swap;
         swap(val_, other.val_);

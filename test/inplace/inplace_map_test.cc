@@ -80,72 +80,72 @@ int Counter::moved = 0;
 
 }  // namespace
 
-TEST(InplaceMap, DefaultConstruct)
+TEST_CASE("InplaceMap - DefaultConstruct")
 {
     ccc::inplace_map<int, std::string, 5> m;
-    EXPECT_TRUE(m.empty());
-    EXPECT_FALSE(m.full());
-    EXPECT_EQ(0u, m.size());
-    EXPECT_EQ(5u, m.capacity());
-    EXPECT_EQ(5u, m.max_size());
+    CHECK(m.empty());
+    CHECK_FALSE(m.full());
+    CHECK(0u == m.size());
+    CHECK(5u == m.capacity());
+    CHECK(5u == m.max_size());
 }
 
-TEST(InplaceMap, InitializerListConstruct)
+TEST_CASE("InplaceMap - InitializerListConstruct")
 {
     ccc::inplace_map<int, std::string, 5> m = {{1, "one"}, {3, "three"}, {2, "two"}};
-    EXPECT_EQ(3u, m.size());
-    EXPECT_EQ(1, m.begin()->first);
+    CHECK(3u == m.size());
+    CHECK(1 == m.begin()->first);
 
-    EXPECT_EQ("one", m.at(1));
-    EXPECT_EQ("two", m.at(2));
-    EXPECT_EQ("three", m.at(3));
+    CHECK("one" == m.at(1));
+    CHECK("two" == m.at(2));
+    CHECK("three" == m.at(3));
 }
 
-TEST(InplaceMap, CopyConstruct)
+TEST_CASE("InplaceMap - CopyConstruct")
 {
     ccc::inplace_map<int, std::string, 5> m;
     m[1] = "one";
     m[2] = "two";
     ccc::inplace_map<int, std::string, 5> m2(m);
-    EXPECT_EQ(2u, m2.size());
-    EXPECT_EQ("one", m2[1]);
-    EXPECT_EQ("two", m2[2]);
+    CHECK(2u == m2.size());
+    CHECK("one" == m2[1]);
+    CHECK("two" == m2[2]);
 }
 
-TEST(InplaceMap, MoveConstruct)
+TEST_CASE("InplaceMap - MoveConstruct")
 {
     ccc::inplace_map<int, std::string, 5> m;
     m[1] = "hello";
     m[2] = "world";
     auto m2(std::move(m));
-    EXPECT_EQ(2u, m2.size());
-    EXPECT_EQ("hello", m2[1]);
-    EXPECT_EQ("world", m2[2]);
+    CHECK(2u == m2.size());
+    CHECK("hello" == m2[1]);
+    CHECK("world" == m2[2]);
 }
 
-TEST(InplaceMap, CopyAssignment)
+TEST_CASE("InplaceMap - CopyAssignment")
 {
     ccc::inplace_map<int, std::string, 5> a, b;
     a[1] = "one";
     a[2] = "two";
     b[9] = "nine";
     b = a;
-    EXPECT_EQ(2u, b.size());
-    EXPECT_EQ("one", b[1]);
+    CHECK(2u == b.size());
+    CHECK("one" == b[1]);
 }
 
-TEST(InplaceMap, MoveAssignment)
+TEST_CASE("InplaceMap - MoveAssignment")
 {
     ccc::inplace_map<int, std::string, 5> a, b;
     a[1] = "x";
     a[2] = "y";
     b[9] = "z";
     b = std::move(a);
-    EXPECT_EQ(2u, b.size());
-    EXPECT_EQ("x", b[1]);
+    CHECK(2u == b.size());
+    CHECK("x" == b[1]);
 }
 
-TEST(InplaceMap, SelfAssignment)
+TEST_CASE("InplaceMap - SelfAssignment")
 {
     ccc::inplace_map<int, std::string, 5> m;
     m[1] = "one";
@@ -159,57 +159,57 @@ TEST(InplaceMap, SelfAssignment)
 #pragma clang diagnostic pop
 #endif
 
-    EXPECT_EQ(1u, m.size());
-    EXPECT_EQ("one", m[1]);
+    CHECK(1u == m.size());
+    CHECK("one" == m[1]);
 }
 
-TEST(InplaceMap, At)
+TEST_CASE("InplaceMap - At")
 {
     ccc::inplace_map<int, std::string, 5> m;
     m[1] = "one";
     m[2] = "two";
-    EXPECT_EQ("one", m.at(1));
-    EXPECT_EQ("two", m.at(2));
-    EXPECT_THROW(m.at(3), std::out_of_range);
+    CHECK("one" == m.at(1));
+    CHECK("two" == m.at(2));
+    CHECK_THROWS_AS(m.at(3), std::out_of_range);
 }
 
-TEST(InplaceMap, AtConst)
+TEST_CASE("InplaceMap - AtConst")
 {
     ccc::inplace_map<int, std::string, 5> m;
     m[1] = "one";
     const auto& cm = m;
-    EXPECT_EQ("one", cm.at(1));
-    EXPECT_THROW(cm.at(99), std::out_of_range);
+    CHECK("one" == cm.at(1));
+    CHECK_THROWS_AS(cm.at(99), std::out_of_range);
 }
 
-TEST(InplaceMap, SubscriptOperatorExisting)
+TEST_CASE("InplaceMap - SubscriptOperatorExisting")
 {
     ccc::inplace_map<int, std::string, 5> m;
     m[1] = "one";
     m[2] = "two";
-    EXPECT_EQ("one", m[1]);
-    EXPECT_EQ("two", m[2]);
+    CHECK("one" == m[1]);
+    CHECK("two" == m[2]);
 }
 
-TEST(InplaceMap, SubscriptOperatorInsertDefault)
+TEST_CASE("InplaceMap - SubscriptOperatorInsertDefault")
 {
     ccc::inplace_map<int, std::string, 5> m;
-    EXPECT_EQ("", m[42]);
-    EXPECT_EQ(1u, m.size());
+    CHECK("" == m[42]);
+    CHECK(1u == m.size());
     m[42] = "answer";
-    EXPECT_EQ("answer", m[42]);
+    CHECK("answer" == m[42]);
 }
 
-TEST(InplaceMap, SubscriptOperatorInsertLots)
+TEST_CASE("InplaceMap - SubscriptOperatorInsertLots")
 {
     ccc::inplace_map<int, std::string, 10> m;
     for (int i = 0; i < 10; ++i) m[i] = std::to_string(i);
-    EXPECT_TRUE(m.full());
-    EXPECT_EQ(10u, m.size());
-    for (int i = 0; i < 10; ++i) EXPECT_EQ(std::to_string(i), m[i]);
+    CHECK(m.full());
+    CHECK(10u == m.size());
+    for (int i = 0; i < 10; ++i) CHECK(std::to_string(i) == m[i]);
 }
 
-TEST(InplaceMap, IteratorForward)
+TEST_CASE("InplaceMap - IteratorForward")
 {
     ccc::inplace_map<int, std::string, 5> m;
     m[2] = "two";
@@ -217,25 +217,25 @@ TEST(InplaceMap, IteratorForward)
     m[3] = "three";
     int e = 1;
     for (auto it = m.begin(); it != m.end(); ++it) {
-        EXPECT_EQ(e, it->first);
+        CHECK(e == it->first);
         ++e;
     }
-    EXPECT_EQ(4, e);
+    CHECK(4 == e);
 }
 
-TEST(InplaceMap, IteratorProxyAccess)
+TEST_CASE("InplaceMap - IteratorProxyAccess")
 {
     ccc::inplace_map<int, std::string, 5> m;
     m[1] = "one";
     m[2] = "two";
     auto it = m.begin();
-    EXPECT_EQ(1, it->first);
-    EXPECT_EQ("one", it->second);
-    EXPECT_EQ(1, (*it).first);
-    EXPECT_EQ("one", (*it).second);
+    CHECK(1 == it->first);
+    CHECK("one" == it->second);
+    CHECK(1 == (*it).first);
+    CHECK("one" == (*it).second);
 }
 
-TEST(InplaceMap, ReverseIterator)
+TEST_CASE("InplaceMap - ReverseIterator")
 {
     ccc::inplace_map<int, std::string, 5> m;
     m[1] = "one";
@@ -243,166 +243,166 @@ TEST(InplaceMap, ReverseIterator)
     m[3] = "three";
     int e = 3;
     for (auto it = m.rbegin(); it != m.rend(); ++it) {
-        EXPECT_EQ(e, it->first);
+        CHECK(e == it->first);
         --e;
     }
 }
 
-TEST(InplaceMap, ConstIterator)
+TEST_CASE("InplaceMap - ConstIterator")
 {
     ccc::inplace_map<int, std::string, 5> m;
     m[1] = "one";
     const auto& cm = m;
     auto it = cm.begin();
-    EXPECT_EQ(1, it->first);
-    EXPECT_EQ("one", it->second);
+    CHECK(1 == it->first);
+    CHECK("one" == it->second);
 }
 
-TEST(InplaceMap, IteratorConversion)
+TEST_CASE("InplaceMap - IteratorConversion")
 {
     ccc::inplace_map<int, std::string, 5> m;
     m[1] = "one";
     ccc::inplace_map<int, std::string, 5>::const_iterator it = m.begin();
-    EXPECT_TRUE(it == m.begin());
+    CHECK(it == m.begin());
 }
 
-TEST(InplaceMap, StaticCapacity)
+TEST_CASE("InplaceMap - StaticCapacity")
 {
     constexpr auto cap = ccc::inplace_map<int, char, 8>::capacity();
     constexpr auto ms = ccc::inplace_map<int, char, 8>::max_size();
-    EXPECT_EQ(8u, cap);
-    EXPECT_EQ(8u, ms);
+    CHECK(8u == cap);
+    CHECK(8u == ms);
 }
 
-TEST(InplaceMap, Full)
+TEST_CASE("InplaceMap - Full")
 {
     ccc::inplace_map<int, int, 3> m;
-    EXPECT_FALSE(m.full());
+    CHECK_FALSE(m.full());
     m[1] = 10;
     m[2] = 20;
     m[3] = 30;
-    EXPECT_TRUE(m.full());
-    EXPECT_EQ(3u, m.size());
+    CHECK(m.full());
+    CHECK(3u == m.size());
 }
 
-TEST(InplaceMap, InsertNew)
+TEST_CASE("InplaceMap - InsertNew")
 {
     ccc::inplace_map<int, std::string, 5> m;
     auto r = m.insert({1, "one"});
-    EXPECT_TRUE(r.second);
-    EXPECT_EQ(1, r.first->first);
-    EXPECT_EQ(1u, m.size());
+    CHECK(r.second);
+    CHECK(1 == r.first->first);
+    CHECK(1u == m.size());
 }
 
-TEST(InplaceMap, InsertDuplicate)
+TEST_CASE("InplaceMap - InsertDuplicate")
 {
     ccc::inplace_map<int, std::string, 5> m;
     m[1] = "original";
     auto r = m.insert({1, "overwrite"});
-    EXPECT_FALSE(r.second);
-    EXPECT_EQ("original", m[1]);
+    CHECK_FALSE(r.second);
+    CHECK("original" == m[1]);
 }
 
-TEST(InplaceMap, InsertMultiple)
+TEST_CASE("InplaceMap - InsertMultiple")
 {
     ccc::inplace_map<int, std::string, 10> m;
     m.insert({{3, "three"}, {1, "one"}, {4, "four"}, {2, "two"}});
-    EXPECT_EQ(4u, m.size());
-    EXPECT_EQ(1, m.begin()->first);
+    CHECK(4u == m.size());
+    CHECK(1 == m.begin()->first);
 }
 
-TEST(InplaceMap, InsertWithHint)
+TEST_CASE("InplaceMap - InsertWithHint")
 {
     ccc::inplace_map<int, std::string, 10> m;
     m[1] = "one";
     m[3] = "three";
     auto it = m.insert(m.end(), {2, "two"});
-    EXPECT_EQ(2, it->first);
-    EXPECT_EQ(3u, m.size());
+    CHECK(2 == it->first);
+    CHECK(3u == m.size());
 }
 
-TEST(InplaceMap, InsertOrAssignNew)
+TEST_CASE("InplaceMap - InsertOrAssignNew")
 {
     ccc::inplace_map<int, std::string, 5> m;
     auto r = m.insert_or_assign(1, "hello");
-    EXPECT_TRUE(r.second);
-    EXPECT_EQ("hello", m[1]);
+    CHECK(r.second);
+    CHECK("hello" == m[1]);
 }
 
-TEST(InplaceMap, InsertOrAssignExisting)
+TEST_CASE("InplaceMap - InsertOrAssignExisting")
 {
     ccc::inplace_map<int, std::string, 5> m;
     m[1] = "old";
     auto r = m.insert_or_assign(1, "new");
-    EXPECT_FALSE(r.second);
-    EXPECT_EQ("new", m[1]);
+    CHECK_FALSE(r.second);
+    CHECK("new" == m[1]);
 }
 
-TEST(InplaceMap, Emplace)
+TEST_CASE("InplaceMap - Emplace")
 {
     ccc::inplace_map<int, std::string, 5> m;
     auto r = m.emplace(1, "hello");
-    EXPECT_TRUE(r.second);
-    EXPECT_EQ("hello", m[1]);
+    CHECK(r.second);
+    CHECK("hello" == m[1]);
 }
 
-TEST(InplaceMap, EmplaceDuplicate)
+TEST_CASE("InplaceMap - EmplaceDuplicate")
 {
     ccc::inplace_map<int, std::string, 5> m;
     m[1] = "original";
     auto r = m.emplace(1, "new");
-    EXPECT_FALSE(r.second);
-    EXPECT_EQ("original", m[1]);
+    CHECK_FALSE(r.second);
+    CHECK("original" == m[1]);
 }
 
-TEST(InplaceMap, TryEmplaceNew)
+TEST_CASE("InplaceMap - TryEmplaceNew")
 {
     ccc::inplace_map<int, std::string, 5> m;
     auto r = m.try_emplace(1, "hello");
-    EXPECT_TRUE(r.second);
-    EXPECT_EQ("hello", m[1]);
+    CHECK(r.second);
+    CHECK("hello" == m[1]);
 }
 
-TEST(InplaceMap, TryEmplaceDuplicate)
+TEST_CASE("InplaceMap - TryEmplaceDuplicate")
 {
     ccc::inplace_map<int, std::string, 5> m;
     m[1] = "original";
     auto r = m.try_emplace(1, "new");
-    EXPECT_FALSE(r.second);
-    EXPECT_EQ("original", m[1]);
+    CHECK_FALSE(r.second);
+    CHECK("original" == m[1]);
 }
 
-TEST(InplaceMap, EraseByKey)
+TEST_CASE("InplaceMap - EraseByKey")
 {
     ccc::inplace_map<int, std::string, 5> m;
     m[1] = "one";
     m[2] = "two";
     m[3] = "three";
-    EXPECT_EQ(1u, m.erase(2));
-    EXPECT_EQ(2u, m.size());
-    EXPECT_FALSE(m.contains(2));
+    CHECK(1u == m.erase(2));
+    CHECK(2u == m.size());
+    CHECK_FALSE(m.contains(2));
 }
 
-TEST(InplaceMap, EraseByKeyNotFound)
+TEST_CASE("InplaceMap - EraseByKeyNotFound")
 {
     ccc::inplace_map<int, std::string, 5> m;
     m[1] = "one";
-    EXPECT_EQ(0u, m.erase(99));
-    EXPECT_EQ(1u, m.size());
+    CHECK(0u == m.erase(99));
+    CHECK(1u == m.size());
 }
 
-TEST(InplaceMap, EraseByIterator)
+TEST_CASE("InplaceMap - EraseByIterator")
 {
     ccc::inplace_map<int, std::string, 5> m;
     m[1] = "one";
     m[2] = "two";
     m[3] = "three";
     auto it = m.erase(m.cbegin() + 1);
-    EXPECT_EQ(3, it->first);
-    EXPECT_EQ(2u, m.size());
+    CHECK(3 == it->first);
+    CHECK(2u == m.size());
 }
 
-TEST(InplaceMap, EraseRange)
+TEST_CASE("InplaceMap - EraseRange")
 {
     ccc::inplace_map<int, std::string, 5> m;
     m[1] = "one";
@@ -410,105 +410,105 @@ TEST(InplaceMap, EraseRange)
     m[3] = "three";
     m[4] = "four";
     auto it = m.erase(m.cbegin() + 1, m.cbegin() + 3);
-    EXPECT_EQ(4, it->first);
-    EXPECT_EQ(2u, m.size());
+    CHECK(4 == it->first);
+    CHECK(2u == m.size());
 }
 
-TEST(InplaceMap, Clear)
+TEST_CASE("InplaceMap - Clear")
 {
     ccc::inplace_map<int, std::string, 5> m;
     m[1] = "one";
     m[2] = "two";
     m.clear();
-    EXPECT_TRUE(m.empty());
+    CHECK(m.empty());
 }
 
-TEST(InplaceMap, ClearThenReuse)
+TEST_CASE("InplaceMap - ClearThenReuse")
 {
     ccc::inplace_map<int, std::string, 5> m;
     m[1] = "one";
     m[2] = "two";
     m.clear();
     m[3] = "three";
-    EXPECT_EQ(1u, m.size());
-    EXPECT_EQ("three", m[3]);
+    CHECK(1u == m.size());
+    CHECK("three" == m[3]);
 }
 
-TEST(InplaceMap, InsertThrowsWhenFull)
+TEST_CASE("InplaceMap - InsertThrowsWhenFull")
 {
     ccc::inplace_map<int, std::string, 2> m;
     m[1] = "one";
     m[2] = "two";
-    EXPECT_THROW(m.insert({3, "three"}), std::bad_alloc);
+    CHECK_THROWS_AS(m.insert({3, "three"}), std::bad_alloc);
 }
 
-TEST(InplaceMap, SubscriptThrowsWhenFull)
+TEST_CASE("InplaceMap - SubscriptThrowsWhenFull")
 {
     ccc::inplace_map<int, std::string, 2> m;
     m[1] = "one";
     m[2] = "two";
-    EXPECT_THROW(m[3] = "three", std::bad_alloc);
+    CHECK_THROWS_AS(m[3] = "three", std::bad_alloc);
 }
 
-TEST(InplaceMap, Find)
+TEST_CASE("InplaceMap - Find")
 {
     ccc::inplace_map<int, std::string, 5> m;
     m[1] = "one";
     m[2] = "two";
-    EXPECT_NE(m.end(), m.find(1));
-    EXPECT_EQ("one", m.find(1)->second);
-    EXPECT_EQ(m.end(), m.find(99));
+    CHECK(m.end() != m.find(1));
+    CHECK("one" == m.find(1)->second);
+    CHECK(m.end() == m.find(99));
 }
 
-TEST(InplaceMap, Contains)
+TEST_CASE("InplaceMap - Contains")
 {
     ccc::inplace_map<int, std::string, 5> m;
     m[1] = "one";
-    EXPECT_TRUE(m.contains(1));
-    EXPECT_FALSE(m.contains(99));
+    CHECK(m.contains(1));
+    CHECK_FALSE(m.contains(99));
 }
 
-TEST(InplaceMap, Count)
+TEST_CASE("InplaceMap - Count")
 {
     ccc::inplace_map<int, std::string, 5> m;
     m[1] = "one";
-    EXPECT_EQ(1u, m.count(1));
-    EXPECT_EQ(0u, m.count(99));
+    CHECK(1u == m.count(1));
+    CHECK(0u == m.count(99));
 }
 
-TEST(InplaceMap, LowerBound)
+TEST_CASE("InplaceMap - LowerBound")
 {
     ccc::inplace_map<int, std::string, 5> m;
     m[2] = "two";
     m[4] = "four";
     m[6] = "six";
-    EXPECT_EQ(2, m.lower_bound(1)->first);
-    EXPECT_EQ(m.end(), m.lower_bound(7));
+    CHECK(2 == m.lower_bound(1)->first);
+    CHECK(m.end() == m.lower_bound(7));
 }
 
-TEST(InplaceMap, UpperBound)
+TEST_CASE("InplaceMap - UpperBound")
 {
     ccc::inplace_map<int, std::string, 5> m;
     m[2] = "two";
     m[4] = "four";
     m[6] = "six";
-    EXPECT_EQ(2, m.upper_bound(1)->first);
-    EXPECT_EQ(4, m.upper_bound(2)->first);
-    EXPECT_EQ(m.end(), m.upper_bound(6));
+    CHECK(2 == m.upper_bound(1)->first);
+    CHECK(4 == m.upper_bound(2)->first);
+    CHECK(m.end() == m.upper_bound(6));
 }
 
-TEST(InplaceMap, EqualRange)
+TEST_CASE("InplaceMap - EqualRange")
 {
     ccc::inplace_map<int, std::string, 5> m;
     m[2] = "two";
     m[4] = "four";
     m[6] = "six";
     auto r = m.equal_range(4);
-    EXPECT_EQ(4, r.first->first);
-    EXPECT_EQ(6, r.second->first);
+    CHECK(4 == r.first->first);
+    CHECK(6 == r.second->first);
 }
 
-TEST(InplaceMap, Equality)
+TEST_CASE("InplaceMap - Equality")
 {
     ccc::inplace_map<int, std::string, 5> a, b, c;
     a[1] = "one";
@@ -517,47 +517,47 @@ TEST(InplaceMap, Equality)
     b[2] = "two";
     c[1] = "one";
     c[3] = "three";
-    EXPECT_TRUE(a == b);
-    EXPECT_FALSE(a == c);
+    CHECK(a == b);
+    CHECK_FALSE(a == c);
 }
 
-TEST(InplaceMap, LessThan)
+TEST_CASE("InplaceMap - LessThan")
 {
     ccc::inplace_map<int, std::string, 5> a, b;
     a[1] = "alpha";
     a[2] = "beta";
     b[1] = "alpha";
     b[3] = "gamma";
-    EXPECT_TRUE(a < b);
-    EXPECT_FALSE(b < a);
-    EXPECT_TRUE(a <= a);
-    EXPECT_TRUE(b > a);
+    CHECK(a < b);
+    CHECK_FALSE(b < a);
+    CHECK(a <= a);
+    CHECK(b > a);
 }
 
-TEST(InplaceMap, MemberSwap)
+TEST_CASE("InplaceMap - MemberSwap")
 {
     ccc::inplace_map<int, std::string, 5> a, b;
     a[1] = "one";
     a[2] = "two";
     b[3] = "three";
     a.swap(b);
-    EXPECT_EQ(1u, a.size());
-    EXPECT_EQ("three", a[3]);
-    EXPECT_EQ(2u, b.size());
+    CHECK(1u == a.size());
+    CHECK("three" == a[3]);
+    CHECK(2u == b.size());
 }
 
-TEST(InplaceMap, NonMemberSwap)
+TEST_CASE("InplaceMap - NonMemberSwap")
 {
     ccc::inplace_map<int, std::string, 5> a, b;
     a[1] = "one";
     b[2] = "two";
     using std::swap;
     swap(a, b);
-    EXPECT_EQ("two", a[2]);
-    EXPECT_EQ("one", b[1]);
+    CHECK("two" == a[2]);
+    CHECK("one" == b[1]);
 }
 
-TEST(InplaceMap, DestructorCallsElementDestructors)
+TEST_CASE("InplaceMap - DestructorCallsElementDestructors")
 {
     Counter::reset();
     {
@@ -565,27 +565,27 @@ TEST(InplaceMap, DestructorCallsElementDestructors)
         m.emplace(1, Counter(10));
         m.emplace(2, Counter(20));
     }
-    EXPECT_EQ(Counter::constructed, Counter::destructed);
+    CHECK(Counter::constructed == Counter::destructed);
 }
 
-TEST(InplaceMap, KeyComp)
+TEST_CASE("InplaceMap - KeyComp")
 {
     ccc::inplace_map<int, std::string, 5> m;
     auto c = m.key_comp();
-    EXPECT_TRUE(c(1, 2));
-    EXPECT_FALSE(c(2, 1));
-    EXPECT_FALSE(c(1, 1));
+    CHECK(c(1, 2));
+    CHECK_FALSE(c(2, 1));
+    CHECK_FALSE(c(1, 1));
 }
 
-TEST(InplaceMap, ValueComp)
+TEST_CASE("InplaceMap - ValueComp")
 {
     ccc::inplace_map<int, std::string, 5> m;
     auto c = m.value_comp();
-    EXPECT_TRUE(c({1, "a"}, {2, "b"}));
-    EXPECT_FALSE(c({2, "b"}, {1, "a"}));
+    CHECK(c({1, "a"}, {2, "b"}));
+    CHECK_FALSE(c({2, "b"}, {1, "a"}));
 }
 
-TEST(InplaceMap, KeysAndValuesAccess)
+TEST_CASE("InplaceMap - KeysAndValuesAccess")
 {
     ccc::inplace_map<int, std::string, 5> m;
     m[3] = "three";
@@ -593,16 +593,16 @@ TEST(InplaceMap, KeysAndValuesAccess)
     m[2] = "two";
     const auto& k = m.keys();
     const auto& v = m.values();
-    EXPECT_EQ(1, k[0]);
-    EXPECT_EQ(2, k[1]);
-    EXPECT_EQ(3, k[2]);
-    EXPECT_EQ("one", v[0]);
+    CHECK(1 == k[0]);
+    CHECK(2 == k[1]);
+    CHECK(3 == k[2]);
+    CHECK("one" == v[0]);
 }
 
-TEST(InplaceMap, RangeConstruct)
+TEST_CASE("InplaceMap - RangeConstruct")
 {
     std::vector<std::pair<int, std::string>> src = {{3, "three"}, {1, "one"}, {2, "two"}};
     ccc::inplace_map<int, std::string, 5> m(src.begin(), src.end());
-    EXPECT_EQ(3u, m.size());
-    EXPECT_EQ(1, m.begin()->first);
+    CHECK(3u == m.size());
+    CHECK(1 == m.begin()->first);
 }

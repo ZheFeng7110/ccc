@@ -16,23 +16,14 @@ if ((${CCC_TEST_CPP_STANDARD} LESS 20) AND (CCC_USE_CPP_MODULES))
     message(FATAL_ERROR "Use modules requires C++20 or higher!")
 endif ()
 
-include("get_cpm.cmake")
-message(STATUS "[${PROJECT_NAME}]: CPM: CPM_SOURCE_CACHE: ${CPM_SOURCE_CACHE}")
-block (SCOPE_FOR POLICIES)
-    cmake_policy(VERSION 3.28...4.0)
-
-    CPMAddPackage(
-        NAME googletest
-        GITHUB_REPOSITORY google/googletest
-        GIT_TAG "v1.17.0"
-        VERSION 1.17.0
-        OPTIONS "BUILD_GMOCK OFF" "INSTALL_GTEST OFF"
-    )
-
-    if (NOT googletest_ADDED)
-        message(FATAL_ERROR "Failed to add googletest")
-    endif ()
-endblock ()
+file(DOWNLOAD
+    "https://github.com/catchorg/Catch2/releases/download/v2.13.10/catch.hpp"
+    "${CMAKE_SOURCE_DIR}/.deps/catch2/catch2/catch.hpp"
+    EXPECTED_HASH SHA256=3725C0F0A75F376A5005DDE31EAD0FEB8F7DA7507644C201B814443DE8355170
+)
+add_library(Catch2 INTERFACE)
+target_include_directories(Catch2 INTERFACE "${CMAKE_SOURCE_DIR}/.deps/catch2")
+add_library(Catch2::Catch2 ALIAS Catch2)
 
 message(STATUS "CMAKE_CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID}")
 message(STATUS "CMAKE_CXX_COMPILER_VERSION=${CMAKE_CXX_COMPILER_VERSION}")
@@ -68,14 +59,14 @@ function (globSources cmd variable cxxStdRequired)
     endif ()
 endfunction ()
 
-globSources(GLOB_RECURSE cccPipeOperatorHelperTestSources 11 "pipe_operator_helper_test/*.cc")
-globSources(GLOB expectedTestSources 14 "expected_test/*.cc")
+globSources(GLOB_RECURSE cccPipeOperatorHelperTestSources 17 "pipe_operator_helper_test/*.cc")
+globSources(GLOB expectedTestSources 17 "expected_test/*.cc")
 
 globSources(GLOB_RECURSE inplaceTestSources 11 "inplace/*.cc")
 globSources(FILES whenTestSources 17 when_test.cc)
 globSources(GLOB_RECURSE utilityTestSources 11 "utility_test/*.cc")
 target_sources(${PROJECT_NAME} PRIVATE
-    gtest_main.cc
+    catch_main.cc
 
     ${cccPipeOperatorHelperTestSources}
     ${expectedTestSources}
@@ -86,7 +77,7 @@ target_sources(${PROJECT_NAME} PRIVATE
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-target_link_libraries(${PROJECT_NAME} PRIVATE ccc GTest::gtest)
+target_link_libraries(${PROJECT_NAME} PRIVATE ccc Catch2::Catch2)
 
 if (NOT MSVC AND (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang"))
     find_package(Threads REQUIRED)
@@ -95,6 +86,7 @@ endif ()
 
 if (NOT APPLE)
     target_precompile_headers(${PROJECT_NAME} PRIVATE test_pch.hh)
+    set_source_files_properties(catch_main.cc PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
 endif ()
 
 get_target_property(cccCppStandard ${PROJECT_NAME} CXX_STANDARD)

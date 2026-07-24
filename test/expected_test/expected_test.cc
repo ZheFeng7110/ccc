@@ -52,44 +52,44 @@ struct ListValue {
 
 }  // namespace
 
-TEST(Expected, DefaultConstructsValue)
+TEST_CASE("Expected - DefaultConstructsValue")
 {
     ccc::expected<int, int> exp;
 
-    EXPECT_TRUE(exp.has_value());
-    EXPECT_TRUE(exp);
-    EXPECT_EQ(0, *exp);
-    EXPECT_NO_THROW(exp.value());
-    EXPECT_EQ(0, exp.value());
+    CHECK(exp.has_value());
+    CHECK(exp);
+    CHECK(0 == *exp);
+    CHECK_NOTHROW(exp.value());
+    CHECK(0 == exp.value());
 }
 
-TEST(Expected, ConstructFromValue)
+TEST_CASE("Expected - ConstructFromValue")
 {
     ccc::expected<int, int> exp(42);
 
-    EXPECT_TRUE(exp.has_value());
-    EXPECT_EQ(42, *exp);
-    EXPECT_EQ(42, exp.value());
+    CHECK(exp.has_value());
+    CHECK(42 == *exp);
+    CHECK(42 == exp.value());
 }
 
-TEST(Expected, ConstructValueInPlace)
+TEST_CASE("Expected - ConstructValueInPlace")
 {
     ccc::expected<Point, int> exp(ccc::in_place, 1, 2);
 
-    ASSERT_TRUE(exp.has_value());
-    EXPECT_EQ((Point{1, 2}), *exp);
-    EXPECT_EQ(3, exp->sum());
+    REQUIRE(exp.has_value());
+    CHECK((Point{1, 2}) == *exp);
+    CHECK(3 == exp->sum());
 }
 
-TEST(Expected, ConstructValueInPlaceWithInitializerList)
+TEST_CASE("Expected - ConstructValueInPlaceWithInitializerList")
 {
     ccc::expected<ListValue, int> exp(ccc::in_place, {1, 2, 3}, 4);
 
-    ASSERT_TRUE(exp.has_value());
-    EXPECT_EQ((ListValue{{1, 2, 3}, 4}), *exp);
+    REQUIRE(exp.has_value());
+    CHECK((ListValue{{1, 2, 3}, 4}) == *exp);
 }
 
-TEST(Expected, ConstructFromUnexpected)
+TEST_CASE("Expected - ConstructFromUnexpected")
 {
     const ccc::unexpected<int> error(7);
     ccc::expected<int, int> from_lvalue(error);
@@ -99,218 +99,219 @@ TEST(Expected, ConstructFromUnexpected)
     ccc::unexpected<int> xerror(114514);
     ccc::expected<int, int> from_xvalue(std::move(xerror));
 
-    EXPECT_FALSE(from_lvalue.has_value());
-    EXPECT_EQ(7, from_lvalue.error());
-    EXPECT_FALSE(from_rvalue.has_value());
-    EXPECT_EQ(9, from_rvalue.error());
-    EXPECT_FALSE(from_xvalue.has_value());
-    EXPECT_EQ(114514, from_xvalue.error());
+    CHECK_FALSE(from_lvalue.has_value());
+    CHECK(7 == from_lvalue.error());
+    CHECK_FALSE(from_rvalue.has_value());
+    CHECK(9 == from_rvalue.error());
+    CHECK_FALSE(from_xvalue.has_value());
+    CHECK(114514 == from_xvalue.error());
 }
 
-TEST(Expected, ConstructErrorInPlace)
+TEST_CASE("Expected - ConstructErrorInPlace")
 {
     ccc::expected<int, int> exp(ccc::unexpect, 13);
 
-    EXPECT_FALSE(exp.has_value());
-    EXPECT_FALSE(static_cast<bool>(exp));
-    EXPECT_EQ(13, exp.error());
+    CHECK_FALSE(exp.has_value());
+    CHECK_FALSE(static_cast<bool>(exp));
+    CHECK(13 == exp.error());
 }
 
-TEST(Expected, ConstructErrorInPlaceWithInitializerList)
+TEST_CASE("Expected - ConstructErrorInPlaceWithInitializerList")
 {
     ccc::expected<int, ListValue> exp(ccc::unexpect, {2, 4, 6}, 8);
 
-    ASSERT_FALSE(exp.has_value());
-    EXPECT_EQ((ListValue{{2, 4, 6}, 8}), exp.error());
+    REQUIRE_FALSE(exp.has_value());
+    CHECK((ListValue{{2, 4, 6}, 8}) == exp.error());
 }
 
-TEST(Expected, CopyAndMoveConstruct)
+TEST_CASE("Expected - CopyAndMoveConstruct")
 {
     ccc::expected<int, int> value(42);
     ccc::expected<int, int> copied_value(value);
     ccc::expected<int, int> moved_value(std::move(value));
 
-    EXPECT_TRUE(copied_value.has_value());
-    EXPECT_EQ(42, *copied_value);
-    EXPECT_TRUE(moved_value.has_value());
-    EXPECT_EQ(42, *moved_value);
+    CHECK(copied_value.has_value());
+    CHECK(42 == *copied_value);
+    CHECK(moved_value.has_value());
+    CHECK(42 == *moved_value);
 
     ccc::expected<int, int> error(ccc::unexpect, 7);
     ccc::expected<int, int> copied_error(error);
     ccc::expected<int, int> moved_error(std::move(error));
 
-    EXPECT_FALSE(copied_error.has_value());
-    EXPECT_EQ(7, copied_error.error());
-    EXPECT_FALSE(moved_error.has_value());
-    EXPECT_EQ(7, moved_error.error());
+    CHECK_FALSE(copied_error.has_value());
+    CHECK(7 == copied_error.error());
+    CHECK_FALSE(moved_error.has_value());
+    CHECK(7 == moved_error.error());
 }
 
-TEST(Expected, ObserversPreserveReferenceQualifiers)
+TEST_CASE("Expected - ObserversPreserveReferenceQualifiers")
 {
     ccc::expected<int, int> exp(42);
     const ccc::expected<int, int> const_exp(43);
     ccc::expected<int, int> err(ccc::unexpect, 7);
 
-    EXPECT_EQ(42, *exp);
-    EXPECT_EQ(43, *const_exp);
-    EXPECT_EQ(42, *std::move(exp));
-    EXPECT_EQ(7, std::move(err).error());
+    CHECK(42 == *exp);
+    CHECK(43 == *const_exp);
+    CHECK(42 == *std::move(exp));
+    CHECK(7 == std::move(err).error());
 }
 
-TEST(Expected, ValueThrowsBadExpectedAccessWhenError)
+TEST_CASE("Expected - ValueThrowsBadExpectedAccessWhenError")
 {
     ccc::expected<int, int> exp(ccc::unexpect, 7);
 
     try {
         (void)exp.value();
-        FAIL() << "value() should throw for an error state";
+        FAIL("value() should throw for an error state");
     }
     catch (const ccc::bad_expected_access<int>& ex) {
-        EXPECT_EQ(7, ex.error());
-        EXPECT_STREQ("bad access to ccc::expected without expected value(ErrorType = non-void)", ex.what());
+        CHECK(7 == ex.error());
+        CHECK(std::string("bad access to ccc::expected without expected value(ErrorType = non-void)") ==
+              std::string(ex.what()));
     }
 }
 
-TEST(Expected, ValueOr)
+TEST_CASE("Expected - ValueOr")
 {
     const ccc::expected<int, int> value(42);
     const ccc::expected<int, int> error(ccc::unexpect, 7);
 
-    EXPECT_EQ(42, value.value_or(100));
-    EXPECT_EQ(100, error.value_or(100));
-    EXPECT_EQ(42, (ccc::expected<int, int>(42).value_or(100)));
-    EXPECT_EQ(100, (ccc::expected<int, int>(ccc::unexpect, 7).value_or(100)));
+    CHECK(42 == value.value_or(100));
+    CHECK(100 == error.value_or(100));
+    CHECK(42 == (ccc::expected<int, int>(42).value_or(100)));
+    CHECK(100 == (ccc::expected<int, int>(ccc::unexpect, 7).value_or(100)));
 }
 
-TEST(Expected, ErrorOr)
+TEST_CASE("Expected - ErrorOr")
 {
     const ccc::expected<int, int> value(42);
     const ccc::expected<int, int> error(ccc::unexpect, 7);
 
-    EXPECT_EQ(100, value.error_or(100));
-    EXPECT_EQ(7, error.error_or(100));
-    EXPECT_EQ(100, (ccc::expected<int, int>(42).error_or(100)));
-    EXPECT_EQ(7, (ccc::expected<int, int>(ccc::unexpect, 7).error_or(100)));
+    CHECK(100 == value.error_or(100));
+    CHECK(7 == error.error_or(100));
+    CHECK(100 == (ccc::expected<int, int>(42).error_or(100)));
+    CHECK(7 == (ccc::expected<int, int>(ccc::unexpect, 7).error_or(100)));
 }
 
-TEST(Expected, AssignExpected)
+TEST_CASE("Expected - AssignExpected")
 {
     ccc::expected<int, int> target(1);
     const ccc::expected<int, int> value(42);
     const ccc::expected<int, int> error(ccc::unexpect, 7);
 
     target = value;
-    ASSERT_TRUE(target.has_value());
-    EXPECT_EQ(42, *target);
+    REQUIRE(target.has_value());
+    CHECK(42 == *target);
 
     target = error;
-    ASSERT_FALSE(target.has_value());
-    EXPECT_EQ(7, target.error());
+    REQUIRE_FALSE(target.has_value());
+    CHECK(7 == target.error());
 
     target.assign(value);
-    ASSERT_TRUE(target.has_value());
-    EXPECT_EQ(42, *target);
+    REQUIRE(target.has_value());
+    CHECK(42 == *target);
 }
 
-TEST(Expected, MoveAssignExpected)
+TEST_CASE("Expected - MoveAssignExpected")
 {
     ccc::expected<int, int> target(1);
     ccc::expected<int, int> value(42);
     ccc::expected<int, int> error(ccc::unexpect, 7);
 
     target = std::move(value);
-    ASSERT_TRUE(target.has_value());
-    EXPECT_EQ(42, *target);
+    REQUIRE(target.has_value());
+    CHECK(42 == *target);
 
     target = std::move(error);
-    ASSERT_FALSE(target.has_value());
-    EXPECT_EQ(7, target.error());
+    REQUIRE_FALSE(target.has_value());
+    CHECK(7 == target.error());
 }
 
-TEST(Expected, AssignValue)
+TEST_CASE("Expected - AssignValue")
 {
     // ReSharper disable once CppDFAUnusedValue
     ccc::expected<int, int> exp(ccc::unexpect, 7);
 
     exp = 42;
-    ASSERT_TRUE(exp.has_value());
-    EXPECT_EQ(42, *exp);
+    REQUIRE(exp.has_value());
+    CHECK(42 == *exp);
 
     exp.assign(100);
-    ASSERT_TRUE(exp.has_value());
-    EXPECT_EQ(100, *exp);
+    REQUIRE(exp.has_value());
+    CHECK(100 == *exp);
 }
 
-TEST(Expected, AssignUnexpected)
+TEST_CASE("Expected - AssignUnexpected")
 {
     ccc::expected<int, int> exp(42);
 
     exp.assign(ccc::unexpected<int>(7));
-    ASSERT_FALSE(exp.has_value());
-    EXPECT_EQ(7, exp.error());
+    REQUIRE_FALSE(exp.has_value());
+    CHECK(7 == exp.error());
 
     exp = ccc::unexpected<int>(9);
-    ASSERT_FALSE(exp.has_value());
-    EXPECT_EQ(9, exp.error());
+    REQUIRE_FALSE(exp.has_value());
+    CHECK(9 == exp.error());
 }
 
-TEST(Expected, EmplaceValue)
+TEST_CASE("Expected - EmplaceValue")
 {
     ccc::expected<Point, int> exp(ccc::unexpect, 7);
 
     Point& value = exp.emplace(3, 4);
-    ASSERT_TRUE(exp.has_value());
-    EXPECT_EQ((Point{3, 4}), value);
-    EXPECT_EQ((Point{3, 4}), *exp);
+    REQUIRE(exp.has_value());
+    CHECK((Point{3, 4}) == value);
+    CHECK((Point{3, 4}) == *exp);
 }
 
-TEST(Expected, EmplaceValueWithInitializerList)
+TEST_CASE("Expected - EmplaceValueWithInitializerList")
 {
     ccc::expected<ListValue, int> exp(ccc::unexpect, 7);
 
     ListValue& value = exp.emplace({1, 2, 3}, 4);
-    ASSERT_TRUE(exp.has_value());
-    EXPECT_EQ((ListValue{{1, 2, 3}, 4}), value);
-    EXPECT_EQ((ListValue{{1, 2, 3}, 4}), *exp);
+    REQUIRE(exp.has_value());
+    CHECK((ListValue{{1, 2, 3}, 4}) == value);
+    CHECK((ListValue{{1, 2, 3}, 4}) == *exp);
 }
 
-TEST(Expected, SwapValueWithValue)
+TEST_CASE("Expected - SwapValueWithValue")
 {
     ccc::expected<int, int> lhs(1);
     ccc::expected<int, int> rhs(2);
 
     lhs.swap(rhs);
-    ASSERT_TRUE(lhs.has_value());
-    ASSERT_TRUE(rhs.has_value());
-    EXPECT_EQ(2, *lhs);
-    EXPECT_EQ(1, *rhs);
+    REQUIRE(lhs.has_value());
+    REQUIRE(rhs.has_value());
+    CHECK(2 == *lhs);
+    CHECK(1 == *rhs);
 }
 
-TEST(Expected, SwapErrorWithError)
+TEST_CASE("Expected - SwapErrorWithError")
 {
     ccc::expected<int, int> lhs(ccc::unexpect, 1);
     ccc::expected<int, int> rhs(ccc::unexpect, 2);
 
     swap(lhs, rhs);
-    ASSERT_FALSE(lhs.has_value());
-    ASSERT_FALSE(rhs.has_value());
-    EXPECT_EQ(2, lhs.error());
-    EXPECT_EQ(1, rhs.error());
+    REQUIRE_FALSE(lhs.has_value());
+    REQUIRE_FALSE(rhs.has_value());
+    CHECK(2 == lhs.error());
+    CHECK(1 == rhs.error());
 }
 
-TEST(Expected, SwapValueWithError)
+TEST_CASE("Expected - SwapValueWithError")
 {
     ccc::expected<int, int> value(42);
     ccc::expected<int, int> error(ccc::unexpect, 7);
 
     value.swap(error);
-    ASSERT_FALSE(value.has_value());
-    ASSERT_TRUE(error.has_value());
-    EXPECT_EQ(7, value.error());
-    EXPECT_EQ(42, *error);
+    REQUIRE_FALSE(value.has_value());
+    REQUIRE(error.has_value());
+    CHECK(7 == value.error());
+    CHECK(42 == *error);
 }
 
-TEST(Expected, CompareWithExpected)
+TEST_CASE("Expected - CompareWithExpected")
 {
     const ccc::expected<int, int> value(42);
     const ccc::expected<int, int> same_value(42);
@@ -319,43 +320,44 @@ TEST(Expected, CompareWithExpected)
     const ccc::expected<int, int> same_error(ccc::unexpect, 7);
     const ccc::expected<int, int> other_error(ccc::unexpect, 9);
 
-    EXPECT_TRUE(value == same_value);
-    EXPECT_FALSE(value == other_value);
-    EXPECT_FALSE(value == error);
-    EXPECT_TRUE(error == same_error);
-    EXPECT_FALSE(error == other_error);
+    CHECK(value == same_value);
+    CHECK_FALSE(value == other_value);
+    CHECK_FALSE(value == error);
+    CHECK(error == same_error);
+    CHECK_FALSE(error == other_error);
 }
 
-TEST(Expected, CompareWithUnexpected)
+TEST_CASE("Expected - CompareWithUnexpected")
 {
     const ccc::expected<int, int> value(42);
     const ccc::expected<int, int> error(ccc::unexpect, 7);
 
-    EXPECT_FALSE(value == ccc::unexpected<int>(7));
-    EXPECT_TRUE(error == ccc::unexpected<int>(7));
-    EXPECT_FALSE(error == ccc::unexpected<int>(9));
+    CHECK_FALSE(value == ccc::unexpected<int>(7));
+    CHECK(error == ccc::unexpected<int>(7));
+    CHECK_FALSE(error == ccc::unexpected<int>(9));
 }
 
-TEST(Expected, CompareWithValue)
+TEST_CASE("Expected - CompareWithValue")
 {
     const ccc::expected<int, int> value(42);
     const ccc::expected<int, int> error(ccc::unexpect, 7);
 
-    EXPECT_TRUE(value == 42);
-    EXPECT_FALSE(value == 100);
-    EXPECT_FALSE(error == 42);
-    EXPECT_TRUE(error == ccc::unexpected<int>(7));
+    CHECK(value == 42);
+    CHECK_FALSE(value == 100);
+    CHECK_FALSE(error == 42);
+    CHECK(error == ccc::unexpected<int>(7));
 }
 
-TEST(Expected, BadExpectedAccessStoresError)
+TEST_CASE("Expected - BadExpectedAccessStoresError")
 {
     ccc::bad_expected_access<int> access(7);
     const std::exception& base = access;
 
-    EXPECT_EQ(7, access.error());
+    CHECK(7 == access.error());
     access.error() = 9;
-    EXPECT_EQ(9, access.error());
-    EXPECT_STREQ("bad access to ccc::expected without expected value(ErrorType = non-void)", base.what());
+    CHECK(9 == access.error());
+    CHECK(std::string("bad access to ccc::expected without expected value(ErrorType = non-void)") ==
+          std::string(base.what()));
 }
 
 #if (__cplusplus >= 202002L)

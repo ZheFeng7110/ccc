@@ -45,26 +45,13 @@ ccc 是一个跨平台的 C++ 实用功能库，提供一系列现代 C++ 工具
 
 ### 单元测试
 
-- 测试框架：Google Test（gtest），通过 CPM 自动拉取。
-- 所有测试放在 `test/` 目录下，每个组件使用独立子目录（如 `test/expected_test/`、`test/inplace_vector_test/`）。
+- 测试框架：Catch2 v2.13.10（单头文件）。
+- 所有测试放在 `test/` 目录下。
 - 测试文件使用 `.cc` 扩展名。
 - 测试的 `CMakeLists.txt` 使用 `globSources` 函数根据配置的 C++ 标准（`CCC_TEST_CPP_STANDARD`）条件性地包含测试。
 - 预编译头：`test/test_pch.hh`。
-- 测试时需覆盖**使用模块**和**不使用模块**两种情形，统一使用 C++20（`-DCCC_TEST_CPP_STANDARD=20`）。
-
-  **不使用模块（头文件模式）：**
-  ```sh
-  cmake -S . -B build -DCCC_BUILD_TESTS=ON -DCCC_TEST_CPP_STANDARD=20
-  cmake --build build
-  ctest --test-dir build
-  ```
-
-  **使用模块：**
-  ```sh
-  cmake -S . -B build_modules -DCCC_BUILD_TESTS=ON -DCCC_TEST_CPP_STANDARD=20 -DCCC_USE_CPP_MODULES=ON
-  cmake --build build_modules
-  ctest --test-dir build_modules
-  ```
+- 测试通过运行脚本 `scripts/Run-UnitTest.ps1`。
+- 除非得到用户提示，否则不运行 `scripts/Run-InstallTest.ps1`
 
 ### 构建系统
 

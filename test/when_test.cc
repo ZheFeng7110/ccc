@@ -29,35 +29,35 @@ struct point {
 
 }  // namespace
 
-TEST(When, MatchesFirstCase)
+TEST_CASE("When - MatchesFirstCase")
 {
     const int value = 1;
     const int result = ccc::when(value, 1, [] { return 10; }, 2, [] { return 20; });
-    EXPECT_EQ(result, 10);
+    CHECK(result == 10);
 }
 
-TEST(When, MatchesLaterCase)
+TEST_CASE("When - MatchesLaterCase")
 {
     const int value = 3;
     const int result = ccc::when(value, 1, [] { return 10; }, 2, [] { return 20; }, 3, [] { return 30; });
-    EXPECT_EQ(result, 30);
+    CHECK(result == 30);
 }
 
-TEST(When, FallsThroughToDefault)
+TEST_CASE("When - FallsThroughToDefault")
 {
     const int value = 42;
     const int result = ccc::when(value, 1, [] { return 10; }, ccc::default_tag, [] { return 99; });
-    EXPECT_EQ(result, 99);
+    CHECK(result == 99);
 }
 
-TEST(When, ReturnsDefaultConstructedValueWhenNoMatch)
+TEST_CASE("When - ReturnsDefaultConstructedValueWhenNoMatch")
 {
     const int value = 7;
     const int result = ccc::when(value, 1, [] { return 10; }, 2, [] { return 20; });
-    EXPECT_EQ(result, 0);
+    CHECK(result == 0);
 }
 
-TEST(When, WorksWithCustomComparableType)
+TEST_CASE("When - WorksWithCustomComparableType")
 {
     const point value{2, 3};
     const int result = ccc::when(
@@ -68,10 +68,10 @@ TEST(When, WorksWithCustomComparableType)
         [] { return 1; },
         ccc::default_tag,
         [] { return -1; });
-    EXPECT_EQ(result, 1);
+    CHECK(result == 1);
 }
 
-TEST(When, WorksWithString)
+TEST_CASE("When - WorksWithString")
 {
     const std::string value = "world";
     const std::string result = ccc::when(
@@ -82,30 +82,30 @@ TEST(When, WorksWithString)
         [] { return std::string{"earth"}; },
         ccc::default_tag,
         [] { return std::string{"unknown"}; });
-    EXPECT_EQ(result, "earth");
+    CHECK(result == "earth");
 }
 
-TEST(When, WorksWithVoidReturn)
+TEST_CASE("When - WorksWithVoidReturn")
 {
     int side_effect = 0;
     const int value = 2;
     ccc::when(value, 1, [&] { side_effect = 10; }, 2, [&] { side_effect = 20; });
-    EXPECT_EQ(side_effect, 20);
+    CHECK(side_effect == 20);
 }
 
-TEST(When, DefaultBranchWithVoidReturn)
+TEST_CASE("When - DefaultBranchWithVoidReturn")
 {
     int side_effect = 0;
     const int value = 99;
     ccc::when(value, 1, [&] { side_effect = 10; }, ccc::default_tag, [&] { side_effect = 30; });
-    EXPECT_EQ(side_effect, 30);
+    CHECK(side_effect == 30);
 }
 
-TEST(When, IsConstexpr)
+TEST_CASE("When - IsConstexpr")
 {
     constexpr int value = 2;
     constexpr int result =
         ccc::when(value, 1, [] { return 1; }, 2, [] { return 4; }, ccc::default_tag, [] { return 0; });
     static_assert(result == 4, "when should be usable in constant expressions");
-    EXPECT_EQ(result, 4);
+    CHECK(result == 4);
 }

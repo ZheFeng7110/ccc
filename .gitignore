@@ -13,3 +13,5 @@ target/
 generated/
 
 compile_commands.json
+
+.deps/

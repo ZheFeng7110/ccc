@@ -10,7 +10,7 @@ cxxflags = ["-DTEST_USE_MODULE=1"]
 
 [targets.ccc_test]
 kind = "bin"
-main = "gtest_main.cc"
+main = "catch_main.cc"
 
 [scan_overrides."expected_test/*.cc"]
 imports = ["ccc.utility", "ccc.expected"]
@@ -33,6 +33,8 @@ imports = ["ccc.utility"]
 [scan_overrides."when_test.cc"]
 imports = ["ccc.when"]
 
+[dependencies.compat]
+catch2 = "2.13.10"
+
 [dependencies]
-gtest = "1.17.0"
 ccc = { path = ".." }

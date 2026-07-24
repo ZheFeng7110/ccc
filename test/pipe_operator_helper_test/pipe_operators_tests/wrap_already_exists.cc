@@ -65,7 +65,7 @@ inline constexpr divide_t divide{};
 
 }  // namespace
 
-TEST(PipeOperatorWrapAlreadyExistsTest, Add)
+TEST_CASE("PipeOperatorWrapAlreadyExistsTest - Add")
 {
 #ifdef TEST_IS_CPP20_OR_HIGHER
     static_assert(2 == pp::add(1, 1));
@@ -75,17 +75,17 @@ TEST(PipeOperatorWrapAlreadyExistsTest, Add)
     static_assert(114515 == (114514 | pp::add(1) | pp::add(0)));
 #endif
 
-    EXPECT_TRUE(noexcept(pp::add(1, 1)));
-    EXPECT_TRUE(noexcept(1 | pp::add(1)));
+    CHECK(noexcept(pp::add(1, 1)));
+    CHECK(noexcept(1 | pp::add(1)));
 
-    EXPECT_EQ(2, pp::add(1, 1));
-    EXPECT_EQ(2, 1 | pp::add(1));
+    CHECK(2 == pp::add(1, 1));
+    CHECK(2 == (1 | pp::add(1)));
 
-    EXPECT_EQ(114515, pp::add(pp::add(114514, 1), 0));
-    EXPECT_EQ(114515, 114514 | pp::add(1) | pp::add(0));
+    CHECK(114515 == pp::add(pp::add(114514, 1), 0));
+    CHECK(114515 == (114514 | pp::add(1) | pp::add(0)));
 }
 
-TEST(PipeOperatorWrapAlreadyExistsTest, Divide)
+TEST_CASE("PipeOperatorWrapAlreadyExistsTest - Divide")
 {
 #ifdef TEST_IS_CPP20_OR_HIGHER
     constexpr std::equal_to<int> eq;
@@ -100,20 +100,20 @@ TEST(PipeOperatorWrapAlreadyExistsTest, Divide)
     static_assert(eq(-1, 4 | pp::divide(2) | pp::divide(-2)));
 #endif
 
-    EXPECT_FALSE(noexcept(pp::divide(1, 1)));
-    EXPECT_FALSE(noexcept(1 | pp::divide(1)));
+    CHECK_FALSE(noexcept(pp::divide(1, 1)));
+    CHECK_FALSE(noexcept(1 | pp::divide(1)));
 
-    EXPECT_EQ(2, pp::divide(4, 2));
-    EXPECT_EQ(2, 4 | pp::divide(2));
+    CHECK(2 == pp::divide(4, 2));
+    CHECK(2 == (4 | pp::divide(2)));
 
-    EXPECT_THROW(pp::divide(2, 0), std::logic_error);
-    EXPECT_THROW(2 | pp::divide(0), std::logic_error);
+    CHECK_THROWS_AS(pp::divide(2, 0), std::logic_error);
+    CHECK_THROWS_AS((2 | pp::divide(0)), std::logic_error);
 
-    EXPECT_EQ(-1, pp::divide(pp::divide(4, 2), -2));
-    EXPECT_EQ(-1, 4 | pp::divide(2) | pp::divide(-2));
+    CHECK(-1 == pp::divide(pp::divide(4, 2), -2));
+    CHECK(-1 == (4 | pp::divide(2) | pp::divide(-2)));
 
-    EXPECT_THROW(pp::divide(pp::divide(-4, 2), 0), std::logic_error);
-    EXPECT_THROW(-4 | pp::divide(2) | pp::divide(0), std::logic_error);
+    CHECK_THROWS_AS(pp::divide(pp::divide(-4, 2), 0), std::logic_error);
+    CHECK_THROWS_AS((-4 | pp::divide(2) | pp::divide(0)), std::logic_error);
 }
 
 namespace {
@@ -141,7 +141,7 @@ inline constexpr add_t add{};
 }  // namespace tmpl
 }  // namespace
 
-TEST(PipeOperatorWrapAlreadyExistsTest, TemplateAdd)
+TEST_CASE("PipeOperatorWrapAlreadyExistsTest - TemplateAdd")
 {
 #ifdef TEST_IS_CPP20_OR_HIGHER
     constexpr std::equal_to<double> eq;
@@ -156,18 +156,18 @@ TEST(PipeOperatorWrapAlreadyExistsTest, TemplateAdd)
     static_assert(eq(2.0, 1.0 | tmpl::pp::add.operator()<double>(1)));
 #endif
 
-    EXPECT_TRUE(noexcept(tmpl::pp::add(1, 1)));
-    EXPECT_TRUE(noexcept(1 | tmpl::pp::add(1)));
+    CHECK(noexcept(tmpl::pp::add(1, 1)));
+    CHECK(noexcept(1 | tmpl::pp::add(1)));
 
-    EXPECT_EQ(2, tmpl::pp::add(1, 1));
-    EXPECT_EQ(2, 1 | tmpl::pp::add(1));
+    CHECK(2 == tmpl::pp::add(1, 1));
+    CHECK(2 == (1 | tmpl::pp::add(1)));
 
-    EXPECT_EQ(114515, tmpl::pp::add(tmpl::pp::add(114514, 1), 0));
-    EXPECT_EQ(114515, 114514 | tmpl::pp::add(1) | tmpl::pp::add(0));
+    CHECK(114515 == tmpl::pp::add(tmpl::pp::add(114514, 1), 0));
+    CHECK(114515 == (114514 | tmpl::pp::add(1) | tmpl::pp::add(0)));
 
-    EXPECT_DOUBLE_EQ(2.0, tmpl::pp::add.operator()<double>(1.0, 1));
-    EXPECT_DOUBLE_EQ(2.0, 1.0 | tmpl::pp::add.operator()<double>(1));
+    CHECK(2.0 == Approx(tmpl::pp::add.operator()<double>(1.0, 1)));
+    CHECK(2.0 == Approx((1.0 | tmpl::pp::add.operator()<double>(1))));
 
-    EXPECT_TRUE((std::is_same<decltype(tmpl::pp::add.operator()<double>(1.0, 1)), double>::value));
-    EXPECT_TRUE((std::is_same<decltype(1.0 | tmpl::pp::add.operator()<double>(1)), double>::value));
+    CHECK((std::is_same<decltype(tmpl::pp::add.operator()<double>(1.0, 1)), double>::value));
+    CHECK((std::is_same<decltype(1.0 | tmpl::pp::add.operator()<double>(1)), double>::value));
 }

@@ -47,7 +47,7 @@ inline constexpr logic_not_t logic_not{};
 
 }  // namespace
 
-TEST(PipeOperator1ArgTest, TypicalLogicNot)
+TEST_CASE("PipeOperator1ArgTest - TypicalLogicNot")
 {
 #ifdef TEST_IS_CPP20_OR_HIGHER
     constexpr std::equal_to<int> eq;
@@ -59,14 +59,14 @@ TEST(PipeOperator1ArgTest, TypicalLogicNot)
     static_assert(eq(false, false | logic_not() | logic_not()));
 #endif
 
-    EXPECT_TRUE(noexcept(logic_not(false)));
-    EXPECT_TRUE(noexcept(false | logic_not()));
+    CHECK(noexcept(logic_not(false)));
+    CHECK(noexcept(false | logic_not()));
 
-    EXPECT_EQ(true, logic_not(false));
-    EXPECT_EQ(true, false | logic_not());
+    CHECK(true == logic_not(false));
+    CHECK(true == (false | logic_not()));
 
-    EXPECT_EQ(false, logic_not(logic_not(false)));
-    EXPECT_EQ(false, false | logic_not() | logic_not());
+    CHECK(false == logic_not(logic_not(false)));
+    CHECK(false == (false | logic_not() | logic_not()));
 }
 
 namespace {
@@ -104,18 +104,18 @@ static_assert(test_(), "");
 
 }  // namespace
 
-TEST(PipeOperator1ArgTest, ReferenceTest)
+TEST_CASE("PipeOperator1ArgTest - ReferenceTest")
 {
     int a = 0;
 
-    EXPECT_TRUE(noexcept(add1(a)));
-    EXPECT_TRUE(noexcept(a | add1()));
+    CHECK(noexcept(add1(a)));
+    CHECK(noexcept(a | add1()));
 
     add1(a);
-    EXPECT_EQ(a, 1);
+    CHECK(a == 1);
 
     a | add1();
-    EXPECT_EQ(a, 2);
+    CHECK(a == 2);
 }
 
 // tests for exceptions
@@ -136,18 +136,18 @@ inline constexpr could_not_past_zero_t could_not_past_zero{};
 
 }  // namespace
 
-TEST(PipeOperator1ArgTest, ExceptionTest)
+TEST_CASE("PipeOperator1ArgTest - ExceptionTest")
 {
-    EXPECT_FALSE(noexcept(could_not_past_zero(1)));
-    EXPECT_FALSE(noexcept(1 | could_not_past_zero()));
+    CHECK_FALSE(noexcept(could_not_past_zero(1)));
+    CHECK_FALSE(noexcept(1 | could_not_past_zero()));
 
-    ASSERT_NO_THROW(could_not_past_zero(1));
-    ASSERT_NO_THROW(1 | could_not_past_zero());
-    EXPECT_TRUE(could_not_past_zero(1));
-    EXPECT_TRUE(1 | could_not_past_zero());
+    REQUIRE_NOTHROW(could_not_past_zero(1));
+    REQUIRE_NOTHROW(1 | could_not_past_zero());
+    CHECK(could_not_past_zero(1));
+    CHECK((1 | could_not_past_zero()));
 
-    EXPECT_THROW(could_not_past_zero(0), std::logic_error);
-    EXPECT_THROW(0 | could_not_past_zero(), std::logic_error);
+    CHECK_THROWS_AS(could_not_past_zero(0), std::logic_error);
+    CHECK_THROWS_AS((0 | could_not_past_zero()), std::logic_error);
 }
 
 // callable object
@@ -165,13 +165,13 @@ inline constexpr Increment increment{};
 
 }  // namespace
 
-TEST(PipeOperator1ArgTest, CallableObjectTest)
+TEST_CASE("PipeOperator1ArgTest - CallableObjectTest")
 {
-    EXPECT_TRUE(noexcept(increment(1)));
-    EXPECT_TRUE(noexcept(1 | increment()));
+    CHECK(noexcept(increment(1)));
+    CHECK(noexcept(1 | increment()));
 
-    EXPECT_EQ(increment(1), 2);
-    EXPECT_EQ(1 | increment(), 2);
+    CHECK(increment(1) == 2);
+    CHECK((1 | increment()) == 2);
 }
 
 // NOLINTEND(*-use-transparent-functors)

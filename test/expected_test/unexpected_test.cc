@@ -31,101 +31,101 @@ struct PairValue {
 
 }  // namespace
 
-TEST(Unexpected, ConstructFromErrorValue)
+TEST_CASE("Unexpected - ConstructFromErrorValue")
 {
     ccc::unexpected<int> unexp(42);
 
-    EXPECT_EQ(42, unexp.error());
+    CHECK(42 == unexp.error());
 
     unexp.error() = 7;
-    EXPECT_EQ(7, unexp.error());
+    CHECK(7 == unexp.error());
 
     const ccc::unexpected<int> const_unexp(11);
-    EXPECT_EQ(11, const_unexp.error());
+    CHECK(11 == const_unexp.error());
 }
 
-TEST(Unexpected, ConstructInPlace)
+TEST_CASE("Unexpected - ConstructInPlace")
 {
     ccc::unexpected<PairValue> unexp(ccc::in_place, 1, 2);
 
-    EXPECT_EQ((PairValue{1, 2}), unexp.error());
+    CHECK((PairValue{1, 2}) == unexp.error());
 }
 
-TEST(Unexpected, ConstructInPlaceWithInitializerList)
+TEST_CASE("Unexpected - ConstructInPlaceWithInitializerList")
 {
     ccc::unexpected<std::vector<int>> unexp(ccc::in_place, {1, 2, 3});
 
-    ASSERT_EQ(3u, unexp.error().size());
-    EXPECT_EQ(1, unexp.error()[0]);
-    EXPECT_EQ(2, unexp.error()[1]);
-    EXPECT_EQ(3, unexp.error()[2]);
+    REQUIRE(unexp.error().size() == 3u);
+    CHECK(1 == unexp.error()[0]);
+    CHECK(2 == unexp.error()[1]);
+    CHECK(3 == unexp.error()[2]);
 }
 
-TEST(Unexpected, ConstructWithInitializerList)
+TEST_CASE("Unexpected - ConstructWithInitializerList")
 {
     ccc::unexpected<std::vector<int>> unexp({1, 2, 3});
 
-    ASSERT_EQ(3u, unexp.error().size());
-    EXPECT_EQ(1, unexp.error()[0]);
-    EXPECT_EQ(2, unexp.error()[1]);
-    EXPECT_EQ(3, unexp.error()[2]);
+    REQUIRE(unexp.error().size() == 3u);
+    CHECK(1 == unexp.error()[0]);
+    CHECK(2 == unexp.error()[1]);
+    CHECK(3 == unexp.error()[2]);
 }
 
-TEST(Unexpected, CopyAndMoveConstruct)
+TEST_CASE("Unexpected - CopyAndMoveConstruct")
 {
     ccc::unexpected<std::string> original("error");
 
     ccc::unexpected<std::string> copied(original);
-    EXPECT_EQ("error", copied.error());
+    CHECK("error" == copied.error());
 
     ccc::unexpected<std::string> moved(std::move(original));
-    EXPECT_EQ("error", moved.error());
+    CHECK("error" == moved.error());
 }
 
-TEST(Unexpected, ErrorRefQualifiers)
+TEST_CASE("Unexpected - ErrorRefQualifiers")
 {
     ccc::unexpected<int> unexp(42);
-    EXPECT_EQ(42, unexp.error());
-    EXPECT_EQ(42, std::move(unexp).error());
+    CHECK(42 == unexp.error());
+    CHECK(42 == std::move(unexp).error());
 }
 
-TEST(Unexpected, SwapMemberAndAdl)
+TEST_CASE("Unexpected - SwapMemberAndAdl")
 {
     ccc::unexpected<int> lhs(1);
     ccc::unexpected<int> rhs(2);
 
     lhs.swap(rhs);
-    EXPECT_EQ(2, lhs.error());
-    EXPECT_EQ(1, rhs.error());
+    CHECK(2 == lhs.error());
+    CHECK(1 == rhs.error());
 
     using std::swap;
     swap(lhs, rhs);
-    EXPECT_EQ(1, lhs.error());
-    EXPECT_EQ(2, rhs.error());
+    CHECK(1 == lhs.error());
+    CHECK(2 == rhs.error());
 }
 
-TEST(Unexpected, EqualityAndOrdering)
+TEST_CASE("Unexpected - EqualityAndOrdering")
 {
     const ccc::unexpected<int> one(1);
     const ccc::unexpected<int> another_one(1);
     const ccc::unexpected<int> two(2);
 
-    EXPECT_TRUE(one == another_one);
-    EXPECT_FALSE(one == two);
-    EXPECT_TRUE(one != two);
-    EXPECT_TRUE(one < two);
-    EXPECT_TRUE(one <= another_one);
-    EXPECT_TRUE(two > one);
-    EXPECT_TRUE(two >= another_one);
+    CHECK(one == another_one);
+    CHECK_FALSE(one == two);
+    CHECK(one != two);
+    CHECK(one < two);
+    CHECK(one <= another_one);
+    CHECK(two > one);
+    CHECK(two >= another_one);
 }
 
 #ifdef __cpp_deduction_guides
-TEST(Unexpected, ClassTemplateArgumentDeduction)
+TEST_CASE("Unexpected - ClassTemplateArgumentDeduction")
 {
     ccc::unexpected unexp(42);
 
     static_assert(std::is_same_v<decltype(unexp), ccc::unexpected<int>>);
-    EXPECT_EQ(42, unexp.error());
+    CHECK(42 == unexp.error());
 }
 #endif
 

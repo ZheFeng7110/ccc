@@ -47,7 +47,7 @@ inline constexpr add_t add{};
 
 }  // namespace
 
-TEST(PipeOperator2ArgsTest, TypicalAdd)
+TEST_CASE("PipeOperator2ArgsTest - TypicalAdd")
 {
 #ifdef TEST_IS_CPP20_OR_HIGHER
     static_assert(2 == add(1, 1));
@@ -57,14 +57,14 @@ TEST(PipeOperator2ArgsTest, TypicalAdd)
     static_assert(114515 == (114514 | add(1) | add(0)));
 #endif
 
-    EXPECT_TRUE(noexcept(add(1, 1)));
-    EXPECT_TRUE(noexcept(1 | add(1)));
+    CHECK(noexcept(add(1, 1)));
+    CHECK(noexcept(1 | add(1)));
 
-    EXPECT_EQ(2, add(1, 1));
-    EXPECT_EQ(2, 1 | add(1));
+    CHECK(2 == add(1, 1));
+    CHECK(2 == (1 | add(1)));
 
-    EXPECT_EQ(114515, add(add(114514, 1), 0));
-    EXPECT_EQ(114515, 114514 | add(1) | add(0));
+    CHECK(114515 == add(add(114514, 1), 0));
+    CHECK(114515 == (114514 | add(1) | add(0)));
 }
 
 namespace {
@@ -85,7 +85,7 @@ inline constexpr divide_t divide{};
 
 }  // namespace
 
-TEST(PipeOperator2ArgsTest, ExceptionTest)
+TEST_CASE("PipeOperator2ArgsTest - ExceptionTest")
 {
 #ifdef TEST_IS_CPP20_OR_HIGHER
     constexpr std::equal_to<int> eq;
@@ -100,20 +100,20 @@ TEST(PipeOperator2ArgsTest, ExceptionTest)
     static_assert(eq(-1, 4 | divide(2) | divide(-2)));
 #endif
 
-    EXPECT_FALSE(noexcept(divide(1, 1)));
-    EXPECT_FALSE(noexcept(1 | divide(1)));
+    CHECK_FALSE(noexcept(divide(1, 1)));
+    CHECK_FALSE(noexcept(1 | divide(1)));
 
-    EXPECT_EQ(2, divide(4, 2));
-    EXPECT_EQ(2, 4 | divide(2));
+    CHECK(2 == divide(4, 2));
+    CHECK(2 == (4 | divide(2)));
 
-    EXPECT_THROW(divide(2, 0), std::logic_error);
-    EXPECT_THROW(2 | divide(0), std::logic_error);
+    CHECK_THROWS_AS(divide(2, 0), std::logic_error);
+    CHECK_THROWS_AS((2 | divide(0)), std::logic_error);
 
-    EXPECT_EQ(-1, divide(divide(4, 2), -2));
-    EXPECT_EQ(-1, 4 | divide(2) | divide(-2));
+    CHECK(-1 == divide(divide(4, 2), -2));
+    CHECK(-1 == (4 | divide(2) | divide(-2)));
 
-    EXPECT_THROW(divide(divide(-4, 2), 0), std::logic_error);
-    EXPECT_THROW(-4 | divide(2) | divide(0), std::logic_error);
+    CHECK_THROWS_AS(divide(divide(-4, 2), 0), std::logic_error);
+    CHECK_THROWS_AS((-4 | divide(2) | divide(0)), std::logic_error);
 }
 
 namespace {
@@ -135,7 +135,7 @@ inline constexpr add_t add{};
 }  // namespace template_test
 }  // namespace
 
-TEST(PipeOperator2ArgsTest, TemplateAdd)
+TEST_CASE("PipeOperator2ArgsTest - TemplateAdd")
 {
 #ifdef TEST_IS_CPP20_OR_HIGHER
     constexpr std::equal_to<double> eq;
@@ -150,20 +150,20 @@ TEST(PipeOperator2ArgsTest, TemplateAdd)
     static_assert(eq(2.0, 1.0 | template_test::add(1)));
 #endif
 
-    EXPECT_TRUE(noexcept(template_test::add(1, 1)));
-    EXPECT_TRUE(noexcept(1 | template_test::add(1)));
-    EXPECT_EQ(2, template_test::add(1, 1));
-    EXPECT_EQ(2, 1 | template_test::add(1));
+    CHECK(noexcept(template_test::add(1, 1)));
+    CHECK(noexcept(1 | template_test::add(1)));
+    CHECK(2 == template_test::add(1, 1));
+    CHECK(2 == (1 | template_test::add(1)));
 
-    EXPECT_TRUE(noexcept(template_test::add(template_test::add(114514, 1), 0)));
-    EXPECT_TRUE(noexcept(114514 | template_test::add(1) | template_test::add(0)));
-    EXPECT_EQ(114515, template_test::add(template_test::add(114514, 1), 0));
-    EXPECT_EQ(114515, 114514 | template_test::add(1) | template_test::add(0));
+    CHECK(noexcept(template_test::add(template_test::add(114514, 1), 0)));
+    CHECK(noexcept(114514 | template_test::add(1) | template_test::add(0)));
+    CHECK(114515 == template_test::add(template_test::add(114514, 1), 0));
+    CHECK(114515 == (114514 | template_test::add(1) | template_test::add(0)));
 
-    EXPECT_TRUE(noexcept(template_test::add(1.0, 1)));
-    EXPECT_TRUE(noexcept(1.0 | template_test::add(1)));
-    EXPECT_DOUBLE_EQ(2.0, template_test::add(1.0, 1));
-    EXPECT_DOUBLE_EQ(2.0, 1.0 | template_test::add(1));
+    CHECK(noexcept(template_test::add(1.0, 1)));
+    CHECK(noexcept(1.0 | template_test::add(1)));
+    CHECK(2.0 == Approx(template_test::add(1.0, 1)));
+    CHECK(2.0 == Approx((1.0 | template_test::add(1))));
 }
 
 #if (defined(TEST_IS_CPP20_OR_HIGHER) && !defined(_MSC_VER))
@@ -190,13 +190,13 @@ static_assert(test::eq(0b11, 0b01 | bit_or(0b10)));
 
 }  // namespace
 
-TEST(PipeOperator2ArgsTest, ConstevalBitOr)
+TEST_CASE("PipeOperator2ArgsTest - ConstevalBitOr")
 {
-    EXPECT_TRUE(noexcept(bit_or(0b01, 0b10)));
-    EXPECT_TRUE(noexcept(0b01 | bit_or(0b10)));
+    CHECK(noexcept(bit_or(0b01, 0b10)));
+    CHECK(noexcept(0b01 | bit_or(0b10)));
 
-    EXPECT_EQ(0b11, bit_or(0b01, 0b10));
-    EXPECT_EQ(0b11, 0b01 | bit_or(0b10));
+    CHECK(0b11 == bit_or(0b01, 0b10));
+    CHECK(0b11 == (0b01 | bit_or(0b10)));
 }
 
 #endif
@@ -218,17 +218,17 @@ inline constexpr swap_t swap{};
 
 }  // namespace
 
-TEST(PipeOperator2ArgsTest, ReferenceTest)
+TEST_CASE("PipeOperator2ArgsTest - ReferenceTest")
 {
     int a = 1, b = -1;
 
     swap(a, b);
-    EXPECT_EQ(-1, a);
-    EXPECT_EQ(1, b);
+    CHECK(-1 == a);
+    CHECK(1 == b);
 
     a | swap(b);
-    EXPECT_EQ(1, a);
-    EXPECT_EQ(-1, b);
+    CHECK(1 == a);
+    CHECK(-1 == b);
 }
 
 // callable object
@@ -246,18 +246,18 @@ inline constexpr Multiply multiply{};
 
 }  // namespace
 
-TEST(PipeOperator2ArgsTest, CallableObjectTest)
+TEST_CASE("PipeOperator2ArgsTest - CallableObjectTest")
 {
 #ifdef TEST_IS_CPP20_OR_HIGHER
     static_assert(6 == multiply(2, 3));
     static_assert(6 == (2 | multiply(3)));
 #endif
 
-    EXPECT_TRUE(noexcept(multiply(2, 3)));
-    EXPECT_TRUE(noexcept(2 | multiply(3)));
+    CHECK(noexcept(multiply(2, 3)));
+    CHECK(noexcept(2 | multiply(3)));
 
-    EXPECT_EQ(6, multiply(2, 3));
-    EXPECT_EQ(6, 2 | multiply(3));
+    CHECK(6 == multiply(2, 3));
+    CHECK(6 == (2 | multiply(3)));
 }
 
 // NOLINTEND(*-use-transparent-functors)

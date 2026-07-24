@@ -26,15 +26,16 @@ import ccc.resource_guard;
 #define TEST_REPORT(msg) \
     (std::cout << "In File `" << __FILE__ << ":" << __LINE__ << "` has message: \n    " << (msg) << std::endl)
 
-TEST(ResourceGuard, Defer_Lambda)
+TEST_CASE("ResourceGuard - Defer_Lambda")
 {
     int x = 0;
     {
-        CCC_MAYBE_UNUSED ccc::defer df{[&] { x = 42; }};
+        auto action = [&] { x = 42; };
+        CCC_MAYBE_UNUSED ccc::defer<decltype(action)> df{action};
         TEST_REPORT("sizeof defer == " + std::to_string(sizeof df));
-        EXPECT_EQ(x, 0);
+        CHECK(x == 0);
     }
-    EXPECT_EQ(x, 42);
+    CHECK(x == 42);
 }
 
 namespace {
@@ -54,35 +55,35 @@ void close_file() noexcept
 
 }  // namespace
 
-TEST(ResourceGuard, Defer_Function)
+TEST_CASE("ResourceGuard - Defer_Function")
 {
-    ASSERT_THROW(open_file(false), std::runtime_error);
-    EXPECT_TRUE(file_on);
+    REQUIRE_THROWS_AS(open_file(false), std::runtime_error);
+    CHECK(file_on);
     close_file();
-    ASSERT_FALSE(file_on);
-    ASSERT_NO_THROW(open_file(true));
-    EXPECT_TRUE(file_on);
+    REQUIRE_FALSE(file_on);
+    REQUIRE_NOTHROW(open_file(true));
+    CHECK(file_on);
     close_file();
-    ASSERT_FALSE(file_on);
+    REQUIRE_FALSE(file_on);
 
     {
-        CCC_MAYBE_UNUSED ccc::defer df{&close_file};
+        CCC_MAYBE_UNUSED ccc::defer<void (*)()> df{&close_file};
         TEST_REPORT("sizeof defer == " + std::to_string(sizeof df));
-        ASSERT_NO_THROW(open_file(true));
-        EXPECT_TRUE(file_on);
+        REQUIRE_NOTHROW(open_file(true));
+        CHECK(file_on);
     }
-    EXPECT_FALSE(file_on);
+    CHECK_FALSE(file_on);
 
     {
-        CCC_MAYBE_UNUSED ccc::defer df{&close_file};
+        CCC_MAYBE_UNUSED ccc::defer<void (*)()> df{&close_file};
         TEST_REPORT("sizeof defer == " + std::to_string(sizeof df));
-        ASSERT_THROW(open_file(false), std::runtime_error);
-        EXPECT_TRUE(file_on);
+        REQUIRE_THROWS_AS(open_file(false), std::runtime_error);
+        CHECK(file_on);
     }
-    EXPECT_FALSE(file_on);
+    CHECK_FALSE(file_on);
 }
 
-TEST(ResourceGuard, Defer_CallableObject)
+TEST_CASE("ResourceGuard - Defer_CallableObject")
 {
     struct Callable {
         int a = 0;
@@ -93,17 +94,18 @@ TEST(ResourceGuard, Defer_CallableObject)
     };
 
     Callable callable;
-    EXPECT_EQ(callable.a, 0);
+    CHECK(callable.a == 0);
     {
-        CCC_MAYBE_UNUSED ccc::defer df{[&] { callable(); }};
+        auto action = [&] { callable(); };
+        CCC_MAYBE_UNUSED ccc::defer<decltype(action)> df{action};
         TEST_REPORT("sizeof defer == " + std::to_string(sizeof df));
         callable.a = 1919810;
-        EXPECT_EQ(callable.a, 1919810);
+        CHECK(callable.a == 1919810);
     }
-    EXPECT_EQ(callable.a, 114514);
+    CHECK(callable.a == 114514);
 }
 
-TEST(ResourceGuard, TryFinally)
+TEST_CASE("ResourceGuard - TryFinally")
 {
     struct File {
         bool on = false;
@@ -119,7 +121,7 @@ TEST(ResourceGuard, TryFinally)
 
     File f;
     f.open();
-    EXPECT_TRUE(f.on);
+    CHECK(f.on);
 
     ccc::try_finally(
         [&] {
@@ -127,10 +129,10 @@ TEST(ResourceGuard, TryFinally)
             return;
         },
         [&] { f.close(); });
-    EXPECT_FALSE(f.on);
+    CHECK_FALSE(f.on);
 }
 
-TEST(ResourceGuard, With)
+TEST_CASE("ResourceGuard - With")
 {
     struct Lock {
         bool is_locked = false;
@@ -154,12 +156,12 @@ TEST(ResourceGuard, With)
     };
 
     Lock l;
-    ASSERT_FALSE(l.is_locked);
+    REQUIRE_FALSE(l.is_locked);
 
     const auto ret = ccc::with(l, [&] {
-        EXPECT_TRUE(l.is_locked);
+        CHECK(l.is_locked);
         return 114514;
     });
-    EXPECT_EQ(114514, ret);
-    EXPECT_FALSE(l.is_locked);
+    CHECK(114514 == ret);
+    CHECK_FALSE(l.is_locked);
 }

@@ -38,15 +38,17 @@ private:
 template<typename TryBlock, typename FinallyBlock>
 inline constexpr void try_finally(TryBlock&& try_block, FinallyBlock&& finally_block)
 {
-    CCC_MAYBE_UNUSED defer _{std::forward<FinallyBlock>(finally_block)};
+    using defer_t = defer<typename std::decay<FinallyBlock>::type>;
+    CCC_MAYBE_UNUSED defer_t _{std::forward<FinallyBlock>(finally_block)};
     std::forward<TryBlock>(try_block)();
 }
 
 template<typename T, typename Func>
-inline constexpr decltype(auto) with(T&& value, Func&& func)
+inline constexpr auto with(T&& value, Func&& func) -> decltype(std::forward<Func>(func)())
 {
     std::forward<T>(value).with_start();
-    CCC_MAYBE_UNUSED defer _{[&] { std::forward<T>(value).with_end(); }};
+    auto end_action = [&] { std::forward<T>(value).with_end(); };
+    CCC_MAYBE_UNUSED defer<decltype(end_action)> _{end_action};
     return std::forward<Func>(func)();
 }
 

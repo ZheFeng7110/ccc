@@ -18,7 +18,7 @@
 #endif
 
 #ifdef __cplusplus
-#include <gtest/gtest.h>
+#include <catch2/catch.hpp>
 #endif
 
 #endif  // !CCC_TEST_TEST_PCH_HH

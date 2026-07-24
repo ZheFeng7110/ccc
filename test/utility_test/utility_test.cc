@@ -27,7 +27,7 @@ struct DefaultConstructible {
 
 }  // namespace
 
-TEST(UtilityTest, InPlaceTag)
+TEST_CASE("UtilityTest - InPlaceTag")
 {
     ccc::in_place_t tag{};
     const auto& ref = ccc::in_place;
@@ -35,34 +35,34 @@ TEST(UtilityTest, InPlaceTag)
     (void)ref;
 }
 
-TEST(UtilityTest, AsConst)
+TEST_CASE("UtilityTest - AsConst")
 {
     int value = 42;
     const int& cref = ccc::as_const(value);
-    EXPECT_EQ(&value, &cref);
+    CHECK(&value == &cref);
     static_assert(std::is_same<const int&, decltype(ccc::as_const(value))>::value, "");
 }
 
-TEST(UtilityTest, ConstructAt)
+TEST_CASE("UtilityTest - ConstructAt")
 {
     alignas(Constructible) unsigned char buf[sizeof(Constructible)];
     Constructible* ptr = ccc::construct_at(reinterpret_cast<Constructible*>(buf), 42, 3.14);
-    ASSERT_NE(nullptr, ptr);
-    EXPECT_EQ(42, ptr->a);
-    EXPECT_DOUBLE_EQ(3.14, ptr->b);
+    REQUIRE(ptr != nullptr);
+    CHECK(42 == ptr->a);
+    CHECK(ptr->b == Approx(3.14));
     ccc::destroy_at(ptr);
 }
 
-TEST(UtilityTest, ConstructAtTrivial)
+TEST_CASE("UtilityTest - ConstructAtTrivial")
 {
     alignas(int) unsigned char buf[sizeof(int)];
     int* ptr = ccc::construct_at(reinterpret_cast<int*>(buf), 42);
-    ASSERT_NE(nullptr, ptr);
-    EXPECT_EQ(42, *ptr);
+    REQUIRE(ptr != nullptr);
+    CHECK(42 == *ptr);
     ccc::destroy_at(ptr);
 }
 
-TEST(UtilityTest, DestroyRange)
+TEST_CASE("UtilityTest - DestroyRange")
 {
     alignas(int) unsigned char buf[3 * sizeof(int)];
     int* arr = reinterpret_cast<int*>(buf);
@@ -72,38 +72,38 @@ TEST(UtilityTest, DestroyRange)
     ccc::destroy(arr, arr + 3);
 }
 
-TEST(UtilityTest, UninitializedCopy)
+TEST_CASE("UtilityTest - UninitializedCopy")
 {
     std::vector<int> src = {1, 2, 3, 4, 5};
     alignas(int) unsigned char buf[5 * sizeof(int)];
     int* dest = reinterpret_cast<int*>(buf);
     int* end = ccc::uninitialized_copy(src.begin(), src.end(), dest);
-    ASSERT_EQ(dest + 5, end);
+    REQUIRE(dest + 5 == end);
     for (int i = 0; i < 5; ++i) {
-        EXPECT_EQ(src[i], dest[i]);
+        CHECK(src[i] == dest[i]);
     }
     ccc::destroy(dest, end);
 }
 
-TEST(UtilityTest, UninitializedFillN)
+TEST_CASE("UtilityTest - UninitializedFillN")
 {
     alignas(int) unsigned char buf[5 * sizeof(int)];
     int* dest = reinterpret_cast<int*>(buf);
     ccc::uninitialized_fill_n(dest, 5, 42);
     for (int i = 0; i < 5; ++i) {
-        EXPECT_EQ(42, dest[i]);
+        CHECK(42 == dest[i]);
     }
     ccc::destroy(dest, dest + 5);
 }
 
-TEST(UtilityTest, UninitializedDefaultConstructN)
+TEST_CASE("UtilityTest - UninitializedDefaultConstructN")
 {
     alignas(DefaultConstructible) unsigned char buf[5 * sizeof(DefaultConstructible)];
     DefaultConstructible* dest = reinterpret_cast<DefaultConstructible*>(buf);
     DefaultConstructible* end = ccc::uninitialized_default_construct_n(dest, 5);
-    ASSERT_EQ(dest + 5, end);
+    REQUIRE(dest + 5 == end);
     for (int i = 0; i < 5; ++i) {
-        EXPECT_EQ(99, dest[i].value);
+        CHECK(99 == dest[i].value);
     }
     ccc::destroy(dest, end);
 }

@@ -27,31 +27,31 @@ using namespace pipe_::type_cast_operators;
 
 #define STATIC_CAST_TEST(value, to_type)                                        \
     static_assert((value) == ((value) > pipe_::static_cast_to<to_type>()), ""); \
-    EXPECT_EQ(static_cast<to_type>(value), (value) > pipe_::static_cast_to<to_type>())
+    CHECK(static_cast<to_type>(value) == ((value) > pipe_::static_cast_to<to_type>()))
 
 }  // namespace
 
-TEST(PipeOperatorStaticCast, BasicType)
+TEST_CASE("PipeOperatorStaticCast - BasicType")
 {
     STATIC_CAST_TEST(123.0f, int);
     STATIC_CAST_TEST(114.514f, double);
     STATIC_CAST_TEST(114514, double);
 }
 
-TEST(PipeOperatorStaticCast, Pointer)
+TEST_CASE("PipeOperatorStaticCast - Pointer")
 {
     int value = 1919;
     int* ptr = &value;
-    EXPECT_EQ(ptr, ptr > pipe_::cast_to<int*>());
-    EXPECT_EQ(value, *(ptr > pipe_::cast_to<int*>()));
+    CHECK(ptr == (ptr > pipe_::cast_to<int*>()));
+    CHECK(value == *(ptr > pipe_::cast_to<int*>()));
 
     auto vptr = &value > pipe_::cast_to<void*>();
-    EXPECT_EQ(value, *(vptr > pipe_::cast_to<int*>()));
+    CHECK(value == *(vptr > pipe_::cast_to<int*>()));
 
-    EXPECT_EQ(value, *(ptr > pipe_::cast_to<void*>() > pipe_::cast_to<int*>()));
+    CHECK(value == *(ptr > pipe_::cast_to<void*>() > pipe_::cast_to<int*>()));
 }
 
-TEST(PipeOperatorStaticCast, Class)
+TEST_CASE("PipeOperatorStaticCast - Class")
 {
     struct Base {
         int a;
@@ -70,24 +70,24 @@ TEST(PipeOperatorStaticCast, Class)
 
     Base base{114, 5.14f};
     Derived derived{{114, 5.14f}, 'a', 1919};
-    EXPECT_EQ(base, derived > pipe_::cast_to<Base>());
+    CHECK(base == (derived > pipe_::cast_to<Base>()));
 
     Base& base_ref = base;
     Derived& derived_ref = derived;
-    EXPECT_EQ(base_ref, derived_ref > pipe_::cast_to<const Base&>());
+    CHECK(base_ref == (derived_ref > pipe_::cast_to<const Base&>()));
 
     const Base& base_cref = base;
     const Derived& derived_cref = derived;
-    EXPECT_EQ(base_cref, derived_cref > pipe_::cast_to<const Base&>());
+    CHECK(base_cref == (derived_cref > pipe_::cast_to<const Base&>()));
 
     Base* base_ptr = &base;
     Derived* derived_ptr = &derived;
-    EXPECT_EQ(*base_ptr, *(derived_ptr > pipe_::cast_to<Base*>()));
+    CHECK(*base_ptr == *(derived_ptr > pipe_::cast_to<Base*>()));
 }
 
 #undef STATIC_CAST_TEST
 
-TEST(PipeOperatorDynamicCast, Class)
+TEST_CASE("PipeOperatorDynamicCast - Class")
 {
     struct Base {
         virtual ~Base() = default;
@@ -136,37 +136,37 @@ TEST(PipeOperatorDynamicCast, Class)
     Derived derived{{1, 2, 'c'}, 114, 'a', 1919};
 
     auto derived_casted = &derived > pipe_::dynamic_cast_to<Base*>();
-    ASSERT_NE(derived_casted, nullptr);
-    EXPECT_EQ(base, *derived_casted);
+    REQUIRE(derived_casted != nullptr);
+    CHECK(base == *derived_casted);
 
-    ASSERT_EQ(nullptr, &base > pipe_::dynamic_cast_to<Derived*>());
+    REQUIRE(nullptr == (&base > pipe_::dynamic_cast_to<Derived*>()));
 }
 
-TEST(PipeOperatorConstCast, BasicType)
+TEST_CASE("PipeOperatorConstCast - BasicType")
 {
     int a = 114;
     const int* a_cptr = &a;
-    EXPECT_EQ(a_cptr, a_cptr > pipe_::const_cast_to<int*>());
-    EXPECT_EQ(*a_cptr, *(a_cptr > pipe_::const_cast_to<int*>()));
-    EXPECT_EQ(a_cptr, a_cptr > pipe_::const_cast_to<volatile int*>());
-    EXPECT_EQ(*a_cptr, *(a_cptr > pipe_::const_cast_to<volatile int*>()));
+    CHECK(a_cptr == (a_cptr > pipe_::const_cast_to<int*>()));
+    CHECK(*a_cptr == *(a_cptr > pipe_::const_cast_to<int*>()));
+    CHECK(a_cptr == (a_cptr > pipe_::const_cast_to<volatile int*>()));
+    CHECK(*a_cptr == *(a_cptr > pipe_::const_cast_to<volatile int*>()));
 
     const int& a_cref = a;
-    EXPECT_EQ(a, a_cref);
-    EXPECT_EQ(a_cref, a_cref > pipe_::const_cast_to<int&>());
-    EXPECT_EQ(a_cref, a_cref > pipe_::const_cast_to<volatile int&>());
+    CHECK(a == a_cref);
+    CHECK(a_cref == (a_cref > pipe_::const_cast_to<int&>()));
+    CHECK(a_cref == (a_cref > pipe_::const_cast_to<volatile int&>()));
 
     short b = -1454;
     volatile short* b_vptr = &b;
-    EXPECT_EQ(b_vptr, b_vptr > pipe_::const_cast_to<short*>());
-    EXPECT_EQ(*b_vptr, *(b_vptr > pipe_::const_cast_to<short*>()));
-    EXPECT_EQ(b_vptr, b_vptr > pipe_::const_cast_to<const short*>());
-    EXPECT_EQ(*b_vptr, *(b_vptr > pipe_::const_cast_to<const short*>()));
+    CHECK(b_vptr == (b_vptr > pipe_::const_cast_to<short*>()));
+    CHECK(*b_vptr == *(b_vptr > pipe_::const_cast_to<short*>()));
+    CHECK(b_vptr == (b_vptr > pipe_::const_cast_to<const short*>()));
+    CHECK(*b_vptr == *(b_vptr > pipe_::const_cast_to<const short*>()));
 
     volatile short& b_vref = b;
-    EXPECT_EQ(b, b_vref);
-    EXPECT_EQ(b_vref, b_vref > pipe_::const_cast_to<short&>());
-    EXPECT_EQ(b_vref, b_vref > pipe_::const_cast_to<const short&>());
+    CHECK(b == b_vref);
+    CHECK(b_vref == (b_vref > pipe_::const_cast_to<short&>()));
+    CHECK(b_vref == (b_vref > pipe_::const_cast_to<const short&>()));
 }
 
 namespace {
@@ -188,21 +188,21 @@ using ptr_store_t =
 
 }  // namespace
 
-TEST(PipeOperatorReinterpretCast, BasicType)
+TEST_CASE("PipeOperatorReinterpretCast - BasicType")
 {
     int a = 3;
     int* pa = &a;
 
     auto pa_value = pa > pipe_::reinterpret_cast_to<ptr_store_t>();
-    EXPECT_EQ(pa_value, reinterpret_cast<ptr_store_t>(pa));
+    CHECK(pa_value == reinterpret_cast<ptr_store_t>(pa));
 
     auto v_to_pa = pa_value > pipe_::reinterpret_cast_to<int*>();
-    EXPECT_EQ(v_to_pa, reinterpret_cast<int*>(pa_value));
-    EXPECT_EQ(pa, v_to_pa);
-    EXPECT_EQ(a, *v_to_pa);
+    CHECK(v_to_pa == reinterpret_cast<int*>(pa_value));
+    CHECK(pa == v_to_pa);
+    CHECK(a == *v_to_pa);
 }
 
-TEST(PipeOperatorBitCast, BasicType)
+TEST_CASE("PipeOperatorBitCast - BasicType")
 {
     int a = 3;
     int* pa = &a;
@@ -210,14 +210,14 @@ TEST(PipeOperatorBitCast, BasicType)
     auto pa_value = pa > pipe_::bit_cast_to<ptr_store_t>();
     ptr_store_t expect_pa_value;
     std::memcpy(&expect_pa_value, &pa, sizeof(int*));
-    EXPECT_EQ(pa_value, expect_pa_value);
+    CHECK(pa_value == expect_pa_value);
 
     auto v_to_pa = pa_value > pipe_::bit_cast_to<int*>();
     int* expect_v_to_pa;
     std::memcpy(&expect_v_to_pa, &pa_value, sizeof pa_value);
-    EXPECT_EQ(v_to_pa, expect_v_to_pa);
-    EXPECT_EQ(pa, v_to_pa);
-    EXPECT_EQ(a, *v_to_pa);
+    CHECK(v_to_pa == expect_v_to_pa);
+    CHECK(pa == v_to_pa);
+    CHECK(a == *v_to_pa);
 }
 
 namespace {
@@ -240,19 +240,19 @@ public:
 
 }  // namespace
 
-TEST(PipeOperatorMoveTo, Class)
+TEST_CASE("PipeOperatorMoveTo - Class")
 {
     TestMove t0, t00;
-    EXPECT_FALSE(t0.isMoveConstructed());
-    EXPECT_FALSE(t00.isMoveConstructed());
+    CHECK_FALSE(t0.isMoveConstructed());
+    CHECK_FALSE(t00.isMoveConstructed());
 
     TestMove t1{t0};
     TestMove t2{std::move(t0)};
-    EXPECT_FALSE(t1.isMoveConstructed());
-    EXPECT_TRUE(t2.isMoveConstructed());
+    CHECK_FALSE(t1.isMoveConstructed());
+    CHECK(t2.isMoveConstructed());
 
     TestMove t3{t00 > pipe_::move_to()};
-    EXPECT_TRUE(t3.isMoveConstructed());
+    CHECK(t3.isMoveConstructed());
 }
 
 namespace {
@@ -283,28 +283,28 @@ constexpr bool forward_to(T&& t) noexcept
 }  // namespace test_forward
 }  // namespace
 
-TEST(PipeOperatorForwardTo, BasicType)
+TEST_CASE("PipeOperatorForwardTo - BasicType")
 {
     using namespace test_forward;
 
     int a = 1;
-    EXPECT_TRUE(is_rvalue(1));
-    EXPECT_FALSE(is_rvalue(a));
+    CHECK(is_rvalue(1));
+    CHECK_FALSE(is_rvalue(a));
 
-    EXPECT_TRUE(std_forward(1));
-    EXPECT_FALSE(std_forward(a));
+    CHECK(std_forward(1));
+    CHECK_FALSE(std_forward(a));
 
-    EXPECT_TRUE(forward_to(1));
-    EXPECT_FALSE(forward_to(a));
+    CHECK(forward_to(1));
+    CHECK_FALSE(forward_to(a));
 
     int& a_ref = a;
-    EXPECT_FALSE(is_rvalue(a_ref));
-    EXPECT_FALSE(std_forward(a_ref));
-    EXPECT_FALSE(forward_to(a_ref));
+    CHECK_FALSE(is_rvalue(a_ref));
+    CHECK_FALSE(std_forward(a_ref));
+    CHECK_FALSE(forward_to(a_ref));
 
-    EXPECT_TRUE(is_rvalue(std::move(a_ref)));    // NOLINT(*-move-const-arg)
-    EXPECT_TRUE(std_forward(std::move(a_ref)));  // NOLINT(*-move-const-arg)
-    EXPECT_TRUE(forward_to(std::move(a_ref)));   // NOLINT(*-move-const-arg)
+    CHECK(is_rvalue(std::move(a_ref)));    // NOLINT(*-move-const-arg)
+    CHECK(std_forward(std::move(a_ref)));  // NOLINT(*-move-const-arg)
+    CHECK(forward_to(std::move(a_ref)));   // NOLINT(*-move-const-arg)
 }
 
 // NOLINTEND(*-unary-static-assert)
