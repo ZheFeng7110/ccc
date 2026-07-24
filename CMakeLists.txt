@@ -64,4 +64,18 @@ else ()
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
     )
+
+    if (MSVC)
+        target_compile_options(${PROJECT_NAME} INTERFACE /Zc:__cplusplus)
+    endif ()
+endif ()
+
+add_library(ccc::ccc ALIAS ${PROJECT_NAME})
+
+if (CCC_INSTALL)
+    if (CCC_USE_CPP_MODULES)
+        include(cmake/InstallModulesTargets.cmake)
+    else ()
+        include(cmake/InstallInterfaceTargets.cmake)
+    endif ()
 endif ()
