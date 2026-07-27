@@ -20,14 +20,14 @@
 #ifdef __cplusplus
 
 #ifdef _MSC_VER
-#pargma warning(push)
+#pragma warning(push)
 #pragma warning(disable : 5311)
 #endif
 
 #include <catch2/catch.hpp>
 
 #ifdef _MSC_VER
-#pargma warning(pop)
+#pragma warning(pop)
 #endif
 
 #endif
