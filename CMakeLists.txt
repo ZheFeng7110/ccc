@@ -54,6 +54,8 @@ if (CCC_USE_CPP_MODULES)
         modules/ccc.when.ccm
     )
 
+    target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
+
     if (MSVC)
         target_compile_options(${PROJECT_NAME} PRIVATE /Zc:__cplusplus)
     endif ()

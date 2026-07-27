@@ -18,7 +18,18 @@
 #endif
 
 #ifdef __cplusplus
+
+#ifdef _MSC_VER
+#pargma warning(push)
+#pragma warning(disable : 5311)
+#endif
+
 #include <catch2/catch.hpp>
+
+#ifdef _MSC_VER
+#pargma warning(pop)
+#endif
+
 #endif
 
 #endif  // !CCC_TEST_TEST_PCH_HH
