@@ -317,6 +317,10 @@ function Invoke-InstallTest
     {
         $consumerConfigArgs += "-DCMAKE_CXX_FLAGS=-stdlib=libc++"
     }
+    if ($UseModules)
+    {
+        $consumerConfigArgs += "-DCMAKE_CXX_SCAN_FOR_MODULES=ON"
+    }
 
     # --- Consumer configure ---
     Write-Host "    Configuring consumer..."
