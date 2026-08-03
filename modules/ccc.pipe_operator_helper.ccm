@@ -10,13 +10,14 @@ using ::ccc::pipe_operator_helper::cast_to;
 using ::ccc::pipe_operator_helper::const_cast_to;
 using ::ccc::pipe_operator_helper::dynamic_cast_to;
 using ::ccc::pipe_operator_helper::forward_to;
-using ::ccc::pipe_operator_helper::move_to;
-using ::ccc::pipe_operator_helper::pipe_operator;
 using ::ccc::pipe_operator_helper::is_pipe_operator;
 using ::ccc::pipe_operator_helper::is_pipe_operator_v;
+using ::ccc::pipe_operator_helper::move_to;
+using ::ccc::pipe_operator_helper::pipe_operator;
 using ::ccc::pipe_operator_helper::pipe_operator_base;
 using ::ccc::pipe_operator_helper::reinterpret_cast_to;
 using ::ccc::pipe_operator_helper::static_cast_to;
+using ::ccc::pipe_operator_helper::to_underlying;
 }  // namespace ccc::pipe_operator_helper
 
 export namespace ccc::pipe_operator_helper {

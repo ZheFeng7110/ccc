@@ -24,7 +24,7 @@
 
 - 管道风格函数调用辅助工具（支持函数对象和模板）。
 - 管道风格类型转换：`static_cast_to`、`dynamic_cast_to`、`const_cast_to`、`reinterpret_cast_to`、`bit_cast_to`，
-  以及 `move_to` 和 `forward_to` 辅助工具。
+  以及 `to_underlying`、`move_to` 和 `forward_to` 辅助工具。
 - 设计为可作为单一头文件使用（也可在配置模块构建时作为模块使用）。
 - 支持引用、指针、值类型以及多种转换场景（详见测试）。
 
@@ -67,6 +67,8 @@
     - `std::move` 和 `std::forward` 也有类型转换操作符：
         - `v > pipe_operator_helper::move_to()` 与 `std::move(v)` 效果相同。
         - `v > pipe_operator_helper::forward_to<T>()` 与 `std::forward<T>(v)` 效果相同。
+    - 枚举类型也有对应的辅助工具：`v > pipe_operator_helper::to_underlying()` 返回枚举 `v` 的底层类型值，
+      与 `std::to_underlying(v)` 效果相同（仅适用于枚举类型）。
 
 ## 类型特征
 

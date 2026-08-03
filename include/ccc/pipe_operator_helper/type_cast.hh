@@ -54,6 +54,9 @@ struct forward_to_tag {
     using to_type = ToType;
 };
 
+struct to_underlying_tag {
+};
+
 }  // namespace detail
 
 template<typename ToType>
@@ -103,6 +106,11 @@ inline constexpr detail::forward_to_tag<ToType> forward_to() noexcept
     return detail::forward_to_tag<ToType>{};
 }
 
+inline constexpr detail::to_underlying_tag to_underlying() noexcept
+{
+    return detail::to_underlying_tag{};
+}
+
 inline namespace operators {
 inline namespace type_cast_operators {
 
@@ -146,6 +154,21 @@ template<typename FromType, typename ToType>
 inline constexpr decltype(auto) operator>(FromType&& from, const detail::forward_to_tag<ToType>&) noexcept
 {
     return std::forward<ToType>(from);
+}
+
+template<typename FromType
+#ifndef __cpp_concepts
+         ,
+         typename = typename std::enable_if<std::is_enum<FromType>::value>::type
+#endif
+         >
+#ifdef __cpp_concepts
+    requires std::is_enum_v<FromType>
+#endif
+inline constexpr typename std::underlying_type<FromType>::type operator>(const FromType& from,
+                                                                         const detail::to_underlying_tag&) noexcept
+{
+    return static_cast<typename std::underlying_type<FromType>::type>(from);
 }
 
 }  // namespace type_cast_operators

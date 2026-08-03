@@ -24,7 +24,7 @@ This can make some call-chains and transformations read left-to-right in a more 
 
 - Pipe-style function invocation helpers (supporting function objects and templates).
 - Pipe-style type casts: `static_cast_to`, `dynamic_cast_to`, `const_cast_to`, `reinterpret_cast_to`, `bit_cast_to`, and
-  helpers for `move_to` and `forward_to`.
+  helpers for `to_underlying`, `move_to` and `forward_to`.
 - Designed to be usable as a single header (or as a module when built that way).
 - Works with references, pointers, value types and many cast scenarios (see tests for details).
 
@@ -68,6 +68,8 @@ This can make some call-chains and transformations read left-to-right in a more 
     - `std::move` and `std::forward` has type-cast operators too:
         - `v > pipe_operator_helper::move_to()` has same effect with `std::move(v)`.
         - `v > pipe_operator_helper::forward_to<T>()` has same effect with `std::forward<T>(v)`.
+    - There is a helper for enum types too: `v > pipe_operator_helper::to_underlying()` returns the value of the enum
+      `v` converted to its underlying type, with the same effect as `std::to_underlying(v)` (only valid for enums).
 
 ## Type Traits
 

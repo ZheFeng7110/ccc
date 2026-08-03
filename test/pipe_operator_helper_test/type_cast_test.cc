@@ -307,4 +307,38 @@ TEST_CASE("PipeOperatorForwardTo - BasicType")
     CHECK(forward_to(std::move(a_ref)));   // NOLINT(*-move-const-arg)
 }
 
+namespace {
+namespace test_to_underlying {
+
+enum class ScopedEnum : unsigned int {
+    Zero = 0,
+    One = 1,
+    FortyTwo = 42,
+    Max = ~static_cast<unsigned int>(0),
+};
+
+enum UnscopedEnum : short {
+    Negative = -7,
+    Zero = 0,
+    TwoHundred = 200,
+};
+
+}  // namespace test_to_underlying
+}  // namespace
+
+TEST_CASE("PipeOperatorToUnderlying - Enum")
+{
+    using namespace test_to_underlying;
+
+    static_assert((ScopedEnum::One > pipe_::to_underlying()) == 1U, "");
+    static_assert((ScopedEnum::FortyTwo > pipe_::to_underlying()) == 42U, "");
+
+    static_assert(std::is_same<decltype(ScopedEnum::Zero > pipe_::to_underlying()), unsigned int>::value, "");
+    static_assert(std::is_same<decltype(UnscopedEnum::Zero > pipe_::to_underlying()), short>::value, "");
+
+    CHECK((ScopedEnum::FortyTwo > pipe_::to_underlying()) == 42U);
+    CHECK((UnscopedEnum::Negative > pipe_::to_underlying()) == static_cast<short>(-7));
+    CHECK((UnscopedEnum::TwoHundred > pipe_::to_underlying()) == static_cast<short>(200));
+}
+
 // NOLINTEND(*-unary-static-assert)
