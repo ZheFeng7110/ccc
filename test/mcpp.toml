@@ -5,8 +5,7 @@ version = "_"
 [build]
 sources = ["**/*.cc"]
 include_dirs = ["."]
-# For some reason, we must use `cxxflags` here instead of `defines`
-cxxflags = ["-DTEST_USE_MODULE=1"]
+defines = ["TEST_USE_MODULE=1"]
 
 [targets.ccc_test]
 kind = "bin"

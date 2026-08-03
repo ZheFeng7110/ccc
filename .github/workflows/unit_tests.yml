@@ -131,4 +131,4 @@ jobs:
 
       - name: Install Test — MSVC (VS 2026)
         shell: pwsh
-        run: ./scripts/Run-InstallTest.ps1 -Verbose
+        run: ./scripts/Run-InstallTest.ps1 -Verbose -CcOverride cl -CxxOverride cl

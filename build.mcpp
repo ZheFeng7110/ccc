@@ -3,15 +3,15 @@
 
 import mcpp;
 
-namespace fs = std::filesystem;
-
 int main()
 {
+    namespace fs = std::filesystem;
+
     const fs::path src_dir = "modules";
     const fs::path dst_dir = "generated/modules";
     fs::create_directories(dst_dir);
 
-    // 清理已生成的 .cppm shim，防止删除 .ccm 后留下幽灵模块
+    // Clear the generated .cppm shim to avoid leaving ghost modules after deleting .ccm
     for (const auto& entry : fs::recursive_directory_iterator(dst_dir)) {
         if (!entry.is_regular_file()) {
             continue;
