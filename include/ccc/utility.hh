@@ -19,7 +19,7 @@ namespace ccc {
 // C++17 in_place_t tag
 #if (__cplusplus < 201703L)
 struct in_place_t {
-    explicit in_place_t() = default;
+    explicit inline in_place_t() = default;
 };
 constexpr in_place_t in_place{};
 #else

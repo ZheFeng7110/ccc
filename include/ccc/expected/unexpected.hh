@@ -21,8 +21,8 @@ public:
     static_assert(!std::is_void<E>::value, "E must not be void");
 
     unexpected() = delete;
-    constexpr unexpected(const unexpected&) = default;
-    constexpr unexpected(unexpected&&) = default;
+    inline constexpr unexpected(const unexpected&) = default;
+    inline constexpr unexpected(unexpected&&) = default;
 
 template<typename Err = E
 #ifndef __cpp_concepts
@@ -35,7 +35,7 @@ template<typename Err = E
         requires(!std::is_same<Err, unexpected>::value && !std::is_same<Err, in_place_t>::value &&
                  std::is_constructible<E, Err>::value)
 #endif
-    explicit constexpr unexpected(Err&& e) : val_(std::forward<Err>(e))  // NOLINT(*-forwarding-reference-overload)
+    explicit inline constexpr unexpected(Err&& e) : val_(std::forward<Err>(e))  // NOLINT(*-forwarding-reference-overload)
     {
     }
 
@@ -48,7 +48,7 @@ template<typename Err = E
 #ifdef __cpp_concepts
         requires(std::is_constructible<E, Args&&...>::value)
 #endif
-    explicit constexpr unexpected(in_place_t, Args&&... args) : val_(std::forward<Args>(args)...)
+    explicit inline constexpr unexpected(in_place_t, Args&&... args) : val_(std::forward<Args>(args)...)
     {
     }
     template<typename U, typename... Args
@@ -60,34 +60,34 @@ template<typename Err = E
 #ifdef __cpp_concepts
         requires(std::is_constructible<E, std::initializer_list<U>&, Args&&...>::value)
 #endif
-    explicit constexpr unexpected(in_place_t, std::initializer_list<U> l, Args&&... args)
+    explicit inline constexpr unexpected(in_place_t, std::initializer_list<U> l, Args&&... args)
         : val_(l, std::forward<Args>(args)...)
     {
     }
 
-    constexpr const E& error() const& noexcept
+    inline constexpr const E& error() const& noexcept
     {
         return val_;
     }
-    constexpr E& error() & noexcept
+    inline constexpr E& error() & noexcept
     {
         return val_;
     }
-    constexpr E&& error() && noexcept
+    inline constexpr E&& error() && noexcept
     {
         return std::move(val_);
     }
-    constexpr const E&& error() const&& noexcept
+    inline constexpr const E&& error() const&& noexcept
     {
         return std::move(val_);
     }
 
-    constexpr void swap(unexpected& other) noexcept(is_nothrow_swappable<E>::value)
+    inline constexpr void swap(unexpected& other) noexcept(is_nothrow_swappable<E>::value)
     {
         using std::swap;
         swap(val_, other.val_);
     }
-    friend constexpr void swap(unexpected& lhs, unexpected& rhs) noexcept(noexcept(lhs.swap(rhs)))
+    friend inline constexpr void swap(unexpected& lhs, unexpected& rhs) noexcept(noexcept(lhs.swap(rhs)))
     {
         lhs.swap(rhs);
     }
@@ -141,7 +141,7 @@ inline constexpr bool operator>=(const unexpected<E>& lhs, const unexpected<E>& 
 #endif
 
 struct unexpect_t {
-    unexpect_t() = default;
+    inline unexpect_t() = default;
 };
 #if (__cplusplus >= 201703L)
 inline constexpr unexpect_t unexpect{};
@@ -175,15 +175,15 @@ template<>
 class bad_expected_access<void> : public std::exception
 {
 protected:
-    bad_expected_access() noexcept = default;
-    bad_expected_access(const bad_expected_access&) noexcept = default;
-    bad_expected_access(bad_expected_access&&) noexcept = default;
-    bad_expected_access& operator=(const bad_expected_access&) noexcept = default;
-    bad_expected_access& operator=(bad_expected_access&&) noexcept = default;
-    ~bad_expected_access() override = default;
+    inline bad_expected_access() noexcept = default;
+    inline bad_expected_access(const bad_expected_access&) noexcept = default;
+    inline bad_expected_access(bad_expected_access&&) noexcept = default;
+    inline bad_expected_access& operator=(const bad_expected_access&) noexcept = default;
+    inline bad_expected_access& operator=(bad_expected_access&&) noexcept = default;
+    inline ~bad_expected_access() override = default;
 
 public:
-    CCC_NO_DISCARD const char* what() const noexcept override
+    CCC_NO_DISCARD inline const char* what() const noexcept override
     {
         return "bad access to ccc::expected without expected value(ErrorType = void)";
     }
@@ -196,28 +196,28 @@ private:
     E error_;
 
 public:
-    CCC_NO_DISCARD const char* what() const noexcept override
+    CCC_NO_DISCARD inline const char* what() const noexcept override
     {
         return "bad access to ccc::expected without expected value(ErrorType = non-void)";
     }
 
     bad_expected_access() = delete;
 
-    explicit bad_expected_access(E error) : error_(std::move(error)) {}
+    explicit inline bad_expected_access(E error) : error_(std::move(error)) {}
 
-    const E& error() const& noexcept
+    inline const E& error() const& noexcept
     {
         return error_;
     }
-    E& error() & noexcept
+    inline E& error() & noexcept
     {
         return error_;
     }
-    E&& error() && noexcept
+    inline E&& error() && noexcept
     {
         return std::move(error_);
     }
-    const E&& error() const&& noexcept
+    inline const E&& error() const&& noexcept
     {
         return std::move(error_);
     }

@@ -53,12 +53,12 @@ private:
     alignas(T) unsigned char store_[sizeof(T) * N];
     size_type size_;
 
-    CCC_CPP26_CONSTEXPR pointer ptr_at(size_type i) noexcept
+    inline CCC_CPP26_CONSTEXPR pointer ptr_at(size_type i) noexcept
     {
         // It can use in constexpr in C++26
         return static_cast<pointer>(static_cast<void*>(store_ + i * sizeof(T)));
     }
-    CCC_CPP26_CONSTEXPR const_pointer ptr_at(size_type i) const noexcept
+    inline CCC_CPP26_CONSTEXPR const_pointer ptr_at(size_type i) const noexcept
     {
         return static_cast<const_pointer>(static_cast<const void*>(store_ + i * sizeof(T)));
     }
@@ -66,154 +66,154 @@ private:
 public:
     // ---------- Static capacity ----------
 
-    CCC_NO_DISCARD static constexpr size_type capacity() noexcept
+    CCC_NO_DISCARD static inline constexpr size_type capacity() noexcept
     {
         return N;
     }
-    CCC_NO_DISCARD static constexpr size_type max_size() noexcept
+    CCC_NO_DISCARD static inline constexpr size_type max_size() noexcept
     {
         return N;
     }
-    static CCC_CPP26_CONSTEXPR void reserve(size_type new_cap)
+    static inline CCC_CPP26_CONSTEXPR void reserve(size_type new_cap)
     {
         if (new_cap > N) {
             throw std::bad_alloc();
         }
     }
-    static CCC_CPP26_CONSTEXPR void shrink_to_fit() noexcept {}
+    static inline CCC_CPP26_CONSTEXPR void shrink_to_fit() noexcept {}
 
     // ---------- Size ----------
 
-    CCC_NO_DISCARD constexpr size_type size() const noexcept
+    CCC_NO_DISCARD inline constexpr size_type size() const noexcept
     {
         return size_;
     }
-    CCC_NO_DISCARD constexpr bool empty() const noexcept
+    CCC_NO_DISCARD inline constexpr bool empty() const noexcept
     {
         return size_ == 0;
     }
-    CCC_NO_DISCARD constexpr bool full() const noexcept
+    CCC_NO_DISCARD inline constexpr bool full() const noexcept
     {
         return size_ == N;
     }
 
     // ---------- Element access ----------
 
-    CCC_CPP26_CONSTEXPR reference operator[](size_type i) noexcept
+    inline CCC_CPP26_CONSTEXPR reference operator[](size_type i) noexcept
     {
         CCC_DETAIL_ASSERT(i < size_, "[ccc.inplace_vector]: index out of range");
         return *ptr_at(i);
     }
-    CCC_CPP26_CONSTEXPR const_reference operator[](size_type i) const noexcept
+    inline CCC_CPP26_CONSTEXPR const_reference operator[](size_type i) const noexcept
     {
         CCC_DETAIL_ASSERT(i < size_, "[ccc.inplace_vector]: index out of range");
         return *ptr_at(i);
     }
-    CCC_CPP26_CONSTEXPR reference at(size_type i)
+    inline CCC_CPP26_CONSTEXPR reference at(size_type i)
     {
         if (i >= size_) {
             throw std::out_of_range("[ccc.inplace_vector]: index out of range");
         }
         return *ptr_at(i);
     }
-    CCC_CPP26_CONSTEXPR const_reference at(size_type i) const
+    inline CCC_CPP26_CONSTEXPR const_reference at(size_type i) const
     {
         if (i >= size_) {
             throw std::out_of_range("[ccc.inplace_vector]: index out of range");
         }
         return *ptr_at(i);
     }
-    CCC_CPP26_CONSTEXPR reference front() noexcept
+    inline CCC_CPP26_CONSTEXPR reference front() noexcept
     {
         CCC_DETAIL_ASSERT(!empty(), "[ccc.inplace_vector]: front() on empty vector");
         return *ptr_at(0);
     }
-    CCC_CPP26_CONSTEXPR const_reference front() const noexcept
+    inline CCC_CPP26_CONSTEXPR const_reference front() const noexcept
     {
         CCC_DETAIL_ASSERT(!empty(), "[ccc.inplace_vector]: front() on empty vector");
         return *ptr_at(0);
     }
-    CCC_CPP26_CONSTEXPR reference back() noexcept
+    inline CCC_CPP26_CONSTEXPR reference back() noexcept
     {
         CCC_DETAIL_ASSERT(!empty(), "[ccc.inplace_vector]: back() on empty vector");
         return *ptr_at(size_ - 1);
     }
-    CCC_CPP26_CONSTEXPR const_reference back() const noexcept
+    inline CCC_CPP26_CONSTEXPR const_reference back() const noexcept
     {
         CCC_DETAIL_ASSERT(!empty(), "[ccc.inplace_vector]: back() on empty vector");
         return *ptr_at(size_ - 1);
     }
-    CCC_CPP26_CONSTEXPR pointer data() noexcept
+    inline CCC_CPP26_CONSTEXPR pointer data() noexcept
     {
         return ptr_at(0);
     }
-    CCC_CPP26_CONSTEXPR const_pointer data() const noexcept
+    inline CCC_CPP26_CONSTEXPR const_pointer data() const noexcept
     {
         return ptr_at(0);
     }
 
     // ---------- Iterators ----------
 
-    CCC_CPP26_CONSTEXPR iterator begin() noexcept
+    inline CCC_CPP26_CONSTEXPR iterator begin() noexcept
     {
         return ptr_at(0);
     }
-    CCC_CPP26_CONSTEXPR const_iterator begin() const noexcept
+    inline CCC_CPP26_CONSTEXPR const_iterator begin() const noexcept
     {
         return ptr_at(0);
     }
-    CCC_CPP26_CONSTEXPR const_iterator cbegin() const noexcept
+    inline CCC_CPP26_CONSTEXPR const_iterator cbegin() const noexcept
     {
         return ptr_at(0);
     }
-    CCC_CPP26_CONSTEXPR iterator end() noexcept
+    inline CCC_CPP26_CONSTEXPR iterator end() noexcept
     {
         return ptr_at(size_);
     }
-    CCC_CPP26_CONSTEXPR const_iterator end() const noexcept
+    inline CCC_CPP26_CONSTEXPR const_iterator end() const noexcept
     {
         return ptr_at(size_);
     }
-    CCC_CPP26_CONSTEXPR const_iterator cend() const noexcept
+    inline CCC_CPP26_CONSTEXPR const_iterator cend() const noexcept
     {
         return ptr_at(size_);
     }
 
-    CCC_CPP26_CONSTEXPR reverse_iterator rbegin() noexcept
+    inline CCC_CPP26_CONSTEXPR reverse_iterator rbegin() noexcept
     {
         return reverse_iterator(end());
     }
-    CCC_CPP26_CONSTEXPR const_reverse_iterator rbegin() const noexcept
+    inline CCC_CPP26_CONSTEXPR const_reverse_iterator rbegin() const noexcept
     {
         return const_reverse_iterator(end());
     }
-    CCC_CPP26_CONSTEXPR const_reverse_iterator crbegin() const noexcept
+    inline CCC_CPP26_CONSTEXPR const_reverse_iterator crbegin() const noexcept
     {
         return const_reverse_iterator(cend());
     }
-    CCC_CPP26_CONSTEXPR reverse_iterator rend() noexcept
+    inline CCC_CPP26_CONSTEXPR reverse_iterator rend() noexcept
     {
         return reverse_iterator(begin());
     }
-    CCC_CPP26_CONSTEXPR const_reverse_iterator rend() const noexcept
+    inline CCC_CPP26_CONSTEXPR const_reverse_iterator rend() const noexcept
     {
         return const_reverse_iterator(begin());
     }
-    CCC_CPP26_CONSTEXPR const_reverse_iterator crend() const noexcept
+    inline CCC_CPP26_CONSTEXPR const_reverse_iterator crend() const noexcept
     {
         return const_reverse_iterator(cbegin());
     }
 
     // ---------- Constructors / destructor ----------
 
-    constexpr inplace_vector() noexcept : size_(0) {}
+    inline constexpr inplace_vector() noexcept : size_(0) {}
 
-    CCC_CPP26_CONSTEXPR inplace_vector(const inplace_vector& other) : size_(other.size_)
+    inline CCC_CPP26_CONSTEXPR inplace_vector(const inplace_vector& other) : size_(other.size_)
     {
         ccc::uninitialized_copy(other.begin(), other.end(), ptr_at(0));
     }
 
-    CCC_CPP26_CONSTEXPR inplace_vector(inplace_vector&& other) noexcept(std::is_nothrow_move_constructible<T>::value)
+    inline CCC_CPP26_CONSTEXPR inplace_vector(inplace_vector&& other) noexcept(std::is_nothrow_move_constructible<T>::value)
         : size_(other.size_)
     {
         ccc::uninitialized_copy(std::make_move_iterator(other.begin()),
@@ -221,7 +221,7 @@ public:
                                 ptr_at(0));
     }
 
-    CCC_CPP26_CONSTEXPR inplace_vector(std::initializer_list<T> ilist) : size_(ilist.size())
+    inline CCC_CPP26_CONSTEXPR inplace_vector(std::initializer_list<T> ilist) : size_(ilist.size())
     {
         if (ilist.size() > N) {
             throw std::bad_alloc();
@@ -229,14 +229,14 @@ public:
         ccc::uninitialized_copy(ilist.begin(), ilist.end(), ptr_at(0));
     }
 
-    CCC_CPP26_CONSTEXPR ~inplace_vector()
+    inline CCC_CPP26_CONSTEXPR ~inplace_vector()
     {
         ccc::destroy(begin(), end());
     }
 
     // ---------- Assignment ----------
 
-    CCC_CPP26_CONSTEXPR inplace_vector& operator=(const inplace_vector& other)
+    inline CCC_CPP26_CONSTEXPR inplace_vector& operator=(const inplace_vector& other)
     {
         if (this == &other) {
             return *this;
@@ -245,7 +245,7 @@ public:
         return *this;
     }
 
-    CCC_CPP26_CONSTEXPR inplace_vector& operator=(inplace_vector&& other) noexcept(
+    inline CCC_CPP26_CONSTEXPR inplace_vector& operator=(inplace_vector&& other) noexcept(
         std::is_nothrow_move_constructible<T>::value && std::is_nothrow_move_assignable<T>::value)
     {
         if (this == &other) {
@@ -265,7 +265,7 @@ public:
         return *this;
     }
 
-    CCC_CPP26_CONSTEXPR inplace_vector& operator=(std::initializer_list<T> ilist)
+    inline CCC_CPP26_CONSTEXPR inplace_vector& operator=(std::initializer_list<T> ilist)
     {
         assign(ilist);
         return *this;
@@ -273,7 +273,7 @@ public:
 
     // ---------- assign ----------
 
-    CCC_CPP26_CONSTEXPR void assign(size_type count, const value_type& value)
+    inline CCC_CPP26_CONSTEXPR void assign(size_type count, const value_type& value)
     {
         if (count > N) {
             throw std::bad_alloc();
@@ -290,7 +290,7 @@ public:
     }
 
     template<typename InputIt, typename = ccc::enable_if_t<!std::is_integral<InputIt>::value>>
-    CCC_CPP26_CONSTEXPR void assign(InputIt first, InputIt last)
+    inline CCC_CPP26_CONSTEXPR void assign(InputIt first, InputIt last)
     {
         const size_type count = static_cast<size_type>(std::distance(first, last));
         if (count > N) {
@@ -308,20 +308,20 @@ public:
         size_ = count;
     }
 
-    CCC_CPP26_CONSTEXPR void assign(std::initializer_list<T> ilist)
+    inline CCC_CPP26_CONSTEXPR void assign(std::initializer_list<T> ilist)
     {
         assign(ilist.begin(), ilist.end());
     }
 
     template<typename Range>
-    CCC_CPP26_CONSTEXPR void assign_range(Range&& range)
+    inline CCC_CPP26_CONSTEXPR void assign_range(Range&& range)
     {
         assign(std::begin(range), std::end(range));
     }
 
     // ---------- resize ----------
 
-    CCC_CPP26_CONSTEXPR void resize(size_type new_size)
+    inline CCC_CPP26_CONSTEXPR void resize(size_type new_size)
     {
         if (new_size > N) {
             throw std::out_of_range("[ccc.inplace_vector]: new_size too large");
@@ -343,7 +343,7 @@ public:
         size_ = new_size;
     }
 
-    CCC_CPP26_CONSTEXPR void resize(size_type new_size, const value_type& value)
+    inline CCC_CPP26_CONSTEXPR void resize(size_type new_size, const value_type& value)
     {
         if (new_size > N) {
             throw std::out_of_range("[ccc.inplace_vector]: new_size too large");
@@ -359,7 +359,7 @@ public:
 
     // ---------- clear ----------
 
-    CCC_CPP26_CONSTEXPR void clear() noexcept
+    inline CCC_CPP26_CONSTEXPR void clear() noexcept
     {
         ccc::destroy(begin(), end());
         size_ = 0;
@@ -367,7 +367,7 @@ public:
 
     // ---------- push_back ----------
 
-    CCC_CPP26_CONSTEXPR reference push_back(const value_type& value)
+    inline CCC_CPP26_CONSTEXPR reference push_back(const value_type& value)
     {
         if (full()) {
             throw std::bad_alloc();
@@ -377,7 +377,7 @@ public:
         return back();
     }
 
-    CCC_CPP26_CONSTEXPR reference push_back(value_type&& value)
+    inline CCC_CPP26_CONSTEXPR reference push_back(value_type&& value)
     {
         if (full()) {
             throw std::bad_alloc();
@@ -387,21 +387,21 @@ public:
         return back();
     }
 
-    CCC_CPP26_CONSTEXPR pointer unchecked_push_back(const value_type& value)
+    inline CCC_CPP26_CONSTEXPR pointer unchecked_push_back(const value_type& value)
     {
         ccc::construct_at(ptr_at(size_), value);
         ++size_;
         return std::addressof(back());
     }
 
-    CCC_CPP26_CONSTEXPR pointer unchecked_push_back(value_type&& value)
+    inline CCC_CPP26_CONSTEXPR pointer unchecked_push_back(value_type&& value)
     {
         ccc::construct_at(ptr_at(size_), std::move(value));
         ++size_;
         return std::addressof(back());
     }
 
-    CCC_CPP26_CONSTEXPR pointer try_push_back(const value_type& value)
+    inline CCC_CPP26_CONSTEXPR pointer try_push_back(const value_type& value)
     {
         if (full()) {
             return nullptr;
@@ -409,7 +409,7 @@ public:
         return unchecked_push_back(value);
     }
 
-    CCC_CPP26_CONSTEXPR pointer try_push_back(value_type&& value)
+    inline CCC_CPP26_CONSTEXPR pointer try_push_back(value_type&& value)
     {
         if (full()) {
             return nullptr;
@@ -420,7 +420,7 @@ public:
     // ---------- emplace_back ----------
 
     template<typename... Args>
-    CCC_CPP26_CONSTEXPR reference emplace_back(Args&&... args)
+    inline CCC_CPP26_CONSTEXPR reference emplace_back(Args&&... args)
     {
         if (full()) {
             throw std::bad_alloc();
@@ -431,7 +431,7 @@ public:
     }
 
     template<typename... Args>
-    CCC_CPP26_CONSTEXPR pointer unchecked_emplace_back(Args&&... args)
+    inline CCC_CPP26_CONSTEXPR pointer unchecked_emplace_back(Args&&... args)
     {
         ccc::construct_at(ptr_at(size_), std::forward<Args>(args)...);
         ++size_;
@@ -439,7 +439,7 @@ public:
     }
 
     template<typename... Args>
-    CCC_CPP26_CONSTEXPR pointer try_emplace_back(Args&&... args)
+    inline CCC_CPP26_CONSTEXPR pointer try_emplace_back(Args&&... args)
     {
         if (full()) {
             return nullptr;
@@ -449,7 +449,7 @@ public:
 
     // ---------- pop_back ----------
 
-    CCC_CPP26_CONSTEXPR void pop_back() noexcept
+    inline CCC_CPP26_CONSTEXPR void pop_back() noexcept
     {
         if (!empty()) {
             --size_;
@@ -460,7 +460,7 @@ public:
     // ---------- emplace ----------
 
     template<typename... Args>
-    CCC_CPP26_CONSTEXPR iterator emplace(const_iterator pos, Args&&... args)
+    inline CCC_CPP26_CONSTEXPR iterator emplace(const_iterator pos, Args&&... args)
     {
         const auto index = static_cast<size_type>(std::distance(cbegin(), pos));
         CCC_DETAIL_ASSERT(cbegin() <= pos && pos <= cend(), "[ccc.inplace_vector]: iterator out of range");
@@ -485,19 +485,19 @@ public:
 
     // ---------- insert (single element) ----------
 
-    CCC_CPP26_CONSTEXPR iterator insert(const_iterator pos, const value_type& value)
+    inline CCC_CPP26_CONSTEXPR iterator insert(const_iterator pos, const value_type& value)
     {
         return emplace(pos, value);
     }
 
-    CCC_CPP26_CONSTEXPR iterator insert(const_iterator pos, value_type&& value)
+    inline CCC_CPP26_CONSTEXPR iterator insert(const_iterator pos, value_type&& value)
     {
         return emplace(pos, std::move(value));
     }
 
     // ---------- insert (count copies) ----------
 
-    CCC_CPP26_CONSTEXPR iterator insert(const_iterator pos, size_type count, const value_type& value)
+    inline CCC_CPP26_CONSTEXPR iterator insert(const_iterator pos, size_type count, const value_type& value)
     {
         const auto index = static_cast<size_type>(std::distance(cbegin(), pos));
         CCC_DETAIL_ASSERT(cbegin() <= pos && pos <= cend(), "[ccc.inplace_vector]: iterator out of range");
@@ -536,7 +536,7 @@ public:
     // ---------- insert (range) ----------
 
     template<typename InputIt, typename = ccc::enable_if_t<!std::is_integral<InputIt>::value>>
-    CCC_CPP26_CONSTEXPR iterator insert(const_iterator pos, InputIt first, InputIt last)
+    inline CCC_CPP26_CONSTEXPR iterator insert(const_iterator pos, InputIt first, InputIt last)
     {
         const auto index = static_cast<size_type>(std::distance(cbegin(), pos));
         CCC_DETAIL_ASSERT(cbegin() <= pos && pos <= cend(), "[ccc.inplace_vector]: iterator out of range");
@@ -570,13 +570,13 @@ public:
         return ptr_at(index);
     }
 
-    CCC_CPP26_CONSTEXPR iterator insert(const_iterator pos, std::initializer_list<T> ilist)
+    inline CCC_CPP26_CONSTEXPR iterator insert(const_iterator pos, std::initializer_list<T> ilist)
     {
         return insert(pos, ilist.begin(), ilist.end());
     }
 
     template<typename Range>
-    CCC_CPP26_CONSTEXPR iterator insert_range(const_iterator pos, Range&& range)
+    inline CCC_CPP26_CONSTEXPR iterator insert_range(const_iterator pos, Range&& range)
     {
         return insert(pos, std::begin(range), std::end(range));
     }
@@ -584,13 +584,13 @@ public:
     // ---------- append_range / try_append_range ----------
 
     template<typename Range>
-    CCC_CPP26_CONSTEXPR void append_range(Range&& range)
+    inline CCC_CPP26_CONSTEXPR void append_range(Range&& range)
     {
         insert(cend(), std::begin(range), std::end(range));
     }
 
     template<typename Range>
-    CCC_CPP26_CONSTEXPR bool try_append_range(Range&& range)
+    inline CCC_CPP26_CONSTEXPR bool try_append_range(Range&& range)
     {
         const auto r_size = static_cast<size_type>(std::distance(std::begin(range), std::end(range)));
         if (size_ + r_size > N) {
@@ -602,12 +602,12 @@ public:
 
     // ---------- erase ----------
 
-    CCC_CPP26_CONSTEXPR iterator erase(const_iterator pos)
+    inline CCC_CPP26_CONSTEXPR iterator erase(const_iterator pos)
     {
         return erase(pos, pos + 1);
     }
 
-    CCC_CPP26_CONSTEXPR iterator erase(const_iterator first, const_iterator last)
+    inline CCC_CPP26_CONSTEXPR iterator erase(const_iterator first, const_iterator last)
     {
         CCC_DETAIL_ASSERT(cbegin() <= first && first <= last && last <= cend(),
                           "[ccc.inplace_vector]: erase range out of range");
@@ -625,7 +625,7 @@ public:
 
     // ---------- swap ----------
 
-    CCC_CPP26_CONSTEXPR void swap(inplace_vector& other) noexcept(ccc::is_nothrow_swappable<T>::value &&
+    inline CCC_CPP26_CONSTEXPR void swap(inplace_vector& other) noexcept(ccc::is_nothrow_swappable<T>::value &&
                                                                   std::is_nothrow_move_constructible<T>::value)
     {
         using std::swap;
@@ -653,39 +653,39 @@ public:
 
 #if (__cplusplus >= 202002L)
 
-    friend CCC_CPP26_CONSTEXPR auto operator<=>(const inplace_vector& a, const inplace_vector& b)
+    friend inline CCC_CPP26_CONSTEXPR auto operator<=>(const inplace_vector& a, const inplace_vector& b)
     {
         return std::lexicographical_compare_three_way(a.begin(), a.end(), b.begin(), b.end());
     }
 
-    friend CCC_CPP26_CONSTEXPR bool operator==(const inplace_vector& a, const inplace_vector& b)
+    friend inline CCC_CPP26_CONSTEXPR bool operator==(const inplace_vector& a, const inplace_vector& b)
     {
         return a.size_ == b.size_ && std::equal(a.begin(), a.end(), b.begin());
     }
 
 #else
 
-    friend bool operator==(const inplace_vector& a, const inplace_vector& b)
+    friend inline bool operator==(const inplace_vector& a, const inplace_vector& b)
     {
         return a.size_ == b.size_ && std::equal(a.begin(), a.end(), b.begin());
     }
-    friend bool operator!=(const inplace_vector& a, const inplace_vector& b)
+    friend inline bool operator!=(const inplace_vector& a, const inplace_vector& b)
     {
         return !(a == b);
     }
-    friend bool operator<(const inplace_vector& a, const inplace_vector& b)
+    friend inline bool operator<(const inplace_vector& a, const inplace_vector& b)
     {
         return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end());
     }
-    friend bool operator>(const inplace_vector& a, const inplace_vector& b)
+    friend inline bool operator>(const inplace_vector& a, const inplace_vector& b)
     {
         return b < a;
     }
-    friend bool operator<=(const inplace_vector& a, const inplace_vector& b)
+    friend inline bool operator<=(const inplace_vector& a, const inplace_vector& b)
     {
         return !(b < a);
     }
-    friend bool operator>=(const inplace_vector& a, const inplace_vector& b)
+    friend inline bool operator>=(const inplace_vector& a, const inplace_vector& b)
     {
         return !(a < b);
     }
@@ -696,7 +696,7 @@ public:
 // ---------- Non-member swap ----------
 
 template<typename T, std::size_t N>
-CCC_CPP26_CONSTEXPR void swap(inplace_vector<T, N>& a, inplace_vector<T, N>& b) noexcept(noexcept(a.swap(b)))
+inline CCC_CPP26_CONSTEXPR void swap(inplace_vector<T, N>& a, inplace_vector<T, N>& b) noexcept(noexcept(a.swap(b)))
 {
     a.swap(b);
 }
@@ -704,7 +704,7 @@ CCC_CPP26_CONSTEXPR void swap(inplace_vector<T, N>& a, inplace_vector<T, N>& b) 
 // ---------- Non-member erase / erase_if ----------
 
 template<typename T, std::size_t N, typename U>
-CCC_CPP26_CONSTEXPR typename inplace_vector<T, N>::size_type erase(inplace_vector<T, N>& c, const U& value)
+inline CCC_CPP26_CONSTEXPR typename inplace_vector<T, N>::size_type erase(inplace_vector<T, N>& c, const U& value)
 {
     auto it = std::remove(c.begin(), c.end(), value);
     auto r = static_cast<typename inplace_vector<T, N>::size_type>(std::distance(it, c.end()));
@@ -713,7 +713,7 @@ CCC_CPP26_CONSTEXPR typename inplace_vector<T, N>::size_type erase(inplace_vecto
 }
 
 template<typename T, std::size_t N, typename Pred>
-CCC_CPP26_CONSTEXPR typename inplace_vector<T, N>::size_type erase_if(inplace_vector<T, N>& c, Pred pred)
+inline CCC_CPP26_CONSTEXPR typename inplace_vector<T, N>::size_type erase_if(inplace_vector<T, N>& c, Pred pred)
 {
     auto it = std::remove_if(c.begin(), c.end(), pred);
     auto r = static_cast<typename inplace_vector<T, N>::size_type>(std::distance(it, c.end()));

@@ -18,15 +18,15 @@ template<typename Func>
 class defer final
 {
 public:
-    explicit constexpr defer(const Func& func) noexcept : func_(func) {}
-    explicit constexpr defer(Func&& func) noexcept : func_(std::move(func)) {}
+    explicit inline constexpr defer(const Func& func) noexcept : func_(func) {}
+    explicit inline constexpr defer(Func&& func) noexcept : func_(std::move(func)) {}
 
     defer(const defer&) = delete;
     defer(defer&&) = delete;
     defer& operator=(const defer&) = delete;
     defer& operator=(defer&&) = delete;
 
-    CCC_CPP20_CONSTEXPR ~defer()
+    inline CCC_CPP20_CONSTEXPR ~defer()
     {
         func_();
     }

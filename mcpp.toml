@@ -1,5 +1,5 @@
 [workspace]
-members  = ["test"]
+members = ["test"]
 
 [package]
 name = "ccc"
@@ -9,11 +9,12 @@ license = "MIT"
 repo = "https://github.com/ZheFeng7110/ccc"
 
 [build]
-sources = ["generated/modules/**/*.cppm"]
+module_extensions = [".ccm"]
+sources = ["modules/**/*.ccm"]
 include_dirs = ["include"]
 
 [lib]
-path = "generated/modules/ccc.cppm"
+path = "modules/ccc.ccm"
 
 [targets.ccc]
 kind = "lib"

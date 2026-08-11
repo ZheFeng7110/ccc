@@ -115,13 +115,13 @@ inline constexpr bool is_nothrow_when_args_v = is_nothrow_when_args<Args...>::va
 
 // when_impl
 template<typename R, typename T>
-constexpr R when_impl(const T&)
+inline constexpr R when_impl(const T&)
 {
     return R();
 }
 
 template<typename R, typename T, typename CaseVal, typename Func, typename... Rest>
-constexpr R when_impl(const T& v, CaseVal&& case_val, Func&& func, Rest&&... rest)
+inline constexpr R when_impl(const T& v, CaseVal&& case_val, Func&& func, Rest&&... rest)
 {
     if constexpr (is_default_tag_v<remove_cvref_t<CaseVal>>) {
         return std::forward<Func>(func)();
@@ -161,7 +161,7 @@ constexpr R when_impl(const T& v, CaseVal&& case_val, Func&& func, Rest&&... res
  * must form the last pair.
  */
 template<typename T, typename... Args>
-CCC_NO_DISCARD constexpr decltype(auto) when(const T& v,
+CCC_NO_DISCARD inline constexpr decltype(auto) when(const T& v,
                                              Args&&... args) noexcept(detail::is_nothrow_when_args_v<Args...>)
 {
     static_assert(sizeof...(Args) % 2 == 0, "Arguments should be in pairs of (target, func) or (default_tag, func)");

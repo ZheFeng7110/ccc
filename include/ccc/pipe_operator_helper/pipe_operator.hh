@@ -43,7 +43,7 @@ private:
     std::tuple<BoundArgs...> bound_;
 
     template<typename Lhs, std::size_t... Is>
-    constexpr decltype(auto) invoke_(Lhs&& lhs, std::index_sequence<Is...>) const
+    inline constexpr decltype(auto) invoke_(Lhs&& lhs, std::index_sequence<Is...>) const
         noexcept(noexcept(callee_(std::forward<Lhs>(lhs), std::get<Is>(bound_)...)))
     {
         return callee_(std::forward<Lhs>(lhs), std::get<Is>(bound_)...);
@@ -51,7 +51,7 @@ private:
 
 public:
     template<typename... Init>
-    constexpr explicit pipe_partial(const callee_type& callee,
+    explicit inline constexpr pipe_partial(const callee_type& callee,
                                     Init&&... init) noexcept((std::is_nothrow_constructible<BoundArgs, Init>::value &&
                                                               ...))
         : callee_(callee), bound_(std::forward<Init>(init)...)
@@ -59,7 +59,7 @@ public:
     }
 
     template<typename Lhs>
-    constexpr decltype(auto) operator()(Lhs&& lhs) const
+    inline constexpr decltype(auto) operator()(Lhs&& lhs) const
         noexcept(noexcept(invoke_(std::forward<Lhs>(lhs), std::index_sequence_for<BoundArgs...>{})))
     {
         return invoke_(std::forward<Lhs>(lhs), std::index_sequence_for<BoundArgs...>{});
@@ -81,7 +81,7 @@ public:
 #ifdef __cpp_concepts
         requires(sizeof...(Bound) < Arity)
 #endif
-    constexpr auto operator()(Bound&&... bound) const
+    inline constexpr auto operator()(Bound&&... bound) const
         noexcept(noexcept(detail::pipe_partial<Derived, Bound...>(static_cast<const Derived&>(*this),
                                                                   std::forward<Bound>(bound)...)))
             -> detail::pipe_partial<Derived, Bound...>

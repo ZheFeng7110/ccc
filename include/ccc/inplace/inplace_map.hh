@@ -34,11 +34,11 @@ namespace detail {
 template<typename ValueType>
 struct inplace_map_arrow_proxy {
     ValueType value_;
-    CCC_CPP20_CONSTEXPR const ValueType* operator->() const noexcept
+    inline CCC_CPP20_CONSTEXPR const ValueType* operator->() const noexcept
     {
         return &value_;
     }
-    CCC_CPP20_CONSTEXPR ValueType* operator->() noexcept
+    inline CCC_CPP20_CONSTEXPR ValueType* operator->() noexcept
     {
         return &value_;
     }
@@ -73,128 +73,128 @@ private:
     map_ptr_ map_;
     std::size_t idx_;
 
-    CCC_CPP20_CONSTEXPR inplace_map_iterator(map_ptr_ m, std::size_t i) noexcept : map_(m), idx_(i) {}
+    inline CCC_CPP20_CONSTEXPR inplace_map_iterator(map_ptr_ m, std::size_t i) noexcept : map_(m), idx_(i) {}
 
 public:
-    CCC_CPP20_CONSTEXPR inplace_map_iterator() noexcept : map_(nullptr), idx_(0) {}
+    inline CCC_CPP20_CONSTEXPR inplace_map_iterator() noexcept : map_(nullptr), idx_(0) {}
 
     template<bool OtherConst, typename = ccc::enable_if_t<IsConst && !OtherConst>>
-    CCC_CPP20_CONSTEXPR inplace_map_iterator(
+    inline CCC_CPP20_CONSTEXPR inplace_map_iterator(
         const inplace_map_iterator<Key, T, N, Compare, KeyContainer, MappedContainer, OtherConst>& other) noexcept
         : map_(other.ptr()), idx_(other.index())
     {
     }
 
-    CCC_CPP20_CONSTEXPR reference operator*() const
+    inline CCC_CPP20_CONSTEXPR reference operator*() const
     {
         return reference(map_->keys_[idx_], map_->values_[idx_]);
     }
 
-    CCC_CPP20_CONSTEXPR pointer operator->() const
+    inline CCC_CPP20_CONSTEXPR pointer operator->() const
     {
         return pointer{{map_->keys_[idx_], map_->values_[idx_]}};
     }
 
-    CCC_CPP20_CONSTEXPR reference operator[](difference_type n) const
+    inline CCC_CPP20_CONSTEXPR reference operator[](difference_type n) const
     {
         const auto i = static_cast<std::size_t>(static_cast<difference_type>(idx_) + n);
         return reference(map_->keys_[i], map_->values_[i]);
     }
 
-    CCC_CPP20_CONSTEXPR inplace_map_iterator& operator++() noexcept
+    inline CCC_CPP20_CONSTEXPR inplace_map_iterator& operator++() noexcept
     {
         ++idx_;
         return *this;
     }
 
-    CCC_CPP20_CONSTEXPR inplace_map_iterator operator++(int) noexcept
+    inline CCC_CPP20_CONSTEXPR inplace_map_iterator operator++(int) noexcept
     {
         auto t = *this;
         ++idx_;
         return t;
     }
 
-    CCC_CPP20_CONSTEXPR inplace_map_iterator& operator--() noexcept
+    inline CCC_CPP20_CONSTEXPR inplace_map_iterator& operator--() noexcept
     {
         --idx_;
         return *this;
     }
 
-    CCC_CPP20_CONSTEXPR inplace_map_iterator operator--(int) noexcept
+    inline CCC_CPP20_CONSTEXPR inplace_map_iterator operator--(int) noexcept
     {
         auto t = *this;
         --idx_;
         return t;
     }
 
-    CCC_CPP20_CONSTEXPR inplace_map_iterator& operator+=(difference_type n) noexcept
+    inline CCC_CPP20_CONSTEXPR inplace_map_iterator& operator+=(difference_type n) noexcept
     {
         idx_ = static_cast<std::size_t>(static_cast<difference_type>(idx_) + n);
         return *this;
     }
 
-    CCC_CPP20_CONSTEXPR inplace_map_iterator& operator-=(difference_type n) noexcept
+    inline CCC_CPP20_CONSTEXPR inplace_map_iterator& operator-=(difference_type n) noexcept
     {
         idx_ = static_cast<std::size_t>(static_cast<difference_type>(idx_) - n);
         return *this;
     }
 
-    CCC_CPP20_CONSTEXPR inplace_map_iterator operator+(difference_type n) const noexcept
+    inline CCC_CPP20_CONSTEXPR inplace_map_iterator operator+(difference_type n) const noexcept
     {
         return inplace_map_iterator(map_, static_cast<std::size_t>(static_cast<difference_type>(idx_) + n));
     }
 
-    CCC_CPP20_CONSTEXPR inplace_map_iterator operator-(difference_type n) const noexcept
+    inline CCC_CPP20_CONSTEXPR inplace_map_iterator operator-(difference_type n) const noexcept
     {
         return inplace_map_iterator(map_, static_cast<std::size_t>(static_cast<difference_type>(idx_) - n));
     }
 
-    CCC_CPP20_CONSTEXPR difference_type operator-(const inplace_map_iterator& o) const noexcept
+    inline CCC_CPP20_CONSTEXPR difference_type operator-(const inplace_map_iterator& o) const noexcept
     {
         return static_cast<difference_type>(idx_) - static_cast<difference_type>(o.idx_);
     }
 
-    CCC_CPP20_CONSTEXPR bool operator==(const inplace_map_iterator& o) const noexcept
+    inline CCC_CPP20_CONSTEXPR bool operator==(const inplace_map_iterator& o) const noexcept
     {
         return idx_ == o.idx_;
     }
 
-    CCC_CPP20_CONSTEXPR bool operator!=(const inplace_map_iterator& o) const noexcept
+    inline CCC_CPP20_CONSTEXPR bool operator!=(const inplace_map_iterator& o) const noexcept
     {
         return idx_ != o.idx_;
     }
 
-    CCC_CPP20_CONSTEXPR bool operator<(const inplace_map_iterator& o) const noexcept
+    inline CCC_CPP20_CONSTEXPR bool operator<(const inplace_map_iterator& o) const noexcept
     {
         return idx_ < o.idx_;
     }
 
-    CCC_CPP20_CONSTEXPR bool operator<=(const inplace_map_iterator& o) const noexcept
+    inline CCC_CPP20_CONSTEXPR bool operator<=(const inplace_map_iterator& o) const noexcept
     {
         return idx_ <= o.idx_;
     }
 
-    CCC_CPP20_CONSTEXPR bool operator>(const inplace_map_iterator& o) const noexcept
+    inline CCC_CPP20_CONSTEXPR bool operator>(const inplace_map_iterator& o) const noexcept
     {
         return idx_ > o.idx_;
     }
 
-    CCC_CPP20_CONSTEXPR bool operator>=(const inplace_map_iterator& o) const noexcept
+    inline CCC_CPP20_CONSTEXPR bool operator>=(const inplace_map_iterator& o) const noexcept
     {
         return idx_ >= o.idx_;
     }
 
-    CCC_CPP20_CONSTEXPR ptr_type ptr() const noexcept
+    inline CCC_CPP20_CONSTEXPR ptr_type ptr() const noexcept
     {
         return map_;
     }
 
-    CCC_CPP20_CONSTEXPR std::size_t index() const noexcept
+    inline CCC_CPP20_CONSTEXPR std::size_t index() const noexcept
     {
         return idx_;
     }
 
-    friend CCC_CPP20_CONSTEXPR inplace_map_iterator operator+(difference_type n,
+    friend inline CCC_CPP20_CONSTEXPR inplace_map_iterator operator+(difference_type n,
                                                               const inplace_map_iterator& it) noexcept
     {
         return it + n;
@@ -209,11 +209,11 @@ class inplace_map_reverse_iterator : public std::reverse_iterator<Iter>
 public:
     using pointer = typename base_type::pointer;
 
-    inplace_map_reverse_iterator() noexcept : base_type() {}
+    inline inplace_map_reverse_iterator() noexcept : base_type() {}
 
-    explicit CCC_CPP20_CONSTEXPR inplace_map_reverse_iterator(Iter x) noexcept : base_type(x) {}
+    explicit inline CCC_CPP20_CONSTEXPR inplace_map_reverse_iterator(Iter x) noexcept : base_type(x) {}
 
-    CCC_CPP20_CONSTEXPR pointer operator->() const
+    inline CCC_CPP20_CONSTEXPR pointer operator->() const
     {
         Iter tmp = base_type::base();
         --tmp;
@@ -252,11 +252,11 @@ public:
     struct value_compare {
         friend class inplace_map;
         key_compare comp_;
-        value_compare(key_compare c) : comp_(c) {}
+        inline value_compare(key_compare c) : comp_(c) {}
 
     public:
         using is_transparent = void;
-        CCC_CPP20_CONSTEXPR bool operator()(const value_type& a, const value_type& b) const
+        inline CCC_CPP20_CONSTEXPR bool operator()(const value_type& a, const value_type& b) const
         {
             return comp_(a.first, b.first);
         }
@@ -270,7 +270,7 @@ private:
     friend class detail::inplace_map_iterator<Key, T, N, Compare, KeyContainer, MappedContainer, false>;
     friend class detail::inplace_map_iterator<Key, T, N, Compare, KeyContainer, MappedContainer, true>;
 
-    CCC_CPP20_CONSTEXPR const_iterator lower_bound_impl_(const key_type& key) const
+    inline CCC_CPP20_CONSTEXPR const_iterator lower_bound_impl_(const key_type& key) const
     {
         return const_iterator(
             this,
@@ -278,14 +278,14 @@ private:
                 std::distance(keys_.cbegin(), std::lower_bound(keys_.cbegin(), keys_.cend(), key, comp_))));
     }
 
-    CCC_CPP20_CONSTEXPR iterator lower_bound_impl_(const key_type& key)
+    inline CCC_CPP20_CONSTEXPR iterator lower_bound_impl_(const key_type& key)
     {
         return iterator(this,
                         static_cast<size_type>(
                             std::distance(keys_.cbegin(), std::lower_bound(keys_.cbegin(), keys_.cend(), key, comp_))));
     }
 
-    CCC_CPP20_CONSTEXPR const_iterator find_impl_(const key_type& key) const
+    inline CCC_CPP20_CONSTEXPR const_iterator find_impl_(const key_type& key) const
     {
         auto it = lower_bound_impl_(key);
         if (it != cend() && !comp_(key, keys_[it.index()])) {
@@ -294,7 +294,7 @@ private:
         return cend();
     }
 
-    CCC_CPP20_CONSTEXPR iterator find_impl_(const key_type& key)
+    inline CCC_CPP20_CONSTEXPR iterator find_impl_(const key_type& key)
     {
         auto it = lower_bound_impl_(key);
         if (it != end() && !comp_(key, keys_[it.index()])) {
@@ -304,67 +304,67 @@ private:
     }
 
 public:
-    CCC_NO_DISCARD static constexpr size_type capacity() noexcept
+    CCC_NO_DISCARD static inline constexpr size_type capacity() noexcept
     {
         return N;
     }
-    CCC_NO_DISCARD static constexpr size_type max_size() noexcept
+    CCC_NO_DISCARD static inline constexpr size_type max_size() noexcept
     {
         return N;
     }
-    CCC_NO_DISCARD CCC_CPP20_CONSTEXPR size_type size() const noexcept
+    CCC_NO_DISCARD inline CCC_CPP20_CONSTEXPR size_type size() const noexcept
     {
         return keys_.size();
     }
-    CCC_NO_DISCARD constexpr bool empty() const noexcept
+    CCC_NO_DISCARD inline constexpr bool empty() const noexcept
     {
         return keys_.empty();
     }
-    CCC_NO_DISCARD constexpr bool full() const noexcept
+    CCC_NO_DISCARD inline constexpr bool full() const noexcept
     {
         return keys_.full();
     }
 
-    CCC_CPP20_CONSTEXPR inplace_map() : comp_() {}
-    CCC_CPP20_CONSTEXPR explicit inplace_map(const key_compare& comp) : comp_(comp) {}
+    inline CCC_CPP20_CONSTEXPR inplace_map() : comp_() {}
+    inline CCC_CPP20_CONSTEXPR explicit inplace_map(const key_compare& comp) : comp_(comp) {}
 
     template<typename InputIt>
-    CCC_CPP20_CONSTEXPR inplace_map(InputIt first, InputIt last) : comp_()
+    inline CCC_CPP20_CONSTEXPR inplace_map(InputIt first, InputIt last) : comp_()
     {
         insert(first, last);
     }
 
     template<typename InputIt>
-    CCC_CPP20_CONSTEXPR inplace_map(InputIt first, InputIt last, const key_compare& comp) : comp_(comp)
+    inline CCC_CPP20_CONSTEXPR inplace_map(InputIt first, InputIt last, const key_compare& comp) : comp_(comp)
     {
         insert(first, last);
     }
 
-    CCC_CPP20_CONSTEXPR inplace_map(std::initializer_list<value_type> ilist) : comp_()
+    inline CCC_CPP20_CONSTEXPR inplace_map(std::initializer_list<value_type> ilist) : comp_()
     {
         insert(ilist);
     }
 
-    CCC_CPP20_CONSTEXPR inplace_map(std::initializer_list<value_type> ilist, const key_compare& comp) : comp_(comp)
+    inline CCC_CPP20_CONSTEXPR inplace_map(std::initializer_list<value_type> ilist, const key_compare& comp) : comp_(comp)
     {
         insert(ilist);
     }
 
-    CCC_CPP20_CONSTEXPR inplace_map(const inplace_map& other)
+    inline CCC_CPP20_CONSTEXPR inplace_map(const inplace_map& other)
         : keys_(other.keys_), values_(other.values_), comp_(other.comp_)
     {
     }
 
-    CCC_CPP20_CONSTEXPR inplace_map(inplace_map&& other) noexcept(
+    inline CCC_CPP20_CONSTEXPR inplace_map(inplace_map&& other) noexcept(
         std::is_nothrow_move_constructible<key_container_type>::value &&
         std::is_nothrow_move_constructible<mapped_container_type>::value)
         : keys_(std::move(other.keys_)), values_(std::move(other.values_)), comp_(std::move(other.comp_))
     {
     }
 
-    CCC_CPP20_CONSTEXPR ~inplace_map() = default;
+    inline CCC_CPP20_CONSTEXPR ~inplace_map() = default;
 
-    CCC_CPP20_CONSTEXPR inplace_map& operator=(const inplace_map& other)
+    inline CCC_CPP20_CONSTEXPR inplace_map& operator=(const inplace_map& other)
     {
         if (this == &other) {
             return *this;
@@ -375,7 +375,7 @@ public:
         return *this;
     }
 
-    CCC_CPP20_CONSTEXPR inplace_map& operator=(inplace_map&& other) noexcept(
+    inline CCC_CPP20_CONSTEXPR inplace_map& operator=(inplace_map&& other) noexcept(
         std::is_nothrow_move_assignable<key_container_type>::value &&
         std::is_nothrow_move_assignable<mapped_container_type>::value)
     {
@@ -388,14 +388,14 @@ public:
         return *this;
     }
 
-    CCC_CPP20_CONSTEXPR inplace_map& operator=(std::initializer_list<value_type> ilist)
+    inline CCC_CPP20_CONSTEXPR inplace_map& operator=(std::initializer_list<value_type> ilist)
     {
         clear();
         insert(ilist);
         return *this;
     }
 
-    CCC_CPP20_CONSTEXPR mapped_type& at(const key_type& key)
+    inline CCC_CPP20_CONSTEXPR mapped_type& at(const key_type& key)
     {
         auto it = find_impl_(key);
         if (it == end()) {
@@ -404,7 +404,7 @@ public:
         return values_[it.index()];
     }
 
-    CCC_CPP20_CONSTEXPR const mapped_type& at(const key_type& key) const
+    inline CCC_CPP20_CONSTEXPR const mapped_type& at(const key_type& key) const
     {
         auto it = find_impl_(key);
         if (it == cend()) {
@@ -413,7 +413,7 @@ public:
         return values_[it.index()];
     }
 
-    CCC_CPP20_CONSTEXPR mapped_type& operator[](const key_type& key)
+    inline CCC_CPP20_CONSTEXPR mapped_type& operator[](const key_type& key)
     {
         auto it = lower_bound_impl_(key);
         const auto idx = it.index();
@@ -428,7 +428,7 @@ public:
         return values_[idx];
     }
 
-    CCC_CPP20_CONSTEXPR mapped_type& operator[](key_type&& key)
+    inline CCC_CPP20_CONSTEXPR mapped_type& operator[](key_type&& key)
     {
         auto it = lower_bound_impl_(key);
         const auto idx = it.index();
@@ -443,95 +443,95 @@ public:
         return values_[idx];
     }
 
-    CCC_CPP20_CONSTEXPR iterator begin() noexcept
+    inline CCC_CPP20_CONSTEXPR iterator begin() noexcept
     {
         return iterator(this, 0);
     }
-    CCC_CPP20_CONSTEXPR const_iterator begin() const noexcept
+    inline CCC_CPP20_CONSTEXPR const_iterator begin() const noexcept
     {
         return const_iterator(this, 0);
     }
-    CCC_CPP20_CONSTEXPR const_iterator cbegin() const noexcept
+    inline CCC_CPP20_CONSTEXPR const_iterator cbegin() const noexcept
     {
         return const_iterator(this, 0);
     }
-    CCC_CPP20_CONSTEXPR iterator end() noexcept
+    inline CCC_CPP20_CONSTEXPR iterator end() noexcept
     {
         return iterator(this, keys_.size());
     }
-    CCC_CPP20_CONSTEXPR const_iterator end() const noexcept
+    inline CCC_CPP20_CONSTEXPR const_iterator end() const noexcept
     {
         return const_iterator(this, keys_.size());
     }
-    CCC_CPP20_CONSTEXPR const_iterator cend() const noexcept
+    inline CCC_CPP20_CONSTEXPR const_iterator cend() const noexcept
     {
         return const_iterator(this, keys_.size());
     }
-    CCC_CPP20_CONSTEXPR reverse_iterator rbegin() noexcept
+    inline CCC_CPP20_CONSTEXPR reverse_iterator rbegin() noexcept
     {
         return reverse_iterator(end());
     }
-    CCC_CPP20_CONSTEXPR const_reverse_iterator rbegin() const noexcept
+    inline CCC_CPP20_CONSTEXPR const_reverse_iterator rbegin() const noexcept
     {
         return const_reverse_iterator(end());
     }
-    CCC_CPP20_CONSTEXPR const_reverse_iterator crbegin() const noexcept
+    inline CCC_CPP20_CONSTEXPR const_reverse_iterator crbegin() const noexcept
     {
         return const_reverse_iterator(cend());
     }
-    CCC_CPP20_CONSTEXPR reverse_iterator rend() noexcept
+    inline CCC_CPP20_CONSTEXPR reverse_iterator rend() noexcept
     {
         return reverse_iterator(begin());
     }
-    CCC_CPP20_CONSTEXPR const_reverse_iterator rend() const noexcept
+    inline CCC_CPP20_CONSTEXPR const_reverse_iterator rend() const noexcept
     {
         return const_reverse_iterator(begin());
     }
-    CCC_CPP20_CONSTEXPR const_reverse_iterator crend() const noexcept
+    inline CCC_CPP20_CONSTEXPR const_reverse_iterator crend() const noexcept
     {
         return const_reverse_iterator(cbegin());
     }
 
-    CCC_CPP20_CONSTEXPR void clear() noexcept
+    inline CCC_CPP20_CONSTEXPR void clear() noexcept
     {
         keys_.clear();
         values_.clear();
     }
 
-    CCC_CPP20_CONSTEXPR std::pair<iterator, bool> insert(const value_type& value)
+    inline CCC_CPP20_CONSTEXPR std::pair<iterator, bool> insert(const value_type& value)
     {
         return insert_impl_(value.first, value.second);
     }
 
-    CCC_CPP20_CONSTEXPR std::pair<iterator, bool> insert(value_type&& value)
+    inline CCC_CPP20_CONSTEXPR std::pair<iterator, bool> insert(value_type&& value)
     {
         return insert_impl_(std::move(value.first), std::move(value.second));
     }
 
-    CCC_CPP20_CONSTEXPR iterator insert(const_iterator hint, const value_type& value)
+    inline CCC_CPP20_CONSTEXPR iterator insert(const_iterator hint, const value_type& value)
     {
         return insert_hint_impl_(hint, value.first, value.second);
     }
 
-    CCC_CPP20_CONSTEXPR iterator insert(const_iterator hint, value_type&& value)
+    inline CCC_CPP20_CONSTEXPR iterator insert(const_iterator hint, value_type&& value)
     {
         return insert_hint_impl_(hint, std::move(value.first), std::move(value.second));
     }
 
     template<typename InputIt>
-    CCC_CPP20_CONSTEXPR void insert(InputIt first, InputIt last)
+    inline CCC_CPP20_CONSTEXPR void insert(InputIt first, InputIt last)
     {
         for (; first != last; ++first) {
             insert(*first);
         }
     }
 
-    CCC_CPP20_CONSTEXPR void insert(std::initializer_list<value_type> ilist)
+    inline CCC_CPP20_CONSTEXPR void insert(std::initializer_list<value_type> ilist)
     {
         insert(ilist.begin(), ilist.end());
     }
 
-    CCC_CPP20_CONSTEXPR std::pair<iterator, bool> insert_or_assign(const key_type& key, mapped_type&& value)
+    inline CCC_CPP20_CONSTEXPR std::pair<iterator, bool> insert_or_assign(const key_type& key, mapped_type&& value)
     {
         auto it = lower_bound_impl_(key);
         const auto idx = it.index();
@@ -547,7 +547,7 @@ public:
         return {iterator(this, idx), true};
     }
 
-    CCC_CPP20_CONSTEXPR std::pair<iterator, bool> insert_or_assign(key_type&& key, mapped_type&& value)
+    inline CCC_CPP20_CONSTEXPR std::pair<iterator, bool> insert_or_assign(key_type&& key, mapped_type&& value)
     {
         auto it = lower_bound_impl_(key);
         const auto idx = it.index();
@@ -564,7 +564,7 @@ public:
     }
 
     template<typename... Args>
-    CCC_CPP20_CONSTEXPR std::pair<iterator, bool> emplace(key_type&& key, Args&&... args)
+    inline CCC_CPP20_CONSTEXPR std::pair<iterator, bool> emplace(key_type&& key, Args&&... args)
     {
         auto it = lower_bound_impl_(key);
         const auto idx = it.index();
@@ -580,7 +580,7 @@ public:
     }
 
     template<typename... Args>
-    CCC_CPP20_CONSTEXPR iterator emplace_hint(const_iterator hint, key_type&& key, Args&&... args)
+    inline CCC_CPP20_CONSTEXPR iterator emplace_hint(const_iterator hint, key_type&& key, Args&&... args)
     {
         if (hint != cend()) {
             const auto h_idx = hint.index();
@@ -601,7 +601,7 @@ public:
     }
 
     template<typename... Args>
-    CCC_CPP20_CONSTEXPR std::pair<iterator, bool> try_emplace(const key_type& key, Args&&... args)
+    inline CCC_CPP20_CONSTEXPR std::pair<iterator, bool> try_emplace(const key_type& key, Args&&... args)
     {
         auto it = lower_bound_impl_(key);
         const auto idx = it.index();
@@ -617,7 +617,7 @@ public:
     }
 
     template<typename... Args>
-    CCC_CPP20_CONSTEXPR std::pair<iterator, bool> try_emplace(key_type&& key, Args&&... args)
+    inline CCC_CPP20_CONSTEXPR std::pair<iterator, bool> try_emplace(key_type&& key, Args&&... args)
     {
         auto it = lower_bound_impl_(key);
         const auto idx = it.index();
@@ -633,7 +633,7 @@ public:
     }
 
     template<typename... Args>
-    CCC_CPP20_CONSTEXPR iterator try_emplace(const_iterator hint, const key_type& key, Args&&... args)
+    inline CCC_CPP20_CONSTEXPR iterator try_emplace(const_iterator hint, const key_type& key, Args&&... args)
     {
         if (hint != cend()) {
             const auto h_idx = hint.index();
@@ -654,7 +654,7 @@ public:
     }
 
     template<typename... Args>
-    CCC_CPP20_CONSTEXPR iterator try_emplace(const_iterator hint, key_type&& key, Args&&... args)
+    inline CCC_CPP20_CONSTEXPR iterator try_emplace(const_iterator hint, key_type&& key, Args&&... args)
     {
         if (hint != cend()) {
             const auto h_idx = hint.index();
@@ -674,7 +674,7 @@ public:
         return try_emplace(std::move(key), std::forward<Args>(args)...).first;
     }
 
-    CCC_CPP20_CONSTEXPR size_type erase(const key_type& key)
+    inline CCC_CPP20_CONSTEXPR size_type erase(const key_type& key)
     {
         auto it = find_impl_(key);
         if (it == end()) {
@@ -686,7 +686,7 @@ public:
         return 1;
     }
 
-    CCC_CPP20_CONSTEXPR iterator erase(const_iterator pos)
+    inline CCC_CPP20_CONSTEXPR iterator erase(const_iterator pos)
     {
         const auto idx = pos.index();
         keys_.erase(keys_.cbegin() + static_cast<difference_type>(idx));
@@ -694,7 +694,7 @@ public:
         return iterator(this, idx);
     }
 
-    CCC_CPP20_CONSTEXPR iterator erase(const_iterator first, const_iterator last)
+    inline CCC_CPP20_CONSTEXPR iterator erase(const_iterator first, const_iterator last)
     {
         const auto f_idx = first.index();
         const auto l_idx = last.index();
@@ -708,7 +708,7 @@ public:
         return iterator(this, f_idx);
     }
 
-    CCC_CPP20_CONSTEXPR void swap(inplace_map& other) noexcept(ccc::is_nothrow_swappable<key_container_type>::value &&
+    inline CCC_CPP20_CONSTEXPR void swap(inplace_map& other) noexcept(ccc::is_nothrow_swappable<key_container_type>::value &&
                                                                ccc::is_nothrow_swappable<mapped_container_type>::value)
     {
         using std::swap;
@@ -717,39 +717,39 @@ public:
         swap(comp_, other.comp_);
     }
 
-    friend CCC_CPP20_CONSTEXPR void swap(inplace_map& a, inplace_map& b) noexcept(noexcept(a.swap(b)))
+    friend inline CCC_CPP20_CONSTEXPR void swap(inplace_map& a, inplace_map& b) noexcept(noexcept(a.swap(b)))
     {
         a.swap(b);
     }
 
-    CCC_CPP20_CONSTEXPR size_type count(const key_type& key) const
+    inline CCC_CPP20_CONSTEXPR size_type count(const key_type& key) const
     {
         return contains(key) ? 1 : 0;
     }
 
-    CCC_CPP20_CONSTEXPR bool contains(const key_type& key) const
+    inline CCC_CPP20_CONSTEXPR bool contains(const key_type& key) const
     {
         return find_impl_(key) != cend();
     }
 
-    CCC_CPP20_CONSTEXPR iterator find(const key_type& key)
+    inline CCC_CPP20_CONSTEXPR iterator find(const key_type& key)
     {
         return find_impl_(key);
     }
-    CCC_CPP20_CONSTEXPR const_iterator find(const key_type& key) const
+    inline CCC_CPP20_CONSTEXPR const_iterator find(const key_type& key) const
     {
         return find_impl_(key);
     }
-    CCC_CPP20_CONSTEXPR iterator lower_bound(const key_type& key)
+    inline CCC_CPP20_CONSTEXPR iterator lower_bound(const key_type& key)
     {
         return lower_bound_impl_(key);
     }
-    CCC_CPP20_CONSTEXPR const_iterator lower_bound(const key_type& key) const
+    inline CCC_CPP20_CONSTEXPR const_iterator lower_bound(const key_type& key) const
     {
         return lower_bound_impl_(key);
     }
 
-    CCC_CPP20_CONSTEXPR iterator upper_bound(const key_type& key)
+    inline CCC_CPP20_CONSTEXPR iterator upper_bound(const key_type& key)
     {
         auto it = lower_bound_impl_(key);
         if (it != end() && !comp_(key, keys_[it.index()])) {
@@ -758,7 +758,7 @@ public:
         return it;
     }
 
-    CCC_CPP20_CONSTEXPR const_iterator upper_bound(const key_type& key) const
+    inline CCC_CPP20_CONSTEXPR const_iterator upper_bound(const key_type& key) const
     {
         auto it = lower_bound_impl_(key);
         if (it != cend() && !comp_(key, keys_[it.index()])) {
@@ -767,7 +767,7 @@ public:
         return it;
     }
 
-    CCC_CPP20_CONSTEXPR std::pair<iterator, iterator> equal_range(const key_type& key)
+    inline CCC_CPP20_CONSTEXPR std::pair<iterator, iterator> equal_range(const key_type& key)
     {
         auto lb = lower_bound(key);
         auto ub = lb;
@@ -777,7 +777,7 @@ public:
         return {lb, ub};
     }
 
-    CCC_CPP20_CONSTEXPR std::pair<const_iterator, const_iterator> equal_range(const key_type& key) const
+    inline CCC_CPP20_CONSTEXPR std::pair<const_iterator, const_iterator> equal_range(const key_type& key) const
     {
         auto lb = lower_bound(key);
         auto ub = lb;
@@ -787,63 +787,63 @@ public:
         return {lb, ub};
     }
 
-    CCC_CPP20_CONSTEXPR key_compare key_comp() const
+    inline CCC_CPP20_CONSTEXPR key_compare key_comp() const
     {
         return comp_;
     }
-    CCC_CPP20_CONSTEXPR value_compare value_comp() const
+    inline CCC_CPP20_CONSTEXPR value_compare value_comp() const
     {
         return value_compare(comp_);
     }
-    CCC_CPP20_CONSTEXPR const key_container_type& keys() const noexcept
+    inline CCC_CPP20_CONSTEXPR const key_container_type& keys() const noexcept
     {
         return keys_;
     }
-    CCC_CPP20_CONSTEXPR const mapped_container_type& values() const noexcept
+    inline CCC_CPP20_CONSTEXPR const mapped_container_type& values() const noexcept
     {
         return values_;
     }
 
 #if (__cplusplus >= 202002L)
 
-    friend auto operator<=>(const inplace_map& a, const inplace_map& b)
+    friend inline auto operator<=>(const inplace_map& a, const inplace_map& b)
     {
         return std::lexicographical_compare_three_way(a.cbegin(), a.cend(), b.cbegin(), b.cend());
     }
 
-    friend bool operator==(const inplace_map& a, const inplace_map& b)
+    friend inline bool operator==(const inplace_map& a, const inplace_map& b)
     {
         return a.size() == b.size() && std::equal(a.cbegin(), a.cend(), b.cbegin());
     }
 
 #else
 
-    friend bool operator==(const inplace_map& a, const inplace_map& b)
+    friend inline bool operator==(const inplace_map& a, const inplace_map& b)
     {
         return a.size() == b.size() && std::equal(a.cbegin(), a.cend(), b.cbegin());
     }
 
-    friend bool operator!=(const inplace_map& a, const inplace_map& b)
+    friend inline bool operator!=(const inplace_map& a, const inplace_map& b)
     {
         return !(a == b);
     }
 
-    friend bool operator<(const inplace_map& a, const inplace_map& b)
+    friend inline bool operator<(const inplace_map& a, const inplace_map& b)
     {
         return std::lexicographical_compare(a.cbegin(), a.cend(), b.cbegin(), b.cend());
     }
 
-    friend bool operator>(const inplace_map& a, const inplace_map& b)
+    friend inline bool operator>(const inplace_map& a, const inplace_map& b)
     {
         return b < a;
     }
 
-    friend bool operator<=(const inplace_map& a, const inplace_map& b)
+    friend inline bool operator<=(const inplace_map& a, const inplace_map& b)
     {
         return !(b < a);
     }
 
-    friend bool operator>=(const inplace_map& a, const inplace_map& b)
+    friend inline bool operator>=(const inplace_map& a, const inplace_map& b)
     {
         return !(a < b);
     }
@@ -852,7 +852,7 @@ public:
 
 private:
     template<typename K, typename V>
-    CCC_CPP20_CONSTEXPR std::pair<iterator, bool> insert_impl_(K&& key, V&& value)
+    inline CCC_CPP20_CONSTEXPR std::pair<iterator, bool> insert_impl_(K&& key, V&& value)
     {
         auto it = lower_bound_impl_(key);
         const auto idx = it.index();
@@ -868,7 +868,7 @@ private:
     }
 
     template<typename K, typename V>
-    CCC_CPP20_CONSTEXPR iterator insert_hint_impl_(const_iterator hint, K&& key, V&& value)
+    inline CCC_CPP20_CONSTEXPR iterator insert_hint_impl_(const_iterator hint, K&& key, V&& value)
     {
         if (hint != cend()) {
             const auto h_idx = hint.index();

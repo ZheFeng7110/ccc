@@ -15,7 +15,7 @@ namespace detail {
 namespace is_criterion_impl {
 
 template<typename T>
-constexpr bool criterion_type_is_nothrow_callable() noexcept
+inline constexpr bool criterion_type_is_nothrow_callable() noexcept
 {
     CCC_MAYBE_UNUSED T v{};
     return noexcept(v.has_value()) && noexcept(v == v);
@@ -53,7 +53,7 @@ struct is_valid_criterion_type<
 };
 
 template<typename T>
-constexpr bool is_valid_criterion_type_v = is_valid_criterion_type<T>::value;
+inline constexpr bool is_valid_criterion_type_v = is_valid_criterion_type<T>::value;
 #endif
 
 template<typename T>
@@ -74,7 +74,7 @@ inline constexpr bool default_error_init_has_not_value() noexcept
 }  // namespace detail
 
 template<typename T>
-constexpr bool is_criterion_v =
+inline constexpr bool is_criterion_v =
     detail::is_criterion_impl::is_valid_criterion_type_v<T> && detail::is_criterion_impl::default_init_has_value<T>() &&
     detail::is_criterion_impl::default_error_init_has_not_value<T>();
 
