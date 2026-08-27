@@ -213,7 +213,8 @@ public:
         ccc::uninitialized_copy(other.begin(), other.end(), ptr_at(0));
     }
 
-    inline CCC_CPP26_CONSTEXPR inplace_vector(inplace_vector&& other) noexcept(std::is_nothrow_move_constructible<T>::value)
+    inline CCC_CPP26_CONSTEXPR inplace_vector(inplace_vector&& other) noexcept(
+        std::is_nothrow_move_constructible<T>::value)
         : size_(other.size_)
     {
         ccc::uninitialized_copy(std::make_move_iterator(other.begin()),
@@ -626,7 +627,7 @@ public:
     // ---------- swap ----------
 
     inline CCC_CPP26_CONSTEXPR void swap(inplace_vector& other) noexcept(ccc::is_nothrow_swappable<T>::value &&
-                                                                  std::is_nothrow_move_constructible<T>::value)
+                                                                         std::is_nothrow_move_constructible<T>::value)
     {
         using std::swap;
         const size_type common = (std::min)(size_, other.size_);

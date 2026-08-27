@@ -14,7 +14,7 @@
 #include <utility>
 #include <type_traits>
 
-#include "ccc/pipe_operator_helper/detail/bit_cast_impl.hh"
+#include "ccc/detail/bit_cast_impl.hh"
 
 namespace ccc {
 namespace pipe_operator_helper {
@@ -141,7 +141,7 @@ inline ToType operator>(const FromType& from, const detail::reinterpret_cast_to_
 template<typename FromType, typename ToType>
 inline CCC_CPP20_CONSTEXPR ToType operator>(const FromType& from, const detail::bit_cast_to_tag<ToType>&) noexcept
 {
-    return detail::bit_cast_impl<ToType>(from);
+    return ::ccc::detail::bit_cast_impl<ToType>(from);
 }
 
 template<typename T>

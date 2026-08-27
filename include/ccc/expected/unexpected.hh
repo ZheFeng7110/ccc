@@ -24,18 +24,19 @@ public:
     inline constexpr unexpected(const unexpected&) = default;
     inline constexpr unexpected(unexpected&&) = default;
 
-template<typename Err = E
+    template<typename Err = E
 #ifndef __cpp_concepts
              ,
              typename std::enable_if<!std::is_same<Err, unexpected>::value && !std::is_same<Err, in_place_t>::value &&
-                                      std::is_constructible<E, Err>::value>::type* = nullptr
+                                     std::is_constructible<E, Err>::value>::type* = nullptr
 #endif
              >
 #ifdef __cpp_concepts
         requires(!std::is_same<Err, unexpected>::value && !std::is_same<Err, in_place_t>::value &&
                  std::is_constructible<E, Err>::value)
 #endif
-    explicit inline constexpr unexpected(Err&& e) : val_(std::forward<Err>(e))  // NOLINT(*-forwarding-reference-overload)
+    explicit inline constexpr unexpected(Err&& e)  // NOLINT(*-forwarding-reference-overload)
+        : val_(std::forward<Err>(e))
     {
     }
 
@@ -46,19 +47,21 @@ template<typename Err = E
 #endif
              >
 #ifdef __cpp_concepts
-        requires(std::is_constructible<E, Args&&...>::value)
+        requires(std::is_constructible<E, Args && ...>::value)
 #endif
     explicit inline constexpr unexpected(in_place_t, Args&&... args) : val_(std::forward<Args>(args)...)
     {
     }
-    template<typename U, typename... Args
+    template<
+        typename U,
+        typename... Args
 #ifndef __cpp_concepts
-             ,
-             typename std::enable_if<std::is_constructible<E, std::initializer_list<U>&, Args&&...>::value>::type* = nullptr
+        ,
+        typename std::enable_if<std::is_constructible<E, std::initializer_list<U>&, Args&&...>::value>::type* = nullptr
 #endif
-             >
+        >
 #ifdef __cpp_concepts
-        requires(std::is_constructible<E, std::initializer_list<U>&, Args&&...>::value)
+        requires(std::is_constructible<E, std::initializer_list<U>&, Args && ...>::value)
 #endif
     explicit inline constexpr unexpected(in_place_t, std::initializer_list<U> l, Args&&... args)
         : val_(l, std::forward<Args>(args)...)

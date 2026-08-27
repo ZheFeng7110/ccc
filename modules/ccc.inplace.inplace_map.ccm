@@ -5,6 +5,6 @@ module;
 export module ccc.inplace.inplace_map;
 
 export namespace ccc {
-    using ::ccc::inplace_map;
-    using ::ccc::swap;
-}
+using ::ccc::inplace_map;
+using ::ccc::swap;
+}  // namespace ccc

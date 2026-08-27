@@ -1,0 +1,9 @@
+module;
+
+#include "ccc/hash.hh"
+
+export module ccc.hash;
+
+export namespace ccc {
+using ::ccc::hash;
+}  // namespace ccc

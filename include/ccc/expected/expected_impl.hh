@@ -160,8 +160,8 @@ struct reinit_other_branch {
 
 template<typename NewType, typename OldType, typename Arg>
 inline CCC_CPP20_CONSTEXPR void reinit(NewType* new_addr,
-                                OldType* old_addr,
-                                Arg&& arg) noexcept(std::is_nothrow_constructible<NewType, Arg>::value)
+                                       OldType* old_addr,
+                                       Arg&& arg) noexcept(std::is_nothrow_constructible<NewType, Arg>::value)
 {
     // clang-format off
     conditional_t<std::is_nothrow_constructible<NewType, Arg>::value, reinit_no_throw_construct,
@@ -230,7 +230,8 @@ public:  // Destructors
     inline constexpr ~expected() = default;
 
     inline constexpr ~expected()
-        requires(!std::is_trivially_destructible<value_type>::value || !std::is_trivially_destructible<error_type>::value ||
+        requires(!std::is_trivially_destructible<value_type>::value ||
+                 !std::is_trivially_destructible<error_type>::value ||
                  !std::is_trivially_destructible<criterion_type>::value)
     {
         if (has_value()) {
@@ -244,7 +245,8 @@ public:  // Destructors
 #else
     inline CCC_CPP20_CONSTEXPR ~expected()
     {
-        if CCC_CPP17_CONSTEXPR (!std::is_trivially_destructible<value_type>::value || !std::is_trivially_destructible<error_type>::value ||
+        if CCC_CPP17_CONSTEXPR (!std::is_trivially_destructible<value_type>::value ||
+                                !std::is_trivially_destructible<error_type>::value ||
                                 !std::is_trivially_destructible<criterion_type>::value) {
             if (has_value()) {
                 ccc::destroy_at(std::addressof(value_));
@@ -265,10 +267,11 @@ public:  // Constructors
 #endif
 
     inline constexpr expected(const expected& other) noexcept(std::is_nothrow_copy_constructible<value_type>::value &&
-                                                       std::is_nothrow_copy_constructible<error_type>::value)
+                                                              std::is_nothrow_copy_constructible<error_type>::value)
 #ifdef __cpp_concepts
         requires(std::is_copy_constructible<value_type>::value && std::is_copy_constructible<error_type>::value &&
-                 !std::is_trivially_copy_constructible<value_type>::value && !std::is_trivially_copy_constructible<error_type>::value)
+                 !std::is_trivially_copy_constructible<value_type>::value &&
+                 !std::is_trivially_copy_constructible<error_type>::value)
 #endif
         : criterion_(other.criterion_)
     {
@@ -285,10 +288,11 @@ public:  // Constructors
 #endif
 
     inline constexpr expected(expected&& other) noexcept(std::is_nothrow_move_constructible<value_type>::value &&
-                                                  std::is_nothrow_move_constructible<error_type>::value)
+                                                         std::is_nothrow_move_constructible<error_type>::value)
 #ifdef __cpp_concepts
         requires(std::is_move_constructible<value_type>::value && std::is_move_constructible<error_type>::value &&
-                 !std::is_trivially_move_constructible<value_type>::value && !std::is_trivially_move_constructible<error_type>::value)
+                 !std::is_trivially_move_constructible<value_type>::value &&
+                 !std::is_trivially_move_constructible<error_type>::value)
 #endif
         : criterion_(std::move(other.criterion_))
     {
@@ -300,22 +304,23 @@ public:  // Constructors
         }
     }
 
-    template<
-        typename U,
-        typename G,
-        typename Cr
+    template<typename U,
+             typename G,
+             typename Cr
 #ifndef __cpp_concepts
-        ,
-        typename std::enable_if<
-            std::is_constructible<value_type, const U&>::value && std::is_constructible<error_type, const G&>::value &&
-            std::is_constructible<criterion_type, const Cr&>::value && !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
-            !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value>::type* = nullptr
+             ,
+             typename std::enable_if<std::is_constructible<value_type, const U&>::value &&
+                                     std::is_constructible<error_type, const G&>::value &&
+                                     std::is_constructible<criterion_type, const Cr&>::value &&
+                                     !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
+                                     !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value>::type* = nullptr
 #endif
-        >
+             >
 #ifdef __cpp_concepts
         requires(std::is_constructible<value_type, const U&>::value &&
                  std::is_constructible<error_type, const G&>::value &&
-                 std::is_constructible<criterion_type, const Cr&>::value && !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
+                 std::is_constructible<criterion_type, const Cr&>::value &&
+                 !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
                  !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value)
 #endif
     CCC_CONDITIONAL_EXPLICIT((!std::is_convertible<const U&, value_type>::value ||
@@ -332,20 +337,22 @@ public:  // Constructors
         }
     }
 
-    template<typename U,
-             typename G,
-             typename Cr
+    template<
+        typename U,
+        typename G,
+        typename Cr
 #ifndef __cpp_concepts
-             ,
-             typename std::enable_if<
-                 std::is_constructible<value_type, U>::value && std::is_constructible<error_type, G>::value &&
-                 std::is_constructible<criterion_type, Cr>::value && !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
-                 !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value>::type* = nullptr
+        ,
+        typename std::enable_if<
+            std::is_constructible<value_type, U>::value && std::is_constructible<error_type, G>::value &&
+            std::is_constructible<criterion_type, Cr>::value && !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
+            !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value>::type* = nullptr
 #endif
-             >
+        >
 #ifdef __cpp_concepts
         requires(std::is_constructible<value_type, U>::value && std::is_constructible<error_type, G>::value &&
-                 std::is_constructible<criterion_type, Cr>::value && !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
+                 std::is_constructible<criterion_type, Cr>::value &&
+                 !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
                  !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value)
 #endif
     CCC_CONDITIONAL_EXPLICIT((!std::is_convertible<U, value_type>::value ||
@@ -362,21 +369,23 @@ public:  // Constructors
         }
     }
 
-    template<typename U = remove_cv_t<value_type>,
-             typename Cr = remove_cv_t<criterion_type>
+    template<
+        typename U = remove_cv_t<value_type>,
+        typename Cr = remove_cv_t<criterion_type>
 #ifndef __cpp_concepts
-             ,
-             typename std::enable_if<
-                 !std::is_same<remove_cvref_t<U>, in_place_t>::value && !detail::is_expected_v<remove_cvref_t<U>> &&
-                 !detail::is_unexpected_v<remove_cvref_t<U>> && std::is_constructible<value_type, U>::value &&
-                 std::is_constructible<criterion_type, Cr>::value && !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
-                 !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value>::type* = nullptr
+        ,
+        typename std::enable_if<
+            !std::is_same<remove_cvref_t<U>, in_place_t>::value && !detail::is_expected_v<remove_cvref_t<U>> &&
+            !detail::is_unexpected_v<remove_cvref_t<U>> && std::is_constructible<value_type, U>::value &&
+            std::is_constructible<criterion_type, Cr>::value && !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
+            !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value>::type* = nullptr
 #endif
-             >
+        >
 #ifdef __cpp_concepts
         requires(!std::is_same<remove_cvref_t<U>, in_place_t>::value && !detail::is_expected_v<remove_cvref_t<U>> &&
                  !detail::is_unexpected_v<remove_cvref_t<U>> && std::is_constructible<value_type, U>::value &&
-                 std::is_constructible<criterion_type, Cr>::value && !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
+                 std::is_constructible<criterion_type, Cr>::value &&
+                 !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
                  !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value)
 #endif
     CCC_CONDITIONAL_EXPLICIT((!std::is_convertible<U, value_type>::value ||
@@ -398,7 +407,8 @@ public:  // Constructors
              >
 #ifdef __cpp_concepts
         requires(std::is_constructible<error_type, const G&>::value &&
-                 std::is_constructible<criterion_type, const Cr&>::value && !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
+                 std::is_constructible<criterion_type, const Cr&>::value &&
+                 !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
                  !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value)
 #endif
     CCC_CONDITIONAL_EXPLICIT((!std::is_convertible_v<const G&, error_type> ||
@@ -408,19 +418,20 @@ public:  // Constructors
     {
     }
 
-    template<
-        typename G,
-        typename Cr = remove_cv_t<criterion_type>
+    template<typename G,
+             typename Cr = remove_cv_t<criterion_type>
 #ifndef __cpp_concepts
-        ,
-        typename std::enable_if<
-            std::is_constructible<error_type, G>::value && std::is_constructible<criterion_type, Cr>::value &&
-            !std::is_same<remove_cvref<Cr>, in_place_t>::value && !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value>::type* = nullptr
+             ,
+             typename std::enable_if<std::is_constructible<error_type, G>::value &&
+                                     std::is_constructible<criterion_type, Cr>::value &&
+                                     !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
+                                     !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value>::type* = nullptr
 #endif
-        >
+             >
 #ifdef __cpp_concepts
         requires(std::is_constructible<error_type, G>::value && std::is_constructible<criterion_type, Cr>::value &&
-                 !std::is_same<remove_cvref<Cr>, in_place_t>::value && !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value)
+                 !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
+                 !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value)
 #endif
     CCC_CONDITIONAL_EXPLICIT((!std::is_convertible_v<G, error_type> || !std::is_convertible<Cr, criterion_type>::value))
     inline constexpr expected(unexpected<G>&& e, Cr&& cr = Cr(criterion_type::default_error_value))
@@ -441,19 +452,20 @@ public:  // Constructors
     {
     }
 
-    template<
-        typename Cr,
-        typename... Args
+    template<typename Cr,
+             typename... Args
 #ifndef __cpp_concepts
-        ,
-        typename std::enable_if<
-            std::is_constructible<value_type, Args...>::value && std::is_constructible<criterion_type, Cr>::value &&
-            !std::is_same<remove_cvref<Cr>, in_place_t>::value && !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value>::type* = nullptr
+             ,
+             typename std::enable_if<std::is_constructible<value_type, Args...>::value &&
+                                     std::is_constructible<criterion_type, Cr>::value &&
+                                     !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
+                                     !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value>::type* = nullptr
 #endif
-        >
+             >
 #ifdef __cpp_concepts
         requires(std::is_constructible<value_type, Args...>::value &&
-                 std::is_constructible<criterion_type, Cr>::value && !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
+                 std::is_constructible<criterion_type, Cr>::value &&
+                 !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
                  !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value)
 #endif
     inline constexpr expected(Cr&& cr, in_place_t, Args&&... args)
@@ -490,7 +502,8 @@ public:  // Constructors
              >
 #ifdef __cpp_concepts
         requires(std::is_constructible<value_type, std::initializer_list<U>&, Args...>::value &&
-                 std::is_constructible<criterion_type, Cr>::value && !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
+                 std::is_constructible<criterion_type, Cr>::value &&
+                 !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
                  !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value)
 #endif
     inline constexpr expected(Cr&& cr, in_place_t, std::initializer_list<U> il, Args&&... args)
@@ -512,19 +525,20 @@ public:  // Constructors
     {
     }
 
-    template<
-        typename Cr,
-        typename... Args
+    template<typename Cr,
+             typename... Args
 #ifndef __cpp_concepts
-        ,
-        typename std::enable_if<
-            std::is_constructible<error_type, Args...>::value && std::is_constructible<criterion_type, Cr>::value &&
-            !std::is_same<remove_cvref<Cr>, in_place_t>::value && !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value>::type* = nullptr
+             ,
+             typename std::enable_if<std::is_constructible<error_type, Args...>::value &&
+                                     std::is_constructible<criterion_type, Cr>::value &&
+                                     !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
+                                     !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value>::type* = nullptr
 #endif
-        >
+             >
 #ifdef __cpp_concepts
         requires(std::is_constructible<error_type, Args...>::value &&
-                 std::is_constructible<criterion_type, Cr>::value && !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
+                 std::is_constructible<criterion_type, Cr>::value &&
+                 !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
                  !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value)
 #endif
     inline constexpr expected(Cr&& cr, unexpect_t, Args&&... args)
@@ -561,7 +575,8 @@ public:  // Constructors
              >
 #ifdef __cpp_concepts
         requires(std::is_constructible<error_type, std::initializer_list<U>&, Args...>::value &&
-                 std::is_constructible<criterion_type, Cr>::value && !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
+                 std::is_constructible<criterion_type, Cr>::value &&
+                 !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
                  !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value)
 #endif
     inline constexpr expected(Cr&& cr, unexpect_t, std::initializer_list<U> il, Args&&... args)
@@ -597,9 +612,9 @@ private:  // Assign
 public:
     inline CCC_CPP20_CONSTEXPR auto operator=(const expected& other) noexcept(
         conjunction<std::is_nothrow_copy_constructible<value_type>,
-                      std::is_nothrow_copy_constructible<error_type>,
-                      std::is_nothrow_copy_assignable<value_type>,
-                      std::is_nothrow_copy_assignable<error_type>>::value)
+                    std::is_nothrow_copy_constructible<error_type>,
+                    std::is_nothrow_copy_assignable<value_type>,
+                    std::is_nothrow_copy_assignable<error_type>>::value)
 #ifdef __cpp_concepts
         -> expected&
         requires(std::is_copy_assignable_v<value_type> && std::is_copy_constructible_v<value_type> &&
@@ -626,18 +641,18 @@ public:
     }
     inline CCC_CPP20_CONSTEXPR expected& assign(const expected& other) noexcept(
         conjunction<std::is_nothrow_copy_constructible<value_type>,
-                      std::is_nothrow_copy_constructible<error_type>,
-                      std::is_nothrow_copy_assignable<value_type>,
-                      std::is_nothrow_copy_assignable<error_type>>::value)
+                    std::is_nothrow_copy_constructible<error_type>,
+                    std::is_nothrow_copy_assignable<value_type>,
+                    std::is_nothrow_copy_assignable<error_type>>::value)
     {
         return this->operator=(other);
     }
 
     inline CCC_CPP20_CONSTEXPR auto operator=(expected&& other) noexcept(
         conjunction<std::is_nothrow_move_constructible<value_type>,
-                      std::is_nothrow_move_constructible<error_type>,
-                      std::is_nothrow_move_assignable<value_type>,
-                      std::is_nothrow_move_assignable<error_type>>::value)
+                    std::is_nothrow_move_constructible<error_type>,
+                    std::is_nothrow_move_assignable<value_type>,
+                    std::is_nothrow_move_assignable<error_type>>::value)
 #ifdef __cpp_concepts
         -> expected&
         requires(std::is_move_assignable_v<value_type> && std::is_move_constructible_v<value_type> &&
@@ -664,9 +679,9 @@ public:
     }
     inline CCC_CPP20_CONSTEXPR expected& assign(expected&& other) noexcept(
         conjunction<std::is_nothrow_move_constructible<value_type>,
-                      std::is_nothrow_move_constructible<error_type>,
-                      std::is_nothrow_move_assignable<value_type>,
-                      std::is_nothrow_move_assignable<error_type>>::value)
+                    std::is_nothrow_move_constructible<error_type>,
+                    std::is_nothrow_move_assignable<value_type>,
+                    std::is_nothrow_move_assignable<error_type>>::value)
     {
         return this->operator=(std::move(other));
     }
@@ -678,7 +693,8 @@ public:
              typename = enable_if_t<
                  !std::is_same<expected, remove_cvref_t<U>>::value && !detail::is_unexpected_v<remove_cvref_t<U>> &&
                  std::is_constructible<value_type, U>::value && std::is_assignable<value_type&, U>::value &&
-                 !std::is_same<remove_cvref<Cr>, in_place_t>::value && !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value &&
+                 !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
+                 !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value &&
                  std::is_constructible<criterion_type, Cr>::value && std::is_assignable<criterion_type&, Cr>::value &&
                  (std::is_nothrow_constructible_v<value_type, U> || std::is_nothrow_move_constructible_v<value_type> ||
                   std::is_nothrow_move_constructible_v<error_type>)>
@@ -687,7 +703,8 @@ public:
 #ifdef __cpp_concepts
         requires(!std::is_same<expected, remove_cvref_t<U>>::value && !detail::is_unexpected_v<remove_cvref_t<U>> &&
                  std::is_constructible<value_type, U>::value && std::is_assignable<value_type&, U>::value &&
-                 !std::is_same<remove_cvref<Cr>, in_place_t>::value && !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value &&
+                 !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
+                 !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value &&
                  std::is_constructible<criterion_type, Cr>::value && std::is_assignable<criterion_type&, Cr>::value &&
                  (std::is_nothrow_constructible_v<value_type, U> || std::is_nothrow_move_constructible_v<value_type> ||
                   std::is_nothrow_move_constructible_v<error_type>))
@@ -697,13 +714,13 @@ public:
         assign_value_(std::forward<U>(v), std::forward<Cr>(cr));
         return *this;
     }
-    template<
-        typename U = remove_cv_t<value_type>
+    template<typename U = remove_cv_t<value_type>
 #ifndef __cpp_concepts
-        ,
-        typename = enable_if_t<!std::is_same<expected, remove_cvref_t<U>>::value && !detail::is_unexpected_v<remove_cvref_t<U>>>
+             ,
+             typename = enable_if_t<!std::is_same<expected, remove_cvref_t<U>>::value &&
+                                    !detail::is_unexpected_v<remove_cvref_t<U>>>
 #endif
-        >
+             >
 #ifdef __cpp_concepts
         requires(!std::is_same<expected, remove_cvref_t<U>>::value && !detail::is_unexpected_v<remove_cvref_t<U>>)
 #endif
@@ -716,23 +733,30 @@ public:
              typename Cr = remove_cv_t<criterion_type>
 #ifndef __cpp_concepts
              ,
-             typename = enable_if_t<
-                 std::is_constructible<error_type, const G&>::value && std::is_assignable<error_type&, const G&>::value &&
-                 (std::is_nothrow_constructible<error_type, const G&>::value || std::is_nothrow_move_constructible<value_type>::value ||
-                  std::is_nothrow_move_constructible<error_type>::value) &&
-                 !std::is_same<remove_cvref<Cr>, in_place_t>::value && !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value &&
-                 std::is_constructible<criterion_type, const Cr&>::value && std::is_assignable<criterion_type&, const Cr&>::value>
+             typename = enable_if_t<std::is_constructible<error_type, const G&>::value &&
+                                    std::is_assignable<error_type&, const G&>::value &&
+                                    (std::is_nothrow_constructible<error_type, const G&>::value ||
+                                     std::is_nothrow_move_constructible<value_type>::value ||
+                                     std::is_nothrow_move_constructible<error_type>::value) &&
+                                    !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
+                                    !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value &&
+                                    std::is_constructible<criterion_type, const Cr&>::value &&
+                                    std::is_assignable<criterion_type&, const Cr&>::value>
 #endif
              >
 #ifdef __cpp_concepts
-        requires(std::is_constructible<error_type, const G&>::value && std::is_assignable<error_type&, const G&>::value &&
+        requires(std::is_constructible<error_type, const G&>::value &&
+                 std::is_assignable<error_type&, const G&>::value &&
                  (std::is_nothrow_constructible<error_type, const G&>::value ||
                   std::is_nothrow_move_constructible_v<value_type> ||
                   std::is_nothrow_move_constructible_v<error_type>) &&
-                 !std::is_same<remove_cvref<Cr>, in_place_t>::value && !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value &&
-                 std::is_constructible<criterion_type, const Cr&>::value && std::is_assignable<criterion_type&, const Cr&>::value)
+                 !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
+                 !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value &&
+                 std::is_constructible<criterion_type, const Cr&>::value &&
+                 std::is_assignable<criterion_type&, const Cr&>::value)
 #endif
-    inline CCC_CPP20_CONSTEXPR expected& assign(const unexpected<G>& e, const Cr& cr = Cr(criterion_type::default_error_value))
+    inline CCC_CPP20_CONSTEXPR expected& assign(const unexpected<G>& e,
+                                                const Cr& cr = Cr(criterion_type::default_error_value))
     {
         assign_error_(e.error(), cr);
         return *this;
@@ -740,15 +764,18 @@ public:
     template<typename G
 #ifndef __cpp_concepts
              ,
-             typename = enable_if_t<
-                 std::is_constructible<error_type, const G&>::value && std::is_assignable<error_type&, const G&>::value &&
-                 (std::is_nothrow_constructible<error_type, const G&>::value || std::is_nothrow_move_constructible<value_type>::value ||
-                  std::is_nothrow_move_constructible<error_type>::value)>
+             typename = enable_if_t<std::is_constructible<error_type, const G&>::value &&
+                                    std::is_assignable<error_type&, const G&>::value &&
+                                    (std::is_nothrow_constructible<error_type, const G&>::value ||
+                                     std::is_nothrow_move_constructible<value_type>::value ||
+                                     std::is_nothrow_move_constructible<error_type>::value)>
 #endif
              >
 #ifdef __cpp_concepts
-        requires(std::is_constructible<error_type, const G&>::value && std::is_assignable<error_type&, const G&>::value &&
-                 (std::is_nothrow_constructible<error_type, const G&>::value || std::is_nothrow_move_constructible<value_type>::value ||
+        requires(std::is_constructible<error_type, const G&>::value &&
+                 std::is_assignable<error_type&, const G&>::value &&
+                 (std::is_nothrow_constructible<error_type, const G&>::value ||
+                  std::is_nothrow_move_constructible<value_type>::value ||
                   std::is_nothrow_move_constructible<error_type>::value))
 #endif
     inline CCC_CPP20_CONSTEXPR expected& operator=(const unexpected<G>& e)
@@ -762,17 +789,21 @@ public:
              ,
              typename = enable_if_t<
                  std::is_constructible<error_type, G>::value && std::is_assignable<error_type&, G>::value &&
-                 (std::is_nothrow_constructible<error_type, G>::value || std::is_nothrow_move_constructible<value_type>::value ||
+                 (std::is_nothrow_constructible<error_type, G>::value ||
+                  std::is_nothrow_move_constructible<value_type>::value ||
                   std::is_nothrow_move_constructible<error_type>::value) &&
-                 !std::is_same<remove_cvref<Cr>, in_place_t>::value && !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value &&
+                 !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
+                 !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value &&
                  std::is_constructible<criterion_type, Cr>::value && std::is_assignable<criterion_type&, Cr>::value>
 #endif
              >
 #ifdef __cpp_concepts
         requires(std::is_constructible<error_type, G>::value && std::is_assignable<error_type&, G>::value &&
-                 (std::is_nothrow_constructible<error_type, G>::value || std::is_nothrow_move_constructible<value_type>::value ||
+                 (std::is_nothrow_constructible<error_type, G>::value ||
+                  std::is_nothrow_move_constructible<value_type>::value ||
                   std::is_nothrow_move_constructible<error_type>::value) &&
-                 !std::is_same<remove_cvref<Cr>, in_place_t>::value && !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value &&
+                 !std::is_same<remove_cvref<Cr>, in_place_t>::value &&
+                 !std::is_same<remove_cvref_t<Cr>, unexpect_t>::value &&
                  std::is_constructible<criterion_type, Cr>::value && std::is_assignable<criterion_type&, Cr>::value)
 #endif
     inline CCC_CPP20_CONSTEXPR expected& assign(unexpected<G>&& e, Cr&& cr = Cr(criterion_type::default_error_value))
@@ -783,15 +814,17 @@ public:
     template<typename G
 #ifndef __cpp_concepts
              ,
-             typename = enable_if_t<std::is_constructible<error_type, G>::value && std::is_assignable<error_type&, G>::value &&
-                                    (std::is_nothrow_constructible<error_type, G>::value ||
-                                     std::is_nothrow_move_constructible<value_type>::value ||
-                                     std::is_nothrow_move_constructible<error_type>::value)>
+             typename =
+                 enable_if_t<std::is_constructible<error_type, G>::value && std::is_assignable<error_type&, G>::value &&
+                             (std::is_nothrow_constructible<error_type, G>::value ||
+                              std::is_nothrow_move_constructible<value_type>::value ||
+                              std::is_nothrow_move_constructible<error_type>::value)>
 #endif
              >
 #ifdef __cpp_concepts
         requires(std::is_constructible<error_type, G>::value && std::is_assignable<error_type&, G>::value &&
-                 (std::is_nothrow_constructible<error_type, G>::value || std::is_nothrow_move_constructible<value_type>::value ||
+                 (std::is_nothrow_constructible<error_type, G>::value ||
+                  std::is_nothrow_move_constructible<value_type>::value ||
                   std::is_nothrow_move_constructible<error_type>::value))
 #endif
     inline CCC_CPP20_CONSTEXPR expected& operator=(unexpected<G>&& e)
@@ -882,7 +915,7 @@ public:  // observer
 
     template<typename U = remove_cv_t<value_type>>
     inline constexpr value_type value_or(U&& v) const& noexcept(std::is_nothrow_copy_constructible<value_type>::value &&
-                                                         is_nothrow_convertible<U, value_type>::value)
+                                                                is_nothrow_convertible<U, value_type>::value)
     {
         static_assert(std::is_copy_constructible<value_type>::value, "value_type must be copy constructible");
         static_assert(std::is_convertible<U, value_type>::value, "U must be convertible to value_type");
@@ -951,19 +984,21 @@ private:  // swap
     }
 
 public:
-    inline CCC_CPP20_CONSTEXPR auto swap(expected& other) noexcept(std::is_nothrow_move_constructible<value_type>::value &&
-                                                            is_nothrow_swappable<value_type>::value &&
-                                                            std::is_nothrow_move_constructible<error_type>::value &&
-                                                            is_nothrow_swappable<error_type>::value)
+    inline CCC_CPP20_CONSTEXPR auto swap(expected& other) noexcept(
+        std::is_nothrow_move_constructible<value_type>::value && is_nothrow_swappable<value_type>::value &&
+        std::is_nothrow_move_constructible<error_type>::value && is_nothrow_swappable<error_type>::value)
 #ifdef __cpp_concepts
         -> void
-        requires(is_swappable<value_type>::value && is_swappable<error_type>::value && std::is_move_constructible<value_type>::value &&
-                 std::is_move_constructible<error_type>::value &&
-                 (std::is_nothrow_move_constructible<value_type>::value || std::is_nothrow_move_constructible<error_type>::value))
+        requires(is_swappable<value_type>::value && is_swappable<error_type>::value &&
+                 std::is_move_constructible<value_type>::value && std::is_move_constructible<error_type>::value &&
+                 (std::is_nothrow_move_constructible<value_type>::value ||
+                  std::is_nothrow_move_constructible<error_type>::value))
 #else
         -> enable_if_t<is_swappable<value_type>::value && is_swappable<error_type>::value &&
-                           std::is_move_constructible<value_type>::value && std::is_move_constructible<error_type>::value &&
-                           (std::is_nothrow_move_constructible<value_type>::value || std::is_nothrow_move_constructible<error_type>::value),
+                           std::is_move_constructible<value_type>::value &&
+                           std::is_move_constructible<error_type>::value &&
+                           (std::is_nothrow_move_constructible<value_type>::value ||
+                            std::is_nothrow_move_constructible<error_type>::value),
                        void>
 #endif
     {
@@ -1034,15 +1069,16 @@ public:
         criterion_ = criterion_type();
         return *construct_at(std::addressof(value_), std::forward<Args>(args)...);
     }
-    template<typename U,
-             typename... Args
+    template<
+        typename U,
+        typename... Args
 #ifndef __cpp_concepts
-             ,
-             typename = enable_if_t<std::is_nothrow_constructible<value_type, std::initializer_list<U>&, Args...>::value &&
-                                    std::is_nothrow_constructible<criterion_type, criterion_type>::value &&
-                                    std::is_nothrow_assignable<criterion_type&, criterion_type>::value>
+        ,
+        typename = enable_if_t<std::is_nothrow_constructible<value_type, std::initializer_list<U>&, Args...>::value &&
+                               std::is_nothrow_constructible<criterion_type, criterion_type>::value &&
+                               std::is_nothrow_assignable<criterion_type&, criterion_type>::value>
 #endif
-             >
+        >
 #ifdef __cpp_concepts
         requires(std::is_nothrow_constructible<value_type, std::initializer_list<U>&, Args...>::value &&
                  std::is_nothrow_constructible<criterion_type, criterion_type>::value &&
@@ -1065,7 +1101,8 @@ public:
 #endif
              >
 #ifdef __cpp_concepts
-        requires(std::is_nothrow_constructible<value_type, Args...>::value && std::is_nothrow_constructible<criterion_type, Cr>::value &&
+        requires(std::is_nothrow_constructible<value_type, Args...>::value &&
+                 std::is_nothrow_constructible<criterion_type, Cr>::value &&
                  std::is_nothrow_assignable<criterion_type&, Cr>::value)
 #endif
     inline CCC_CPP20_CONSTEXPR value_type& emplace_with_criterion(Cr&& cr, Args&&... args) noexcept
@@ -1074,23 +1111,25 @@ public:
         criterion_ = std::forward<Cr>(cr);
         return *construct_at(std::addressof(value_), std::forward<Args>(args)...);
     }
-    template<typename Cr,
-             typename U,
-             typename... Args
+    template<
+        typename Cr,
+        typename U,
+        typename... Args
 #ifndef __cpp_concepts
-             ,
-             typename = enable_if_t<std::is_nothrow_constructible<value_type, std::initializer_list<U>&, Args...>::value &&
-                                    std::is_nothrow_constructible<criterion_type, Cr>::value &&
-                                    std::is_nothrow_assignable<criterion_type&, Cr>::value>
+        ,
+        typename = enable_if_t<std::is_nothrow_constructible<value_type, std::initializer_list<U>&, Args...>::value &&
+                               std::is_nothrow_constructible<criterion_type, Cr>::value &&
+                               std::is_nothrow_assignable<criterion_type&, Cr>::value>
 #endif
-             >
+        >
 #ifdef __cpp_concepts
         requires(std::is_nothrow_constructible<value_type, std::initializer_list<U>&, Args...>::value &&
-                 std::is_nothrow_constructible<criterion_type, Cr>::value && std::is_nothrow_assignable<criterion_type&, Cr>::value)
+                 std::is_nothrow_constructible<criterion_type, Cr>::value &&
+                 std::is_nothrow_assignable<criterion_type&, Cr>::value)
 #endif
     inline CCC_CPP20_CONSTEXPR value_type& emplace_with_criterion(Cr&& cr,
-                                                           std::initializer_list<U> il,
-                                                           Args&&... args) noexcept
+                                                                  std::initializer_list<U> il,
+                                                                  Args&&... args) noexcept
     {
         emplace_preprocess_();
         criterion_ = std::forward<Cr>(cr);
@@ -1107,11 +1146,12 @@ public:  // operator==
             { l.error() == r.error() } -> std::convertible_to<bool>;
         })
 #else
-        -> enable_if_t<!std::is_void<T2>::value &&
-                           std::is_void<void_t<decltype(**this == *rhs), decltype(this->error() == rhs.error())>>::value &&
-                           std::is_convertible<decltype(**this == *rhs), bool>::value &&
-                           std::is_convertible<decltype(this->error() == rhs.error()), bool>::value,
-                       bool>
+        -> enable_if_t<
+            !std::is_void<T2>::value &&
+                std::is_void<void_t<decltype(**this == *rhs), decltype(this->error() == rhs.error())>>::value &&
+                std::is_convertible<decltype(**this == *rhs), bool>::value &&
+                std::is_convertible<decltype(this->error() == rhs.error()), bool>::value,
+            bool>
 #endif
     {
         const auto& lhs = *this;
@@ -1146,7 +1186,8 @@ public:  // operator==
             { *e == val } -> std::convertible_to<bool>;
         })
 #else
-        -> enable_if_t<!detail::is_expected_v<remove_cvref<V>> && std::is_void<void_t<decltype(**this == val)>>::value &&
+        -> enable_if_t<!detail::is_expected_v<remove_cvref<V>> &&
+                           std::is_void<void_t<decltype(**this == val)>>::value &&
                            std::is_convertible<decltype(**this == val), bool>::value,
                        bool>
 #endif
@@ -1159,8 +1200,8 @@ public:  // operator==
 private:  // Monadic operations
     template<typename Func>
     explicit inline constexpr expected(detail::expected_impl::in_place_invoke_tag,
-                                detail::expected_impl::transform_func_return_2values_tag,
-                                Func&& func)
+                                       detail::expected_impl::transform_func_return_2values_tag,
+                                       Func&& func)
         : value_()
     {
         auto [value, criterion] = std::invoke(std::forward<Func>(func));
@@ -1175,8 +1216,8 @@ private:  // Monadic operations
 
     template<typename Func>
     explicit inline constexpr expected(detail::expected_impl::unexpect_invoke_tag,
-                                detail::expected_impl::transform_func_return_2values_tag,
-                                Func&& func)
+                                       detail::expected_impl::transform_func_return_2values_tag,
+                                       Func&& func)
         : error_()
     {
         auto [error, criterion] = std::invoke(std::forward<Func>(func));
@@ -1198,7 +1239,8 @@ public:
 #endif
              >
 #ifdef __cpp_concepts
-        requires(std::is_constructible<error_type, error_type&>::value && std::is_constructible<criterion_type, criterion_type&>::value)
+        requires(std::is_constructible<error_type, error_type&>::value &&
+                 std::is_constructible<criterion_type, criterion_type&>::value)
 #endif
     inline CCC_CPP20_CONSTEXPR auto and_then(Func&& func) &
     {
@@ -1255,7 +1297,8 @@ public:
 #endif
              >
 #ifdef __cpp_concepts
-        requires(std::is_constructible<error_type, error_type &&>::value && std::is_constructible<criterion_type, criterion_type &&>::value)
+        requires(std::is_constructible<error_type, error_type &&>::value &&
+                 std::is_constructible<criterion_type, criterion_type &&>::value)
 #endif
     inline CCC_CPP20_CONSTEXPR auto and_then(Func&& func) &&
     {
@@ -1312,7 +1355,8 @@ public:
 #endif
              >
 #ifdef __cpp_concepts
-        requires(std::is_constructible<value_type, value_type&>::value && std::is_constructible<criterion_type, criterion_type&>::value)
+        requires(std::is_constructible<value_type, value_type&>::value &&
+                 std::is_constructible<criterion_type, criterion_type&>::value)
 #endif
     inline CCC_CPP20_CONSTEXPR auto or_else(Func&& func) &
     {
@@ -1369,7 +1413,8 @@ public:
 #endif
              >
 #ifdef __cpp_concepts
-        requires(std::is_constructible<value_type, value_type &&>::value && std::is_constructible<criterion_type, criterion_type &&>::value)
+        requires(std::is_constructible<value_type, value_type &&>::value &&
+                 std::is_constructible<criterion_type, criterion_type &&>::value)
 #endif
     inline CCC_CPP20_CONSTEXPR auto or_else(Func&& func) &&
     {
@@ -1418,16 +1463,17 @@ public:
         return std::invoke(std::forward<Func>(func), std::move(error_), std::move(criterion_));
     }
 
-    template<
-        typename Func
+    template<typename Func
 #ifndef __cpp_concepts
-        ,
-        typename = enable_if_t<std::is_default_constructible<value_type>::value && std::is_constructible<error_type, error_type&>::value &&
-                               std::is_constructible<criterion_type, criterion_type&>::value && (sizeof(Func) > 0)>
+             ,
+             typename = enable_if_t<std::is_default_constructible<value_type>::value &&
+                                    std::is_constructible<error_type, error_type&>::value &&
+                                    std::is_constructible<criterion_type, criterion_type&>::value && (sizeof(Func) > 0)>
 #endif
-        >
+             >
 #ifdef __cpp_concepts
-        requires(std::is_default_constructible<value_type>::value && std::is_constructible<error_type, error_type&>::value &&
+        requires(std::is_default_constructible<value_type>::value &&
+                 std::is_constructible<error_type, error_type&>::value &&
                  std::is_constructible<criterion_type, criterion_type&>::value)
 #endif
     inline constexpr auto transform(Func&& func) &
@@ -1459,13 +1505,15 @@ public:
     template<typename Func
 #ifndef __cpp_concepts
              ,
-             typename = enable_if_t<std::is_default_constructible<value_type>::value &&
-                                    std::is_constructible<error_type, const error_type&>::value &&
-                                    std::is_constructible<criterion_type, const criterion_type&>::value && (sizeof(Func) > 0)>
+             typename =
+                 enable_if_t<std::is_default_constructible<value_type>::value &&
+                             std::is_constructible<error_type, const error_type&>::value &&
+                             std::is_constructible<criterion_type, const criterion_type&>::value && (sizeof(Func) > 0)>
 #endif
              >
 #ifdef __cpp_concepts
-        requires(std::is_default_constructible<value_type>::value && std::is_constructible<error_type, const error_type&>::value &&
+        requires(std::is_default_constructible<value_type>::value &&
+                 std::is_constructible<error_type, const error_type&>::value &&
                  std::is_constructible<criterion_type, const criterion_type&>::value)
 #endif
     inline constexpr auto transform(Func&& func) const&
@@ -1504,12 +1552,14 @@ public:
         typename Func
 #ifndef __cpp_concepts
         ,
-        typename = enable_if_t<std::is_default_constructible<value_type>::value && std::is_constructible<error_type, error_type&&>::value &&
+        typename = enable_if_t<std::is_default_constructible<value_type>::value &&
+                               std::is_constructible<error_type, error_type&&>::value &&
                                std::is_constructible<criterion_type, criterion_type&&>::value && (sizeof(Func) > 0)>
 #endif
         >
 #ifdef __cpp_concepts
-        requires(std::is_default_constructible<value_type>::value && std::is_constructible<error_type, error_type &&>::value &&
+        requires(std::is_default_constructible<value_type>::value &&
+                 std::is_constructible<error_type, error_type &&>::value &&
                  std::is_constructible<criterion_type, criterion_type &&>::value)
 #endif
     inline constexpr auto transform(Func&& func) &&
@@ -1543,13 +1593,15 @@ public:
     template<typename Func
 #ifndef __cpp_concepts
              ,
-             typename = enable_if_t<std::is_default_constructible<value_type>::value &&
-                                    std::is_constructible<error_type, const error_type&&>::value &&
-                                    std::is_constructible<criterion_type, const criterion_type&&>::value && (sizeof(Func) > 0)>
+             typename =
+                 enable_if_t<std::is_default_constructible<value_type>::value &&
+                             std::is_constructible<error_type, const error_type&&>::value &&
+                             std::is_constructible<criterion_type, const criterion_type&&>::value && (sizeof(Func) > 0)>
 #endif
              >
 #ifdef __cpp_concepts
-        requires(std::is_default_constructible<value_type>::value && std::is_constructible<error_type, const error_type &&>::value &&
+        requires(std::is_default_constructible<value_type>::value &&
+                 std::is_constructible<error_type, const error_type &&>::value &&
                  std::is_constructible<criterion_type, const criterion_type &&>::value)
 #endif
     inline constexpr auto transform(Func&& func) const&&
@@ -1580,16 +1632,17 @@ public:
         }
     }
 
-    template<
-        typename Func
+    template<typename Func
 #ifndef __cpp_concepts
-        ,
-        typename = enable_if_t<std::is_default_constructible<error_type>::value && std::is_constructible<error_type, error_type&>::value &&
-                               std::is_constructible<criterion_type, criterion_type&>::value && (sizeof(Func) > 0)>
+             ,
+             typename = enable_if_t<std::is_default_constructible<error_type>::value &&
+                                    std::is_constructible<error_type, error_type&>::value &&
+                                    std::is_constructible<criterion_type, criterion_type&>::value && (sizeof(Func) > 0)>
 #endif
-        >
+             >
 #ifdef __cpp_concepts
-        requires(std::is_default_constructible<error_type>::value && std::is_constructible<error_type, error_type&>::value &&
+        requires(std::is_default_constructible<error_type>::value &&
+                 std::is_constructible<error_type, error_type&>::value &&
                  std::is_constructible<criterion_type, criterion_type&>::value)
 #endif
     inline constexpr auto transform_error(Func&& func) &
@@ -1621,13 +1674,15 @@ public:
     template<typename Func
 #ifndef __cpp_concepts
              ,
-             typename = enable_if_t<std::is_default_constructible<error_type>::value &&
-                                    std::is_constructible<error_type, const error_type&>::value &&
-                                    std::is_constructible<criterion_type, const criterion_type&>::value && (sizeof(Func) > 0)>
+             typename =
+                 enable_if_t<std::is_default_constructible<error_type>::value &&
+                             std::is_constructible<error_type, const error_type&>::value &&
+                             std::is_constructible<criterion_type, const criterion_type&>::value && (sizeof(Func) > 0)>
 #endif
              >
 #ifdef __cpp_concepts
-        requires(std::is_default_constructible<error_type>::value && std::is_constructible<error_type, const error_type&>::value &&
+        requires(std::is_default_constructible<error_type>::value &&
+                 std::is_constructible<error_type, const error_type&>::value &&
                  std::is_constructible<criterion_type, const criterion_type&>::value)
 #endif
     inline constexpr auto transform_error(Func&& func) const&
@@ -1660,12 +1715,14 @@ public:
         typename Func
 #ifndef __cpp_concepts
         ,
-        typename = enable_if_t<std::is_default_constructible<error_type>::value && std::is_constructible<error_type, error_type&&>::value &&
+        typename = enable_if_t<std::is_default_constructible<error_type>::value &&
+                               std::is_constructible<error_type, error_type&&>::value &&
                                std::is_constructible<criterion_type, criterion_type&&>::value && (sizeof(Func) > 0)>
 #endif
         >
 #ifdef __cpp_concepts
-        requires(std::is_default_constructible<error_type>::value && std::is_constructible<error_type, error_type &&>::value &&
+        requires(std::is_default_constructible<error_type>::value &&
+                 std::is_constructible<error_type, error_type &&>::value &&
                  std::is_constructible<criterion_type, criterion_type &&>::value)
 #endif
     inline constexpr auto transform_error(Func&& func) &&
@@ -1699,13 +1756,15 @@ public:
     template<typename Func
 #ifndef __cpp_concepts
              ,
-             typename = enable_if_t<std::is_default_constructible<error_type>::value &&
-                                    std::is_constructible<error_type, const error_type&&>::value &&
-                                    std::is_constructible<criterion_type, const criterion_type&&>::value && (sizeof(Func) > 0)>
+             typename =
+                 enable_if_t<std::is_default_constructible<error_type>::value &&
+                             std::is_constructible<error_type, const error_type&&>::value &&
+                             std::is_constructible<criterion_type, const criterion_type&&>::value && (sizeof(Func) > 0)>
 #endif
              >
 #ifdef __cpp_concepts
-        requires(std::is_default_constructible<error_type>::value && std::is_constructible<error_type, const error_type &&>::value &&
+        requires(std::is_default_constructible<error_type>::value &&
+                 std::is_constructible<error_type, const error_type &&>::value &&
                  std::is_constructible<criterion_type, const criterion_type &&>::value)
 #endif
     inline constexpr auto transform_error(Func&& func) const&&

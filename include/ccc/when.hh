@@ -162,7 +162,7 @@ inline constexpr R when_impl(const T& v, CaseVal&& case_val, Func&& func, Rest&&
  */
 template<typename T, typename... Args>
 CCC_NO_DISCARD inline constexpr decltype(auto) when(const T& v,
-                                             Args&&... args) noexcept(detail::is_nothrow_when_args_v<Args...>)
+                                                    Args&&... args) noexcept(detail::is_nothrow_when_args_v<Args...>)
 {
     static_assert(sizeof...(Args) % 2 == 0, "Arguments should be in pairs of (target, func) or (default_tag, func)");
 

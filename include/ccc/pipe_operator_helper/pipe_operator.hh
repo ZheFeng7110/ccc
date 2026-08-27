@@ -51,9 +51,8 @@ private:
 
 public:
     template<typename... Init>
-    explicit inline constexpr pipe_partial(const callee_type& callee,
-                                    Init&&... init) noexcept((std::is_nothrow_constructible<BoundArgs, Init>::value &&
-                                                              ...))
+    explicit inline constexpr pipe_partial(const callee_type& callee, Init&&... init) noexcept(
+        (std::is_nothrow_constructible<BoundArgs, Init>::value && ...))
         : callee_(callee), bound_(std::forward<Init>(init)...)
     {
     }

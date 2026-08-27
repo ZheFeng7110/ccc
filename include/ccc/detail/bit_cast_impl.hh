@@ -6,8 +6,8 @@
 // ReSharper disable CppRedundantInlineSpecifier
 
 #pragma once
-#ifndef CCC_PIPE_OPERATOR_HELPER_BIT_CAST_IMPL_HH
-#define CCC_PIPE_OPERATOR_HELPER_BIT_CAST_IMPL_HH
+#ifndef CCC_DETAIL_BIT_CAST_IMPL_HH
+#define CCC_DETAIL_BIT_CAST_IMPL_HH
 
 #include "ccc/detail/config.hh"
 
@@ -19,7 +19,6 @@
 #endif
 
 namespace ccc {
-namespace pipe_operator_helper {
 namespace detail {
 
 template<typename To, typename From>
@@ -41,7 +40,6 @@ inline CCC_CPP20_CONSTEXPR To bit_cast_impl(const From& from) noexcept
 }
 
 }  // namespace detail
-}  // namespace pipe_operator_helper
 }  // namespace ccc
 
-#endif  // !CCC_PIPE_OPERATOR_HELPER_BIT_CAST_IMPL_HH
+#endif  // !CCC_DETAIL_BIT_CAST_IMPL_HH

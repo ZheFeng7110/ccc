@@ -195,7 +195,7 @@ public:
     }
 
     friend inline CCC_CPP20_CONSTEXPR inplace_map_iterator operator+(difference_type n,
-                                                              const inplace_map_iterator& it) noexcept
+                                                                     const inplace_map_iterator& it) noexcept
     {
         return it + n;
     }
@@ -345,7 +345,8 @@ public:
         insert(ilist);
     }
 
-    inline CCC_CPP20_CONSTEXPR inplace_map(std::initializer_list<value_type> ilist, const key_compare& comp) : comp_(comp)
+    inline CCC_CPP20_CONSTEXPR inplace_map(std::initializer_list<value_type> ilist, const key_compare& comp)
+        : comp_(comp)
     {
         insert(ilist);
     }
@@ -708,8 +709,8 @@ public:
         return iterator(this, f_idx);
     }
 
-    inline CCC_CPP20_CONSTEXPR void swap(inplace_map& other) noexcept(ccc::is_nothrow_swappable<key_container_type>::value &&
-                                                               ccc::is_nothrow_swappable<mapped_container_type>::value)
+    inline CCC_CPP20_CONSTEXPR void swap(inplace_map& other) noexcept(
+        ccc::is_nothrow_swappable<key_container_type>::value && ccc::is_nothrow_swappable<mapped_container_type>::value)
     {
         using std::swap;
         swap(keys_, other.keys_);
