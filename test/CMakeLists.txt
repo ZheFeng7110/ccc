@@ -34,6 +34,13 @@ else ()
     add_compile_options(-Wall -Wextra -Wpedantic)
 endif ()
 
+if ((CMAKE_CXX_COMPILER_ID MATCHES "Clang") AND
+    (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 22))
+    # Catch2 v2 uses __COUNTER__ inside TEST_CASE, which clang 22 reports as
+    # a C2y extension under -Wpedantic
+    add_compile_options(-Wno-c2y-extensions)
+endif ()
+
 if ((${CMAKE_CXX_COMPILER_ID} MATCHES "GNU") AND
     (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16))
     add_compile_options(-fdiagnostics-all-candidates -fdiagnostics-add-output=experimental-html)
@@ -63,6 +70,10 @@ globSources(GLOB_RECURSE cccPipeOperatorHelperTestSources 17 "pipe_operator_help
 globSources(GLOB expectedTestSources 17 "expected_test/*.cc")
 
 globSources(GLOB_RECURSE hashTestSources 11 "hash_test/*.cc")
+# Constructing std::shared_ptr<T[]> from a raw pointer is a C++17 feature;
+# libc++ rejects it in earlier modes
+list(REMOVE_ITEM hashTestSources "${CMAKE_CURRENT_SOURCE_DIR}/hash_test/smart_ptr.cc")
+globSources(GLOB hashSmartPtrTestSources 17 "hash_test/smart_ptr.cc")
 globSources(GLOB_RECURSE inplaceTestSources 11 "inplace/*.cc")
 globSources(FILES whenTestSources 17 when_test.cc)
 globSources(GLOB_RECURSE utilityTestSources 11 "utility_test/*.cc")
@@ -72,6 +83,7 @@ target_sources(${PROJECT_NAME} PRIVATE
     ${cccPipeOperatorHelperTestSources}
     ${expectedTestSources}
     ${hashTestSources}
+    ${hashSmartPtrTestSources}
     ${inplaceTestSources}
     ${utilityTestSources}
     ${whenTestSources}
