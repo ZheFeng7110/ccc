@@ -42,6 +42,11 @@ if (CCC_USE_CPP_MODULES)
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
     )
+    # Exported targets with CXX_MODULES file sets need cxx_std_20 among their
+    # compile features, otherwise consumers fail generation with
+    # "no C++ standard found" for the module collation target.
+    target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
+
     target_sources(${PROJECT_NAME} PUBLIC FILE_SET modules TYPE CXX_MODULES FILES
         modules/ccc.ccm
         modules/ccc.utility.ccm
