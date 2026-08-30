@@ -26,9 +26,9 @@ namespace detail {
 
 // Fixed seeds so that empty optionals / valueless variants hash distinctly
 // from any engaged state
-constexpr std::size_t hash_seed_nullopt = 0x6e756c6cU;    // "null"
-constexpr std::size_t hash_seed_monostate = 0x6d6f6e6fU;  // "mono"
-constexpr std::size_t hash_seed_valueless = 0x766c6573U;  // "vles"
+inline constexpr std::size_t hash_seed_nullopt = 0x6e756c6cU;    // "null"
+inline constexpr std::size_t hash_seed_monostate = 0x6d6f6e6fU;  // "mono"
+inline constexpr std::size_t hash_seed_valueless = 0x766c6573U;  // "vles"
 
 template<std::size_t Index, typename... Types>
 inline CCC_CPP20_CONSTEXPR typename std::enable_if<Index == sizeof...(Types), std::size_t>::type
