@@ -77,6 +77,7 @@ message(STATUS "* ccc_DIR=${ccc_DIR}")
 find_package(ccc REQUIRED)
 
 add_executable(ccc_install_test main.cc)
+target_compile_features(ccc_install_test PRIVATE cxx_std_CCC_INSTALL_TEST_STD)
 target_link_libraries(ccc_install_test PRIVATE ccc::ccc)
 '@
 
@@ -288,7 +289,8 @@ function Invoke-InstallTest
     # Build and run the minimal downstream project
     # ------------------------------------------------------------------
     $consumerSource = if ($UseModules) { $ModuleMainCc } else { $HeaderMainCc }
-    Set-Content -Path (Join-Path $consumerDir "CMakeLists.txt") -Value $ConsumerCMakeLists -NoNewline
+    $consumerCMakeLists = $ConsumerCMakeLists -replace 'CCC_INSTALL_TEST_STD', $CppStandard
+    Set-Content -Path (Join-Path $consumerDir "CMakeLists.txt") -Value $consumerCMakeLists -NoNewline
     Set-Content -Path (Join-Path $consumerDir "main.cc") -Value $consumerSource -NoNewline
 
     $consumerBuildDir = Join-Path $consumerDir "build"
@@ -451,10 +453,10 @@ foreach ($std in $Standards)
     # C++20+: also test module mode
     if ([int]$std -ge 20)
     {
-        # Keep the platform default generator: on Windows the Ninja generator
-        # requires an MSVC developer environment (cl on PATH) that plain CI
-        # shells do not provide, while the Visual Studio generator works.
-        Invoke-InstallTest -Generator $Generator -CppStandard $std -UseModules $true `
+        # Ninja is required here: consuming installed modules needs the
+        # BMI-only synthetic target, which the Visual Studio generator does
+        # not support.
+        Invoke-InstallTest -Generator "Ninja" -CppStandard $std -UseModules $true `
             -CcOverride $CcOverride -CxxOverride $CxxOverride -UseLibCXX:$UseLibCXX
     }
 }
