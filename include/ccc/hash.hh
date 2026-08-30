@@ -14,7 +14,6 @@
 #include "ccc/hash/optional_variant.hh"
 #include "ccc/hash/smart_ptr.hh"
 #include "ccc/hash/string.hh"
-#include "ccc/hash/system_error.hh"
 #include "ccc/hash/tuple.hh"
 #include "ccc/hash/utils.hh"
 #include "ccc/hash/vector.hh"

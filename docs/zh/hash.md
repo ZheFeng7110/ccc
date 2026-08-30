@@ -4,7 +4,7 @@
 
 ---
 
-`ccc.hash` 提供一套支持编译期计算的哈希设施：仿照 `std::hash` 策略设计的哈希函数对象 `ccc::hash`，以及用于组合自定义类型哈希的 `ccc::hash_combine`。覆盖基础类型（算术类型、枚举、指针）以及常用标准库类型（字符串、pair、tuple、optional、variant、智能指针、vector、bitset、错误码等）。
+`ccc.hash` 提供一套支持编译期计算的哈希设施：仿照 `std::hash` 策略设计的哈希函数对象 `ccc::hash`，以及用于组合自定义类型哈希的 `ccc::hash_combine`。覆盖基础类型（算术类型、枚举、指针）以及常用标准库类型（字符串、pair、tuple、optional、variant、智能指针、vector、bitset 等）。
 
 ## 特性
 
@@ -43,7 +43,6 @@ import ccc.hash;
 - optional 与 variant（C++17）：`std::optional<T>`（空态使用固定种子，与任何有效值区分开）、`std::variant<Ts...>`（混入备选项索引，同一值在不同备选项中哈希不同），以及 `std::monostate`。
 - 智能指针：`std::unique_ptr<T, D>` 与 `std::shared_ptr<T>` 对存储的指针本身哈希，绝不解引用所指对象（与标准库策略一致）；空指针哈希为 `0`。
 - vector：`std::vector<T>`（按顺序逐元素合并，并把长度混入结果），另有专门的 `std::vector<bool>` 特化，将位打包成字后计算。
-- 错误类型：`std::error_code` 与 `std::error_condition`，由整数值与类别对象的地址组合而成。
 - `std::bitset<N>`：位打包成字后合并，第 64 位之后的位同样参与哈希。
 
 ```cpp
@@ -111,4 +110,4 @@ constexpr std::size_t hash_of_string = ccc::hash<std::string_view>()("hello");
 - `test/hash_test/basic_types.cc`、`test/hash_test/string.cc`
 - `test/hash_test/combine.cc`、`test/hash_test/tuple.cc`
 - `test/hash_test/optional_variant.cc`、`test/hash_test/smart_ptr.cc`
-- `test/hash_test/vector.cc`、`test/hash_test/bitset.cc`、`test/hash_test/system_error.cc`
+- `test/hash_test/vector.cc`、`test/hash_test/bitset.cc`

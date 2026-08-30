@@ -4,7 +4,7 @@ English | [简体中文](../zh/hash.md)
 
 ---
 
-`ccc.hash` provides a compile-time-capable hash facility: the `ccc::hash` function object, modeled on the `std::hash` policy, together with `ccc::hash_combine` for building hashes of composite values. It covers basic types (arithmetic types, enumerations, pointers) as well as common standard library types (strings, pairs, tuples, optionals, variants, smart pointers, vectors, bitsets, error codes, and more).
+`ccc.hash` provides a compile-time-capable hash facility: the `ccc::hash` function object, modeled on the `std::hash` policy, together with `ccc::hash_combine` for building hashes of composite values. It covers basic types (arithmetic types, enumerations, pointers) as well as common standard library types (strings, pairs, tuples, optionals, variants, smart pointers, vectors, bitsets, and more).
 
 ## Features
 
@@ -43,7 +43,6 @@ Enabled specializations:
 - Optionals and variants (C++17): `std::optional<T>` (empty state uses a fixed seed distinct from any engaged value), `std::variant<Ts...>` (mixes the alternative index, so the same value in different alternatives hashes differently), and `std::monostate`.
 - Smart pointers: `std::unique_ptr<T, D>` and `std::shared_ptr<T>` hash the stored pointer itself, never the pointee (matching the standard library policy); a null pointer hashes to `0`.
 - Vectors: `std::vector<T>` (elements combined in order, with the length mixed into the result), plus a dedicated `std::vector<bool>` specialization that packs bits into words.
-- Error types: `std::error_code` and `std::error_condition`, combining the integer value with the category object's address.
 - `std::bitset<N>`: bits are packed into words and combined, so bits beyond the first 64 also participate in the hash.
 
 ```cpp
@@ -111,4 +110,4 @@ For more usage examples, see the test files:
 - `test/hash_test/basic_types.cc`, `test/hash_test/string.cc`
 - `test/hash_test/combine.cc`, `test/hash_test/tuple.cc`
 - `test/hash_test/optional_variant.cc`, `test/hash_test/smart_ptr.cc`
-- `test/hash_test/vector.cc`, `test/hash_test/bitset.cc`, `test/hash_test/system_error.cc`
+- `test/hash_test/vector.cc`, `test/hash_test/bitset.cc`
