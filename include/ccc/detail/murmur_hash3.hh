@@ -44,11 +44,12 @@ inline CCC_CPP20_CONSTEXPR std::uint32_t murmur_hash3_finalize(std::uint32_t val
 }
 
 template<typename CharT>
-inline CCC_CPP20_CONSTEXPR std::size_t murmur_hash3(const CharT* data, std::size_t length) noexcept
+inline CCC_CPP20_CONSTEXPR std::size_t murmur_hash3(const CharT* data,
+                                                    std::size_t length,
+                                                    std::uint32_t seed = 0x9747b28cU) noexcept
 {
     const std::size_t byte_length = length * sizeof(CharT);
     const std::size_t block_count = byte_length / 4U;
-    std::uint32_t hash = 0U;
 
     for (std::size_t block_index = 0; block_index < block_count; ++block_index) {
         const std::size_t byte_index = block_index * 4U;
@@ -61,9 +62,9 @@ inline CCC_CPP20_CONSTEXPR std::size_t murmur_hash3(const CharT* data, std::size
         block = murmur_hash3_rotate_left(block, 15U);
         block *= 0x1b873593U;
 
-        hash ^= block;
-        hash = murmur_hash3_rotate_left(hash, 13U);
-        hash = hash * 5U + 0xe6546b64U;
+        seed ^= block;
+        seed = murmur_hash3_rotate_left(seed, 13U);
+        seed = seed * 5U + 0xe6546b64U;
     }
 
     const std::size_t tail_index = block_count * 4U;
@@ -81,11 +82,11 @@ inline CCC_CPP20_CONSTEXPR std::size_t murmur_hash3(const CharT* data, std::size
         tail *= 0xcc9e2d51U;
         tail = murmur_hash3_rotate_left(tail, 15U);
         tail *= 0x1b873593U;
-        hash ^= tail;
+        seed ^= tail;
     }
 
-    hash ^= static_cast<std::uint32_t>(byte_length);
-    return static_cast<std::size_t>(murmur_hash3_finalize(hash));
+    seed ^= static_cast<std::uint32_t>(byte_length);
+    return static_cast<std::size_t>(murmur_hash3_finalize(seed));
 }
 
 template<typename CharT>

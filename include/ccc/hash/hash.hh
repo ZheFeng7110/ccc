@@ -35,7 +35,7 @@ struct unsigned_integer_of_size {
                 Size == sizeof(unsigned int),
                 unsigned int,
                 typename std::conditional<Size == sizeof(unsigned long), unsigned long, unsigned long long>::type>::
-                type>::type>::type type;
+                type>::type>::type;
 
     static_assert(sizeof(type) == Size, "No standard unsigned integer type has the required size");
 };
@@ -72,7 +72,7 @@ struct hash {
 };
 
 template<typename T>
-struct hash<T, typename = std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value>::type> {
+struct hash<T, typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value>::type> {
     inline CCC_CPP20_CONSTEXPR std::size_t operator()(const T& value) const noexcept
     {
         return detail::hash_scalar(value, std::integral_constant<bool, sizeof(T) == sizeof(std::size_t)>());
@@ -80,7 +80,7 @@ struct hash<T, typename = std::enable_if<std::is_integral<T>::value || std::is_f
 };
 
 template<typename T>
-struct hash<T, typename = std::enable_if<std::is_enum<T>::value>::type> {
+struct hash<T, typename std::enable_if<std::is_enum<T>::value>::type> {
     inline CCC_CPP20_CONSTEXPR std::size_t operator()(const T& value) const noexcept
     {
         using underlying_type = typename std::underlying_type<T>::type;

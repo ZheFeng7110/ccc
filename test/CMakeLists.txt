@@ -62,6 +62,7 @@ endfunction ()
 globSources(GLOB_RECURSE cccPipeOperatorHelperTestSources 17 "pipe_operator_helper_test/*.cc")
 globSources(GLOB expectedTestSources 17 "expected_test/*.cc")
 
+globSources(GLOB_RECURSE hashTestSources 11 "hash_test/*.cc")
 globSources(GLOB_RECURSE inplaceTestSources 11 "inplace/*.cc")
 globSources(FILES whenTestSources 17 when_test.cc)
 globSources(GLOB_RECURSE utilityTestSources 11 "utility_test/*.cc")
@@ -70,6 +71,7 @@ target_sources(${PROJECT_NAME} PRIVATE
 
     ${cccPipeOperatorHelperTestSources}
     ${expectedTestSources}
+    ${hashTestSources}
     ${inplaceTestSources}
     ${utilityTestSources}
     ${whenTestSources}
