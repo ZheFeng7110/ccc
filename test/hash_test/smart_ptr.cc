@@ -50,7 +50,16 @@ TEST_CASE("Hash - Shared pointer")
     auto other = std::shared_ptr<int>(new int(42));
     CHECK(ccc::hash<std::shared_ptr<int>>()(shared) != ccc::hash<std::shared_ptr<int>>()(other));
 
-    // Array form
-    auto array_ptr = std::shared_ptr<int[]>(new int[3]{1, 2, 3});
+    // Array form. std::shared_ptr<T[]> array support is a C++17 feature
+    // (P0674): pre-C++17 libc++ rejects both the raw-pointer constructor and
+    // std::make_shared<T[]>, libstdc++ only offers the constructor as an
+    // extension in C++11/14, and MSVC's unconstrained std::make_shared
+    // generic overload breaks make_shared<T[]> until its C++20 constraints.
+#if (__cplusplus >= 202002L)
+    auto array_ptr = std::make_shared<int[]>(3);
     CHECK(ccc::hash<std::shared_ptr<int[]>>()(array_ptr) == ccc::hash<std::shared_ptr<int[]>>()(array_ptr));
+#elif (__cplusplus >= 201703L)
+    auto array_ptr = std::shared_ptr<int[]>(new int[3]);
+    CHECK(ccc::hash<std::shared_ptr<int[]>>()(array_ptr) == ccc::hash<std::shared_ptr<int[]>>()(array_ptr));
+#endif
 }
