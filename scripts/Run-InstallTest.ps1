@@ -451,7 +451,10 @@ foreach ($std in $Standards)
     # C++20+: also test module mode
     if ([int]$std -ge 20)
     {
-        Invoke-InstallTest -Generator "Ninja" -CppStandard $std -UseModules $true `
+        # Keep the platform default generator: on Windows the Ninja generator
+        # requires an MSVC developer environment (cl on PATH) that plain CI
+        # shells do not provide, while the Visual Studio generator works.
+        Invoke-InstallTest -Generator $Generator -CppStandard $std -UseModules $true `
             -CcOverride $CcOverride -CxxOverride $CxxOverride -UseLibCXX:$UseLibCXX
     }
 }
