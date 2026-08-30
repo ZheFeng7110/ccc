@@ -40,6 +40,7 @@ import ccc.expected;  // import expected component only
 - [ccc.expected](docs/en/expected.md) - Monadic expected with optional criterion support
 - [ccc.inplace](docs/en/inplace/inplace.md) - Stack-allocated, compile-time fixed-capacity "in-place" containers
 - [ccc.resource_guard](docs/en/resource_guard.md) - RAII-based resource management with defer, try_finally, and with patterns
+- [ccc.hash](docs/en/hash.md) - Compile-time-capable hashing for basic and standard library types with hash_combine
 - [ccc.when](docs/en/when.md) - Generalized switch-like expression inspired by Kotlin's when
 
 ## Building
