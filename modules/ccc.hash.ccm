@@ -6,4 +6,5 @@ export module ccc.hash;
 
 export namespace ccc {
 using ::ccc::hash;
+using ::ccc::hash_combine;
 }  // namespace ccc

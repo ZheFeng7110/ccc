@@ -11,12 +11,7 @@
 
 #include <cstddef>
 #include <cstring>
-#include <string>
 #include <type_traits>
-
-#if (__cplusplus >= 201703L)
-#include <string_view>
-#endif
 
 #ifdef TEST_USE_MODULE
 import ccc.hash;
@@ -75,9 +70,6 @@ std::size_t expected_scalar_hash(const T& value)
 #if (__cplusplus >= 202002L)
 static_assert(ccc::hash<unsigned int>()(114514U) == ccc::hash<unsigned int>()(114514U),
               "ccc::hash must be constexpr in C++20");
-
-static_assert(ccc::hash<std::string_view>()(std::string_view("hello")) == 1568626408U,
-              "ccc::hash must use MurmurHash3 for strings");
 #endif
 
 }  // namespace
@@ -115,21 +107,4 @@ TEST_CASE("Hash - Pointer")
 TEST_CASE("Hash - Enumeration")
 {
     CHECK(ccc::hash<TestEnum>()(TestEnum::value) == expected_scalar_hash(static_cast<unsigned short>(TestEnum::value)));
-}
-
-TEST_CASE("Hash - Strings")
-{
-    const char* text = "hello";
-
-    CHECK(ccc::hash<const char*>()(text) == expected_scalar_hash(text));
-    CHECK(ccc::hash<const char*>()(nullptr) == 0U);
-
-    const std::string str{text};
-    CHECK(ccc::hash<std::string>()(str) == 1568626408U);
-    CHECK(ccc::hash<std::string>()(str) == ccc::hash<std::string>()(text));
-
-#if (__cplusplus >= 201703L)
-    const std::string_view string_view{text};
-    CHECK(ccc::hash<std::string_view>()(string_view) == ccc::hash<std::string>()(text));
-#endif
 }

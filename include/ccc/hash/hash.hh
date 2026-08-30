@@ -10,15 +10,10 @@
 #include "ccc/detail/config.hh"
 
 #include <cstddef>
-#include <string>
 #include <type_traits>
-
-#if (__cplusplus >= 201703L)
-#include <string_view>
-#endif
+#include <utility>
 
 #include "ccc/detail/bit_cast_impl.hh"
-#include "ccc/detail/murmur_hash3.hh"
 
 namespace ccc {
 namespace detail {
@@ -105,27 +100,54 @@ struct hash<std::nullptr_t, void> {
     }
 };
 
-template<typename CharT, typename Traits, typename Allocator>
-struct hash<std::basic_string<CharT, Traits, Allocator>, void> {
-    using string_type = std::basic_string<CharT, Traits, Allocator>;
+namespace detail {
 
-    inline CCC_CPP20_CONSTEXPR std::size_t operator()(const string_type& value) const noexcept
-    {
-        return detail::murmur_hash3(value.data(), value.size());
-    }
+// C++17 void_t, scoped to the hash component to keep it self-contained
+template<typename...>
+struct hash_void {
+    using type = void;
 };
 
-#if (__cplusplus >= 201703L)
-template<typename CharT, typename Traits>
-struct hash<std::basic_string_view<CharT, Traits>, void> {
-    using string_view_type = std::basic_string_view<CharT, Traits>;
+template<typename... Ts>
+using hash_void_t = typename hash_void<Ts...>::type;
 
-    inline CCC_CPP20_CONSTEXPR std::size_t operator()(const string_view_type& value) const noexcept
-    {
-        return detail::murmur_hash3(value.data(), value.size());
-    }
+// True when `ccc::hash<T>` is an enabled specialization (i.e. callable)
+template<typename T, typename = void>
+struct is_hashable : std::false_type {
 };
-#endif
+
+template<typename T>
+struct is_hashable<T, hash_void_t<decltype(std::declval<hash<T>&>()(std::declval<const T&>()))>> : std::true_type {
+};
+
+template<typename T, typename = void>
+struct is_nothrow_hashable : std::false_type {
+};
+
+template<typename T>
+struct is_nothrow_hashable<T, hash_void_t<decltype(std::declval<hash<T>&>()(std::declval<const T&>()))>>
+    : std::integral_constant<bool, noexcept(std::declval<hash<T>&>()(std::declval<const T&>()))> {
+};
+
+// Conjunctions over a pack of element types, for composite specializations
+template<typename... Ts>
+struct all_hashable : std::true_type {
+};
+
+template<typename T, typename... Rest>
+struct all_hashable<T, Rest...> : std::integral_constant<bool, is_hashable<T>::value && all_hashable<Rest...>::value> {
+};
+
+template<typename... Ts>
+struct all_nothrow_hashable : std::true_type {
+};
+
+template<typename T, typename... Rest>
+struct all_nothrow_hashable<T, Rest...>
+    : std::integral_constant<bool, is_nothrow_hashable<T>::value && all_nothrow_hashable<Rest...>::value> {
+};
+
+}  // namespace detail
 
 }  // namespace ccc
 
