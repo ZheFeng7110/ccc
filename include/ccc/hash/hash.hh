@@ -53,13 +53,14 @@ inline CCC_CPP20_CONSTEXPR std::size_t hash_scalar(const T& value, std::false_ty
     return bit_cast_impl<unsigned_type>(value);
 }
 
-template<typename CharT>
-struct c_string_hash {
-    inline CCC_CPP20_CONSTEXPR std::size_t operator()(const CharT* value) const noexcept
-    {
-        return value == nullptr ? 0U : murmur_hash3(value, c_string_length(value));
+template<typename T>
+inline CCC_CPP20_CONSTEXPR std::size_t hash_arithmetic(const T& value) noexcept
+{
+    if (std::is_floating_point<T>::value && value == T(0)) {
+        return 0U;
     }
-};
+    return hash_scalar(value, std::integral_constant<bool, sizeof(T) == sizeof(std::size_t)>());
+}
 
 }  // namespace detail
 
@@ -75,7 +76,7 @@ template<typename T>
 struct hash<T, typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value>::type> {
     inline CCC_CPP20_CONSTEXPR std::size_t operator()(const T& value) const noexcept
     {
-        return detail::hash_scalar(value, std::integral_constant<bool, sizeof(T) == sizeof(std::size_t)>());
+        return detail::hash_arithmetic(value);
     }
 };
 
@@ -97,26 +98,12 @@ struct hash<T*, void> {
 };
 
 template<>
-struct hash<const char*, void> : detail::c_string_hash<char> {
+struct hash<std::nullptr_t, void> {
+    inline CCC_CPP20_CONSTEXPR std::size_t operator()(std::nullptr_t) const noexcept
+    {
+        return 0U;
+    }
 };
-
-template<>
-struct hash<const wchar_t*, void> : detail::c_string_hash<wchar_t> {
-};
-
-template<>
-struct hash<const char16_t*, void> : detail::c_string_hash<char16_t> {
-};
-
-template<>
-struct hash<const char32_t*, void> : detail::c_string_hash<char32_t> {
-};
-
-#if defined(__cpp_char8_t)
-template<>
-struct hash<const char8_t*, void> : detail::c_string_hash<char8_t> {
-};
-#endif
 
 template<typename CharT, typename Traits, typename Allocator>
 struct hash<std::basic_string<CharT, Traits, Allocator>, void> {

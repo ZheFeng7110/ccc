@@ -90,6 +90,16 @@ TEST_CASE("Hash - Scalar types")
     CHECK(ccc::hash<unsigned int>()(114514U) == expected_scalar_hash(114514U));
     CHECK(ccc::hash<float>()(114.514F) == expected_scalar_hash(114.514F));
     CHECK(ccc::hash<double>()(114514.1919) == expected_scalar_hash(114514.1919));
+
+    CHECK(ccc::hash<float>()(0.0F) == 0U);
+    CHECK(ccc::hash<float>()(-0.0F) == 0U);
+    CHECK(ccc::hash<double>()(0.0) == 0U);
+    CHECK(ccc::hash<double>()(-0.0) == 0U);
+}
+
+TEST_CASE("Hash - Null pointer type")
+{
+    CHECK(ccc::hash<std::nullptr_t>()(nullptr) == 0U);
 }
 
 TEST_CASE("Hash - Pointer")
@@ -110,16 +120,13 @@ TEST_CASE("Hash - Enumeration")
 TEST_CASE("Hash - Strings")
 {
     const char* text = "hello";
-    const wchar_t* wide_text = L"hello";
-    const char16_t* utf16_text = u"hello";
-    const char32_t* utf32_text = U"hello";
 
-    CHECK(ccc::hash<const char*>()(text) == 1568626408U);
-    CHECK(ccc::hash<const char*>()(text) == ccc::hash<std::string>()(text));
-    CHECK(0U == ccc::hash<const char*>()(nullptr));
-    CHECK(ccc::hash<const wchar_t*>()(wide_text) == ccc::hash<std::wstring>()(wide_text));
-    CHECK(ccc::hash<const char16_t*>()(utf16_text) == ccc::hash<std::u16string>()(utf16_text));
-    CHECK(ccc::hash<const char32_t*>()(utf32_text) == ccc::hash<std::u32string>()(utf32_text));
+    CHECK(ccc::hash<const char*>()(text) == expected_scalar_hash(text));
+    CHECK(ccc::hash<const char*>()(nullptr) == 0U);
+
+    const std::string str{text};
+    CHECK(ccc::hash<std::string>()(str) == 1568626408U);
+    CHECK(ccc::hash<std::string>()(str) == ccc::hash<std::string>()(text));
 
 #if (__cplusplus >= 201703L)
     const std::string_view string_view{text};

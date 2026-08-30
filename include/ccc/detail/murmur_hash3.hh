@@ -89,16 +89,6 @@ inline CCC_CPP20_CONSTEXPR std::size_t murmur_hash3(const CharT* data,
     return static_cast<std::size_t>(murmur_hash3_finalize(seed));
 }
 
-template<typename CharT>
-inline CCC_CPP20_CONSTEXPR std::size_t c_string_length(const CharT* value) noexcept
-{
-    std::size_t length = 0U;
-    while (value[length] != CharT()) {
-        ++length;
-    }
-    return length;
-}
-
 }  // namespace detail
 }  // namespace ccc
 
