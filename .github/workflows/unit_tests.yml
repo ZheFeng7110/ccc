@@ -30,18 +30,7 @@ jobs:
       - name: Install build tools
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y ninja-build ca-certificates gpg wget
-          # CMake >= 4.4 is required: consuming installed C++ module targets
-          # needs the synthetic BMI targets to adopt the consumer's compile
-          # features (fixed in 4.4; 3.x builds BMIs with the provider's
-          # standard, which breaks GCC consumers using a newer dialect).
-          wget -qO- https://apt.kitware.com/keys/kitware-archive-latest.asc \
-            | gpg --dearmor - \
-            | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg > /dev/null
-          echo "deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main" \
-            | sudo tee /etc/apt/sources.list.d/kitware.list > /dev/null
-          sudo apt-get update -qq
-          sudo apt-get install -y cmake
+          sudo apt-get install -y ninja-build
 
       - name: Install toolchains via xlings
         env:
@@ -53,6 +42,11 @@ jobs:
           export PATH="$XLINGS:$HOME/.xlings/bin:$PATH"
           xlings config --mirror GLOBAL
           xlings update
+          # CMake >= 4.4 is required: consuming installed C++ module targets
+          # needs the synthetic BMI targets to adopt the consumer's compile
+          # features (fixed in 4.4; 3.x builds BMIs with the provider's
+          # standard, which breaks GCC consumers using a newer dialect).
+          xlings install cmake@4.4.2 -y -g
           xlings install gcc@16.1.0 -y -g
           xlings install llvm@22.1.8 -y -g
           echo "$XLINGS" >> "$GITHUB_PATH"
