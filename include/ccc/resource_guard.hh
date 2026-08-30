@@ -36,15 +36,17 @@ private:
 };
 
 template<typename TryBlock, typename FinallyBlock>
-inline constexpr void try_finally(TryBlock&& try_block, FinallyBlock&& finally_block)
+inline CCC_CPP14_CONSTEXPR void try_finally(TryBlock&& try_block, FinallyBlock&& finally_block)
 {
     using defer_t = defer<typename std::decay<FinallyBlock>::type>;
     CCC_MAYBE_UNUSED defer_t _{std::forward<FinallyBlock>(finally_block)};
     std::forward<TryBlock>(try_block)();
 }
 
+// C++17 is the first standard where the lambda in the body is allowed in a
+// constexpr function
 template<typename T, typename Func>
-inline constexpr auto with(T&& value, Func&& func) -> decltype(std::forward<Func>(func)())
+inline CCC_CPP17_CONSTEXPR auto with(T&& value, Func&& func) -> decltype(std::forward<Func>(func)())
 {
     std::forward<T>(value).with_start();
     auto end_action = [&] { std::forward<T>(value).with_end(); };
