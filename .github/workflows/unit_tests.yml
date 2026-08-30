@@ -57,8 +57,13 @@ jobs:
         run: ./scripts/Run-UnitTest.ps1 -Verbose -CcOverride gcc -CxxOverride g++
 
       - name: Test — Clang 22 (libc++)
+        # -Clean: this step reuses the build roots of the GCC step above;
+        # reconfiguring a cached build dir for a different compiler makes
+        # CMake delete the cache and re-run, dropping the command-line -D
+        # variables (e.g. CCC_BUILD_TESTS) and silently reusing stale
+        # binaries.
         shell: pwsh
-        run: ./scripts/Run-UnitTest.ps1 -Verbose -UseLibCXX -CcOverride clang -CxxOverride clang++
+        run: ./scripts/Run-UnitTest.ps1 -Verbose -Clean -UseLibCXX -CcOverride clang -CxxOverride clang++
 
       - name: Install Test — GCC 16
         shell: pwsh
@@ -114,19 +119,25 @@ jobs:
         run: ./scripts/Run-UnitTest.ps1 -Verbose -UseLibCXX -CcOverride clang -CxxOverride clang++
 
       - name: Test — Apple Clang (libc++)
+        # -Clean: same reason as above, the LLVM Clang step ran before.
+        # -SkipModules: CMake cannot do module dependency scanning with
+        # AppleClang (no compatible clang-scan-deps flow), so module mode
+        # cannot be built with this toolchain.
         shell: pwsh
-        run: ./scripts/Run-UnitTest.ps1 -Verbose -UseLibCXX -CcOverride /usr/bin/clang -CxxOverride /usr/bin/clang++
+        run: ./scripts/Run-UnitTest.ps1 -Verbose -Clean -SkipModules -UseLibCXX -CcOverride /usr/bin/clang -CxxOverride /usr/bin/clang++
 
       - name: Install Test — LLVM Clang 22 (libc++)
         shell: pwsh
         run: ./scripts/Run-InstallTest.ps1 -Verbose -UseLibCXX -CcOverride clang -CxxOverride clang++
 
       - name: Install Test — Apple Clang (libc++)
-        # -Clean: this step reuses the build/install roots of the LLVM step
+        # -Clean: reuses the build/install roots of the LLVM Clang step
         # above; reconfiguring a cached consumer dir for a different compiler
         # makes CMake delete the cache and re-run, losing CMAKE_PREFIX_PATH.
+        # -SkipModules: CMake cannot do module dependency scanning with
+        # AppleClang (no compatible clang-scan-deps flow).
         shell: pwsh
-        run: ./scripts/Run-InstallTest.ps1 -Verbose -Clean -UseLibCXX -CcOverride /usr/bin/clang -CxxOverride /usr/bin/clang++
+        run: ./scripts/Run-InstallTest.ps1 -Verbose -Clean -SkipModules -UseLibCXX -CcOverride /usr/bin/clang -CxxOverride /usr/bin/clang++
 
   windows:
     name: Windows

@@ -48,7 +48,8 @@ param(
     [string]$BuildType = "Release",
     [string]$CcOverride = "",
     [string]$CxxOverride = "",
-    [switch]$UseLibCXX
+    [switch]$UseLibCXX,
+    [switch]$SkipModules
 )
 
 $ErrorActionPreference = "Stop"
@@ -92,22 +93,31 @@ function Get-MacOsSdkPath
 function Get-LibCxxIncludeDir
 {
     param([string]$Compiler)
-    if ($Platform -ne "macos") { return "" }
     $resolved = if ($Compiler) { $Compiler } else { "clang++" }
     $cmd = Get-Command $resolved -ErrorAction SilentlyContinue
     if (-not $cmd) { return "" }
-    $llvmPrefix = Split-Path -Parent (Split-Path -Parent $cmd.Source)
-    $includeDir = Join-Path $llvmPrefix "include/c++/v1"
-    if (Test-Path $includeDir) { return $includeDir }
+    # clang-scan-deps does not reproduce the driver's libc++ include path
+    # inference, so locate the headers explicitly. Prefer the symlinked
+    # wrapper prefix (xlings "subos"), then the real toolchain prefix.
+    $candidates = @($cmd.Source)
+    $linkTarget = (Get-Item $cmd.Source -ErrorAction SilentlyContinue).Target
+    if ($linkTarget) { $candidates += @($linkTarget) }
+    foreach ($exe in $candidates)
+    {
+        $llvmPrefix = Split-Path -Parent (Split-Path -Parent $exe)
+        $includeDir = Join-Path $llvmPrefix "include/c++/v1"
+        if (Test-Path $includeDir) { return $includeDir }
+    }
     return ""
 }
 
 function Get-LibCxxCxxFlags
 {
     # clang-scan-deps (invoked by CMake to scan C++20+ sources) does not
-    # reproduce the clang driver's own macOS SDK and libc++ include path
-    # inference, failing with "'cstddef' file not found". CMake forwards
-    # CMAKE_CXX_FLAGS to the scanner, so pass both paths explicitly.
+    # reproduce the clang driver's own SDK and libc++ include path inference,
+    # failing with "'cstddef' file not found". CMake forwards CMAKE_CXX_FLAGS
+    # to the scanner, so pass both paths explicitly. The SDK lookup is
+    # macOS-only; libc++ headers live in the toolchain prefix everywhere.
     param([string]$Compiler)
     $flags = "-stdlib=libc++"
     $sdkPath = Get-MacOsSdkPath
@@ -324,7 +334,7 @@ foreach ($std in $Standards)
         -CcOverride $CcOverride -CxxOverride $CxxOverride -UseLibCXX:$UseLibCXX
 
     # C++20+: also test module mode
-    if ([int]$std -ge 20)
+    if ([int]$std -ge 20 -and -not $SkipModules)
     {
         Invoke-BuildAndTest -Generator $Generator -CppStandard $std -UseModules $true `
             -CcOverride $CcOverride -CxxOverride $CxxOverride -UseLibCXX:$UseLibCXX
