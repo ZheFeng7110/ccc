@@ -78,6 +78,46 @@ function Get-Platform
 $Platform = Get-Platform
 
 # ----------------------------------------------------------------------
+# macOS SDK / libc++ helpers (needed by C++ module dependency scanning)
+# ----------------------------------------------------------------------
+function Get-MacOsSdkPath
+{
+    if ($Platform -ne "macos") { return "" }
+    if (-not (Get-Command xcrun -ErrorAction SilentlyContinue)) { return "" }
+    $sdkPath = & xcrun --show-sdk-path 2>$null
+    if ($LASTEXITCODE -eq 0 -and $sdkPath -and (Test-Path $sdkPath)) { return $sdkPath }
+    return ""
+}
+
+function Get-LibCxxIncludeDir
+{
+    param([string]$Compiler)
+    if ($Platform -ne "macos") { return "" }
+    $resolved = if ($Compiler) { $Compiler } else { "clang++" }
+    $cmd = Get-Command $resolved -ErrorAction SilentlyContinue
+    if (-not $cmd) { return "" }
+    $llvmPrefix = Split-Path -Parent (Split-Path -Parent $cmd.Source)
+    $includeDir = Join-Path $llvmPrefix "include/c++/v1"
+    if (Test-Path $includeDir) { return $includeDir }
+    return ""
+}
+
+function Get-LibCxxCxxFlags
+{
+    # clang-scan-deps (invoked by CMake to scan C++20+ sources) does not
+    # reproduce the clang driver's own macOS SDK and libc++ include path
+    # inference, failing with "'cstddef' file not found". CMake forwards
+    # CMAKE_CXX_FLAGS to the scanner, so pass both paths explicitly.
+    param([string]$Compiler)
+    $flags = "-stdlib=libc++"
+    $sdkPath = Get-MacOsSdkPath
+    if ($sdkPath) { $flags = "$flags -isysroot $sdkPath" }
+    $libcxxInclude = Get-LibCxxIncludeDir -Compiler $Compiler
+    if ($libcxxInclude) { $flags = "$flags -isystem $libcxxInclude" }
+    return $flags
+}
+
+# ----------------------------------------------------------------------
 # Results tracking
 # ----------------------------------------------------------------------
 $Script:AllResults = [System.Collections.Generic.List[PSCustomObject]]::new()
@@ -174,8 +214,9 @@ function Invoke-BuildAndTest
     }
     if ($UseLibCXX)
     {
-        $cmakeConfigArgs += "-DCMAKE_CXX_FLAGS=-stdlib=libc++"
-        Write-Host "    CXXFLAGS   = -stdlib=libc++"
+        $cxxFlags = Get-LibCxxCxxFlags -Compiler $CxxOverride
+        $cmakeConfigArgs += "-DCMAKE_CXX_FLAGS=$cxxFlags"
+        Write-Host "    CXXFLAGS   = $cxxFlags"
     }
 
     # --- Configure ---

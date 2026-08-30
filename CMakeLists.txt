@@ -60,8 +60,11 @@ if (CCC_USE_CPP_MODULES)
         modules/ccc.when.ccm
     )
 
+    # Must be PUBLIC: MSVC reports __cplusplus as 199711L without this flag,
+    # so consumers compiling the installed module units fail the C++11 check
+    # in include/ccc/detail/config.hh.
     if (MSVC)
-        target_compile_options(${PROJECT_NAME} PRIVATE /Zc:__cplusplus)
+        target_compile_options(${PROJECT_NAME} PUBLIC /Zc:__cplusplus)
     endif ()
 else ()
     add_library(${PROJECT_NAME} INTERFACE)

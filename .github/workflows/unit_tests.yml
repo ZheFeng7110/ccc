@@ -30,7 +30,18 @@ jobs:
       - name: Install build tools
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y cmake ninja-build
+          sudo apt-get install -y ninja-build ca-certificates gpg wget
+          # CMake >= 4.4 is required: consuming installed C++ module targets
+          # needs the synthetic BMI targets to adopt the consumer's compile
+          # features (fixed in 4.4; 3.x builds BMIs with the provider's
+          # standard, which breaks GCC consumers using a newer dialect).
+          wget -qO- https://apt.kitware.com/keys/kitware-archive-latest.asc \
+            | gpg --dearmor - \
+            | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg > /dev/null
+          echo "deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main" \
+            | sudo tee /etc/apt/sources.list.d/kitware.list > /dev/null
+          sudo apt-get update -qq
+          sudo apt-get install -y cmake
 
       - name: Install toolchains via xlings
         env:
