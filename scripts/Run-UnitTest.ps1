@@ -96,17 +96,14 @@ function Get-LibCxxIncludeDir
     $resolved = if ($Compiler) { $Compiler } else { "clang++" }
     $cmd = Get-Command $resolved -ErrorAction SilentlyContinue
     if (-not $cmd) { return "" }
-    # clang-scan-deps does not reproduce the driver's libc++ include path
-    # inference, so locate the headers explicitly. Prefer the symlinked
-    # wrapper prefix (xlings "subos"), then the real toolchain prefix.
-    $candidates = @($cmd.Source)
-    $linkTarget = (Get-Item $cmd.Source -ErrorAction SilentlyContinue).Target
-    if ($linkTarget) { $candidates += @($linkTarget) }
-    foreach ($exe in $candidates)
+    # Ask the driver for its libc++ location. xlings exposes clang++ through a
+    # relative symlink to its dispatcher, so deriving the toolchain prefix from
+    # the command path does not locate the actual LLVM installation.
+    $includeDir = & $cmd.Source --print-file-name=include/c++/v1 2>$null
+    $isValidPath = $includeDir -and [System.IO.Path]::IsPathRooted($includeDir) -and (Test-Path $includeDir)
+    if ($LASTEXITCODE -eq 0 -and $isValidPath)
     {
-        $llvmPrefix = Split-Path -Parent (Split-Path -Parent $exe)
-        $includeDir = Join-Path $llvmPrefix "include/c++/v1"
-        if (Test-Path $includeDir) { return $includeDir }
+        return $includeDir
     }
     return ""
 }
@@ -119,7 +116,10 @@ function Get-LibCxxCxxFlags
     # to the scanner, so pass both paths explicitly. The SDK lookup is
     # macOS-only; libc++ headers live in the toolchain prefix everywhere.
     param([string]$Compiler)
-    $flags = "-stdlib=libc++"
+    # xlings already selects libc++ in clang++.cfg, which makes this explicit
+    # selection unused during compile-only steps. The flag remains necessary
+    # for other Clang installations and for linking.
+    $flags = "-stdlib=libc++ -Wno-unused-command-line-argument"
     $sdkPath = Get-MacOsSdkPath
     if ($sdkPath) { $flags = "$flags -isysroot $sdkPath" }
     $libcxxInclude = Get-LibCxxIncludeDir -Compiler $Compiler
