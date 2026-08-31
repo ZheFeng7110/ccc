@@ -24,7 +24,6 @@
 #include <new>
 
 #if defined(__clang__) && __clang_major__ >= 22
-#pragma clang diagnostic push
 // Catch2 v2's TEST_CASE expands __COUNTER__, which clang 22 reports as a
 // C2y extension under -Wpedantic
 #pragma clang diagnostic ignored "-Wc2y-extensions"
@@ -39,10 +38,6 @@
 
 #ifdef _MSC_VER
 #pragma warning(pop)
-#endif
-
-#if defined(__clang__) && __clang_major__ >= 22
-#pragma clang diagnostic pop
 #endif
 
 #endif
