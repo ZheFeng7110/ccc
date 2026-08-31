@@ -7,6 +7,9 @@
 **/cmake-build-*/
 **/out/
 
+.clangd
+**/.cache/
+
 # mcpp build artifacts and local sandbox
 target/
 .mcpp/

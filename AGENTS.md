@@ -68,7 +68,7 @@ ccc 是一个跨平台的 C++ 实用功能库，提供一系列现代 C++ 工具
 - `build.mcpp` — 构建脚本，将 `modules/*.ccm` 生成到 `generated/modules/*.cppm`
 - `test/mcpp.toml` — `ccc-test` 测试包配置
 
-mcpp 会在首次构建时自动安装默认工具链，无需在 CI 中手写安装流程。用法参考 mcpp 仓库的 [`.agents/skills/mcpp-usage/SKILL.md`](https://github.com/mcpp-community/mcpp/blob/main/.agents/skills/mcpp-usage/SKILL.md) 和 [`docs/`](https://github.com/mcpp-community/mcpp/tree/main/docs) 目录。
+mcpp 用法参考 mcpp 仓库的 [`.agents/skills/mcpp-usage/SKILL.md`](https://github.com/mcpp-community/mcpp/blob/main/.agents/skills/mcpp-usage/SKILL.md) 和 [`docs/`](https://github.com/mcpp-community/mcpp/tree/main/docs) 目录。
 
 本地运行测试：
 
@@ -90,10 +90,7 @@ mcpp run -p test
 
 ### Git 提交规范
 
-- 提交信息统一使用英文，清晰描述变更内容和原因。
-- 提交信息第一行为一句简洁的总结，基于最近一次提交与当前变更之间的差异概括。
-- 若变更较复杂，可在第一行后空一行，以 `- ` 开头的条目补充原因、内容和影响；简单变更可省略。
-- 提交信息每行首字母大写，不以句号结尾，不使用 Markdown 语法。
+- 提交信息统一使用英文。
 - 最后一行标注 AI 辅助信息，格式为
   `Assisted-by: AGENT_NAME:MODEL_VERSION[, AGENT_NAME2:MODEL_VERSION2, ...] [TOOL1] [TOOL2]...`
   - AGENT_NAME：你使用的 AI 工具、框架或智能体的名称（例如 Claude, Copilot, Codex 等）。
@@ -106,4 +103,3 @@ mcpp run -p test
     - `Assisted-by: OpenCode:deepseek-v4-pro clang-tidy`
     - `Assisted-by: Claude:claude-3-opus coccinelle sparse`
     - `Assisted-by: Kimi Code:"K2.7 Code", OpenCode:GLM-5.1 clang-tidy`
-- 多行提交信息使用多个 `-m` 参数分行，不要用 `\n` 内嵌换行。

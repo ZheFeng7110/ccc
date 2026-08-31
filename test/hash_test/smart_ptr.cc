@@ -50,7 +50,10 @@ TEST_CASE("Hash - Shared pointer")
     auto other = std::shared_ptr<int>(new int(42));
     CHECK(ccc::hash<std::shared_ptr<int>>()(shared) != ccc::hash<std::shared_ptr<int>>()(other));
 
-    // Array form
-    auto array_ptr = std::shared_ptr<int[]>(new int[3]{1, 2, 3});
+    // Array form; std::shared_ptr<T[]> array support is a C++17 feature
+    // (P0674), and pre-C++17 libc++ rejects the raw-pointer constructor
+#if (__cplusplus >= 201703L)
+    auto array_ptr = std::shared_ptr<int[]>(new int[3]);
     CHECK(ccc::hash<std::shared_ptr<int[]>>()(array_ptr) == ccc::hash<std::shared_ptr<int[]>>()(array_ptr));
+#endif
 }

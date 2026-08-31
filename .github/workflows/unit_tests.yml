@@ -7,20 +7,9 @@ on:
     branches: [ develop ]
 
 jobs:
-  linux-cache-gcc:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - uses: ZheFeng7110/linux-build-gcc@v1
-        with:
-          gcc-version: 16.1.0
-
   linux:
     name: Linux
     runs-on: ubuntu-latest
-    needs: linux-cache-gcc
 
     steps:
       - name: Checkout
@@ -38,31 +27,54 @@ jobs:
           key: cpm-linux-${{ hashFiles('test/get_cpm.cmake') }}
           restore-keys: cpm-linux-
 
-      - name: Load GCC 16 from cache
-        uses: ZheFeng7110/linux-build-gcc/restore-cache@v1
-        with:
-          gcc-version: 16.1.0
-
       - name: Install build tools
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y cmake ninja-build clang-19 clang-tools-19 libc++-19-dev libc++abi-19-dev wget xz-utils
+          sudo apt-get install -y ninja-build
+
+      - name: Install toolchains via xlings
+        env:
+          XLINGS_NON_INTERACTIVE: '1'
+          XLINGS_RELEASE_MIRROR: GLOBAL
+        run: |
+          curl -fsSL https://d2learn.org/xlings-install.sh | bash
+          XLINGS="$HOME/.xlings/subos/current/bin"
+          export PATH="$XLINGS:$HOME/.xlings/bin:$PATH"
+          xlings config --mirror GLOBAL
+          xlings update
+          # CMake >= 4.4 is required: consuming installed C++ module targets
+          # needs the synthetic BMI targets to adopt the consumer's compile
+          # features (fixed in 4.4; 3.x builds BMIs with the provider's
+          # standard, which breaks GCC consumers using a newer dialect).
+          xlings install cmake@4.4.2 -y -g
+          xlings install gcc@16.1.0 -y -g
+          xlings install llvm@22.1.8 -y -g
+          echo "$XLINGS" >> "$GITHUB_PATH"
+          echo "$HOME/.xlings/bin" >> "$GITHUB_PATH"
 
       - name: Test — GCC 16
         shell: pwsh
-        run: ./scripts/Run-UnitTest.ps1 -Verbose -CcOverride $HOME/.local/gcc-16.1.0/bin/gcc -CxxOverride $HOME/.local/gcc-16.1.0/bin/g++
+        run: ./scripts/Run-UnitTest.ps1 -Verbose -CcOverride gcc -CxxOverride g++
 
-      - name: Test — Clang 19 (libc++)
+      - name: Test — Clang 22 (libc++)
+        # -Clean: this step reuses the build roots of the GCC step above;
+        # reconfiguring a cached build dir for a different compiler makes
+        # CMake delete the cache and re-run, dropping the command-line -D
+        # variables (e.g. CCC_BUILD_TESTS) and silently reusing stale
+        # binaries.
         shell: pwsh
-        run: ./scripts/Run-UnitTest.ps1 -Verbose -UseLibCXX -CcOverride clang-19 -CxxOverride clang++-19
+        run: ./scripts/Run-UnitTest.ps1 -Verbose -Clean -UseLibCXX -CcOverride clang -CxxOverride clang++
 
       - name: Install Test — GCC 16
         shell: pwsh
-        run: ./scripts/Run-InstallTest.ps1 -Verbose -CcOverride $HOME/.local/gcc-16.1.0/bin/gcc -CxxOverride $HOME/.local/gcc-16.1.0/bin/g++
+        run: ./scripts/Run-InstallTest.ps1 -Verbose -CcOverride gcc -CxxOverride g++
 
-      - name: Install Test — Clang 19 (libc++)
+      - name: Install Test — Clang 22 (libc++)
+        # -Clean: this step reuses the build/install roots of the GCC step
+        # above; reconfiguring a cached consumer dir for a different compiler
+        # makes CMake delete the cache and re-run, losing CMAKE_PREFIX_PATH.
         shell: pwsh
-        run: ./scripts/Run-InstallTest.ps1 -Verbose -UseLibCXX -CcOverride clang-19 -CxxOverride clang++-19
+        run: ./scripts/Run-InstallTest.ps1 -Verbose -Clean -UseLibCXX -CcOverride clang -CxxOverride clang++
 
   macos:
     name: macOS
@@ -86,23 +98,46 @@ jobs:
 
       - name: Install build tools
         run: |
-          brew install ninja gcc@15
+          brew install ninja
 
-      - name: Test — GCC 15
-        shell: pwsh
-        run: ./scripts/Run-UnitTest.ps1 -Verbose -CcOverride gcc-15 -CxxOverride g++-15
+      - name: Install toolchains via xlings
+        env:
+          XLINGS_NON_INTERACTIVE: '1'
+          XLINGS_RELEASE_MIRROR: GLOBAL
+        run: |
+          curl -fsSL https://d2learn.org/xlings-install.sh | bash
+          XLINGS="$HOME/.xlings/subos/current/bin"
+          export PATH="$XLINGS:$HOME/.xlings/bin:$PATH"
+          xlings config --mirror GLOBAL
+          xlings update
+          xlings install llvm@22.1.8 -y -g
+          echo "$XLINGS" >> "$GITHUB_PATH"
+          echo "$HOME/.xlings/bin" >> "$GITHUB_PATH"
 
-      - name: Test — Apple Clang (libc++)
+      - name: Test — LLVM Clang 22 (libc++)
         shell: pwsh
         run: ./scripts/Run-UnitTest.ps1 -Verbose -UseLibCXX -CcOverride clang -CxxOverride clang++
 
-      - name: Install Test — GCC 15
+      - name: Test — Apple Clang (libc++)
+        # -Clean: same reason as above, the LLVM Clang step ran before.
+        # -SkipModules: CMake cannot do module dependency scanning with
+        # AppleClang (no compatible clang-scan-deps flow), so module mode
+        # cannot be built with this toolchain.
         shell: pwsh
-        run: ./scripts/Run-InstallTest.ps1 -Verbose -CcOverride gcc-15 -CxxOverride g++-15
+        run: ./scripts/Run-UnitTest.ps1 -Verbose -Clean -SkipModules -UseLibCXX -CcOverride /usr/bin/clang -CxxOverride /usr/bin/clang++
 
-      - name: Install Test — Apple Clang (libc++)
+      - name: Install Test — LLVM Clang 22 (libc++)
         shell: pwsh
         run: ./scripts/Run-InstallTest.ps1 -Verbose -UseLibCXX -CcOverride clang -CxxOverride clang++
+
+      - name: Install Test — Apple Clang (libc++)
+        # -Clean: reuses the build/install roots of the LLVM Clang step
+        # above; reconfiguring a cached consumer dir for a different compiler
+        # makes CMake delete the cache and re-run, losing CMAKE_PREFIX_PATH.
+        # -SkipModules: CMake cannot do module dependency scanning with
+        # AppleClang (no compatible clang-scan-deps flow).
+        shell: pwsh
+        run: ./scripts/Run-InstallTest.ps1 -Verbose -Clean -SkipModules -UseLibCXX -CcOverride /usr/bin/clang -CxxOverride /usr/bin/clang++
 
   windows:
     name: Windows
@@ -111,6 +146,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Set up MSVC developer environment
+        uses: ilammy/msvc-dev-cmd@v1
 
       - name: Create CPM cache dir
         shell: bash

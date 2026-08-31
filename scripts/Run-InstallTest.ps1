@@ -55,7 +55,8 @@ param(
     [string]$BuildType = "Release",
     [string]$CcOverride = "",
     [string]$CxxOverride = "",
-    [switch]$UseLibCXX
+    [switch]$UseLibCXX,
+    [switch]$SkipModules
 )
 
 $ErrorActionPreference = "Stop"
@@ -77,6 +78,7 @@ message(STATUS "* ccc_DIR=${ccc_DIR}")
 find_package(ccc REQUIRED)
 
 add_executable(ccc_install_test main.cc)
+target_compile_features(ccc_install_test PRIVATE cxx_std_CCC_INSTALL_TEST_STD)
 target_link_libraries(ccc_install_test PRIVATE ccc::ccc)
 '@
 
@@ -118,6 +120,79 @@ function Get-Platform
 }
 
 $Platform = Get-Platform
+
+# ----------------------------------------------------------------------
+# macOS SDK / libc++ helpers (needed by C++ module dependency scanning)
+# ----------------------------------------------------------------------
+function Get-MacOsSdkPath
+{
+    if ($Platform -ne "macos") { return "" }
+    if (-not (Get-Command xcrun -ErrorAction SilentlyContinue)) { return "" }
+    $sdkPath = & xcrun --show-sdk-path 2>$null
+    if ($LASTEXITCODE -eq 0 -and $sdkPath -and (Test-Path $sdkPath)) { return $sdkPath }
+    return ""
+}
+
+function Get-LibCxxIncludeDirs
+{
+    param([string]$Compiler)
+    $resolved = if ($Compiler) { $Compiler } else { "clang++" }
+    $cmd = Get-Command $resolved -ErrorAction SilentlyContinue
+    if (-not $cmd) { return @() }
+    # Ask the driver for its libc++ location. xlings exposes clang++ through a
+    # relative symlink to its dispatcher, so deriving the toolchain prefix from
+    # the command path does not locate the actual LLVM installation.
+    $includeDir = & $cmd.Source --print-file-name=include/c++/v1 2>$null
+    $isValidPath = $includeDir -and [System.IO.Path]::IsPathRooted($includeDir) -and (Test-Path $includeDir)
+    if ($LASTEXITCODE -ne 0 -or -not $isValidPath)
+    {
+        return @()
+    }
+    $dirs = [System.Collections.Generic.List[string]]::new()
+    # Normalize the driver's "bin/../include/c++/v1" spelling so the sibling
+    # scan below sees the real install prefix.
+    $dirs.Add((Resolve-Path -LiteralPath $includeDir).Path)
+    # LLVM ships generated headers (__config_site et al) in an
+    # include/<target-triple>/c++/v1 directory next to the generic
+    # include/c++/v1; the driver and the xlings clang++.cfg both search it
+    # after the main directory. clang-scan-deps reproduces neither inference
+    # and fails with "'__config_site' file not found", so mirror it here.
+    $includeRoot = Split-Path -Parent (Split-Path -Parent $dirs[0])
+    if (Test-Path -LiteralPath $includeRoot)
+    {
+        Get-ChildItem -LiteralPath $includeRoot -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+            $targetDir = Join-Path $_.FullName "c++/v1"
+            if (Test-Path -LiteralPath $targetDir)
+            {
+                $dirs.Add($targetDir)
+            }
+        }
+    }
+    # The leading comma keeps the List from being unrolled when it holds a
+    # single directory, so callers always iterate a collection.
+    return , $dirs
+}
+
+function Get-LibCxxCxxFlags
+{
+    # clang-scan-deps (invoked by CMake to scan C++20+ sources) does not
+    # reproduce the clang driver's own SDK and libc++ include path inference,
+    # failing with "'cstddef' file not found". CMake forwards CMAKE_CXX_FLAGS
+    # to the scanner, so pass both paths explicitly. The SDK lookup is
+    # macOS-only; libc++ headers live in the toolchain prefix everywhere.
+    param([string]$Compiler)
+    # xlings already selects libc++ in clang++.cfg, which makes this explicit
+    # selection unused during compile-only steps. The flag remains necessary
+    # for other Clang installations and for linking.
+    $flags = "-stdlib=libc++ -Wno-unused-command-line-argument"
+    $sdkPath = Get-MacOsSdkPath
+    if ($sdkPath) { $flags = "$flags -isysroot $sdkPath" }
+    foreach ($libcxxInclude in (Get-LibCxxIncludeDirs -Compiler $Compiler))
+    {
+        $flags = "$flags -isystem $libcxxInclude"
+    }
+    return $flags
+}
 
 # ----------------------------------------------------------------------
 # Results tracking
@@ -237,8 +312,9 @@ function Invoke-InstallTest
     }
     if ($UseLibCXX)
     {
-        $cmakeConfigArgs += "-DCMAKE_CXX_FLAGS=-stdlib=libc++"
-        Write-Host "    CXXFLAGS   = -stdlib=libc++"
+        $cxxFlags = Get-LibCxxCxxFlags -Compiler $CxxOverride
+        $cmakeConfigArgs += "-DCMAKE_CXX_FLAGS=$cxxFlags"
+        Write-Host "    CXXFLAGS   = $cxxFlags"
     }
 
     # --- Configure ---
@@ -288,7 +364,8 @@ function Invoke-InstallTest
     # Build and run the minimal downstream project
     # ------------------------------------------------------------------
     $consumerSource = if ($UseModules) { $ModuleMainCc } else { $HeaderMainCc }
-    Set-Content -Path (Join-Path $consumerDir "CMakeLists.txt") -Value $ConsumerCMakeLists -NoNewline
+    $consumerCMakeLists = $ConsumerCMakeLists -replace 'CCC_INSTALL_TEST_STD', $CppStandard
+    Set-Content -Path (Join-Path $consumerDir "CMakeLists.txt") -Value $consumerCMakeLists -NoNewline
     Set-Content -Path (Join-Path $consumerDir "main.cc") -Value $consumerSource -NoNewline
 
     $consumerBuildDir = Join-Path $consumerDir "build"
@@ -315,7 +392,8 @@ function Invoke-InstallTest
     }
     if ($UseLibCXX)
     {
-        $consumerConfigArgs += "-DCMAKE_CXX_FLAGS=-stdlib=libc++"
+        $cxxFlags = Get-LibCxxCxxFlags -Compiler $CxxOverride
+        $consumerConfigArgs += "-DCMAKE_CXX_FLAGS=$cxxFlags"
     }
     if ($UseModules)
     {
@@ -449,8 +527,11 @@ foreach ($std in $Standards)
         -CcOverride $CcOverride -CxxOverride $CxxOverride -UseLibCXX:$UseLibCXX
 
     # C++20+: also test module mode
-    if ([int]$std -ge 20)
+    if ([int]$std -ge 20 -and -not $SkipModules)
     {
+        # Ninja is required here: consuming installed modules needs the
+        # BMI-only synthetic target, which the Visual Studio generator does
+        # not support.
         Invoke-InstallTest -Generator "Ninja" -CppStandard $std -UseModules $true `
             -CcOverride $CcOverride -CxxOverride $CxxOverride -UseLibCXX:$UseLibCXX
     }

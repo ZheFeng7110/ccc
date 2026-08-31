@@ -24,6 +24,12 @@
 #define CCC_CPP17_CONSTEXPR
 #endif
 
+#if (__cplusplus >= 201402L)
+#define CCC_CPP14_CONSTEXPR constexpr
+#else
+#define CCC_CPP14_CONSTEXPR
+#endif
+
 #if (__cplusplus >= 202002L)
 #define CCC_CONDITIONAL_EXPLICIT(condition) explicit(condition)
 #else
