@@ -23,14 +23,6 @@
 import ccc.resource_guard;
 #endif
 
-// try_finally/with are constexpr from C++14/17 on, but every instantiation in
-// this file invokes runtime callbacks and can never be constant-evaluated;
-// clang warns about that on each instantiation
-// uncomment it if failed
-// #if defined(__clang__)
-// #pragma clang diagnostic ignored "-Winvalid-constexpr"
-// #endif
-
 #define TEST_REPORT(msg) \
     (std::cout << "In File `" << __FILE__ << ":" << __LINE__ << "` has message: \n    " << (msg) << std::endl)
 
