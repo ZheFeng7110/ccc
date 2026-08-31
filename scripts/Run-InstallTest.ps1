@@ -133,22 +133,44 @@ function Get-MacOsSdkPath
     return ""
 }
 
-function Get-LibCxxIncludeDir
+function Get-LibCxxIncludeDirs
 {
     param([string]$Compiler)
     $resolved = if ($Compiler) { $Compiler } else { "clang++" }
     $cmd = Get-Command $resolved -ErrorAction SilentlyContinue
-    if (-not $cmd) { return "" }
+    if (-not $cmd) { return @() }
     # Ask the driver for its libc++ location. xlings exposes clang++ through a
     # relative symlink to its dispatcher, so deriving the toolchain prefix from
     # the command path does not locate the actual LLVM installation.
     $includeDir = & $cmd.Source --print-file-name=include/c++/v1 2>$null
     $isValidPath = $includeDir -and [System.IO.Path]::IsPathRooted($includeDir) -and (Test-Path $includeDir)
-    if ($LASTEXITCODE -eq 0 -and $isValidPath)
+    if ($LASTEXITCODE -ne 0 -or -not $isValidPath)
     {
-        return $includeDir
+        return @()
     }
-    return ""
+    $dirs = [System.Collections.Generic.List[string]]::new()
+    # Normalize the driver's "bin/../include/c++/v1" spelling so the sibling
+    # scan below sees the real install prefix.
+    $dirs.Add((Resolve-Path -LiteralPath $includeDir).Path)
+    # LLVM ships generated headers (__config_site et al) in an
+    # include/<target-triple>/c++/v1 directory next to the generic
+    # include/c++/v1; the driver and the xlings clang++.cfg both search it
+    # after the main directory. clang-scan-deps reproduces neither inference
+    # and fails with "'__config_site' file not found", so mirror it here.
+    $includeRoot = Split-Path -Parent (Split-Path -Parent $dirs[0])
+    if (Test-Path -LiteralPath $includeRoot)
+    {
+        Get-ChildItem -LiteralPath $includeRoot -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+            $targetDir = Join-Path $_.FullName "c++/v1"
+            if (Test-Path -LiteralPath $targetDir)
+            {
+                $dirs.Add($targetDir)
+            }
+        }
+    }
+    # The leading comma keeps the List from being unrolled when it holds a
+    # single directory, so callers always iterate a collection.
+    return , $dirs
 }
 
 function Get-LibCxxCxxFlags
@@ -165,8 +187,10 @@ function Get-LibCxxCxxFlags
     $flags = "-stdlib=libc++ -Wno-unused-command-line-argument"
     $sdkPath = Get-MacOsSdkPath
     if ($sdkPath) { $flags = "$flags -isysroot $sdkPath" }
-    $libcxxInclude = Get-LibCxxIncludeDir -Compiler $Compiler
-    if ($libcxxInclude) { $flags = "$flags -isystem $libcxxInclude" }
+    foreach ($libcxxInclude in (Get-LibCxxIncludeDirs -Compiler $Compiler))
+    {
+        $flags = "$flags -isystem $libcxxInclude"
+    }
     return $flags
 }
 
