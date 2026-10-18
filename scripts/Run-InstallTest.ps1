@@ -11,8 +11,10 @@
     Tests every C++ standard from 11 to 23. For C++20 and above, both
     header-only and C++20 module modes are exercised.
 
-    CMake automatically detects the toolchain. Use CcOverride and CxxOverride
-    to override the C and C++ compilers respectively.
+    CMake automatically detects the toolchain. The CI matrix installs exactly
+    one compiler per job, so this script never selects a compiler. Callers
+    that need extra compiler flags (for example libc++ scan-deps flags) pass
+    them through the CXXFLAGS environment variable, which CMake reads.
 
     CMake variables used:
         CCC_INSTALL=ON
@@ -25,39 +27,25 @@
 .PARAMETER InstallRoot
     Root directory for CI install artifacts (default: build-inst-tst).
 
-.PARAMETER Standards
-    C++ standards to test. Defaults to all: 11, 14, 17, 20, 23.
-
 .PARAMETER Clean
     Remove existing build and install directories before starting.
 
 .PARAMETER BuildType
     CMake build type (default: Release).
-
-.PARAMETER CcOverride
-    Override C compiler path (sets -DCMAKE_C_COMPILER).
-
-.PARAMETER CxxOverride
-    Override C++ compiler path (sets -DCMAKE_CXX_COMPILER).
-
-.PARAMETER UseLibCXX
-    Add -stdlib=libc++ to the C++ compiler flags.
 #>
 
 [CmdletBinding()]
 param(
     [string]$BuildRoot = "build-inst-build-tst",
     [string]$InstallRoot = "build-inst-tst",
-    [ValidateSet("11", "14", "17", "20", "23")]
-    [string[]]$Standards = @("11", "14", "17", "20", "23"),
     [switch]$Clean,
     [ValidateSet("Debug", "Release", "RelWithDebInfo", "MinSizeRel")]
-    [string]$BuildType = "Release",
-    [string]$CcOverride = "",
-    [string]$CxxOverride = "",
-    [switch]$UseLibCXX,
-    [switch]$SkipModules
+    [string]$BuildType = "Release"
 )
+
+# Fixed sweep so the caller never selects a C++ version. The toolchain comes
+# from the environment and is auto-detected by CMake.
+$Standards = @("11", "14", "17", "20", "23")
 
 $ErrorActionPreference = "Stop"
 
@@ -122,79 +110,6 @@ function Get-Platform
 $Platform = Get-Platform
 
 # ----------------------------------------------------------------------
-# macOS SDK / libc++ helpers (needed by C++ module dependency scanning)
-# ----------------------------------------------------------------------
-function Get-MacOsSdkPath
-{
-    if ($Platform -ne "macos") { return "" }
-    if (-not (Get-Command xcrun -ErrorAction SilentlyContinue)) { return "" }
-    $sdkPath = & xcrun --show-sdk-path 2>$null
-    if ($LASTEXITCODE -eq 0 -and $sdkPath -and (Test-Path $sdkPath)) { return $sdkPath }
-    return ""
-}
-
-function Get-LibCxxIncludeDirs
-{
-    param([string]$Compiler)
-    $resolved = if ($Compiler) { $Compiler } else { "clang++" }
-    $cmd = Get-Command $resolved -ErrorAction SilentlyContinue
-    if (-not $cmd) { return @() }
-    # Ask the driver for its libc++ location. xlings exposes clang++ through a
-    # relative symlink to its dispatcher, so deriving the toolchain prefix from
-    # the command path does not locate the actual LLVM installation.
-    $includeDir = & $cmd.Source --print-file-name=include/c++/v1 2>$null
-    $isValidPath = $includeDir -and [System.IO.Path]::IsPathRooted($includeDir) -and (Test-Path $includeDir)
-    if ($LASTEXITCODE -ne 0 -or -not $isValidPath)
-    {
-        return @()
-    }
-    $dirs = [System.Collections.Generic.List[string]]::new()
-    # Normalize the driver's "bin/../include/c++/v1" spelling so the sibling
-    # scan below sees the real install prefix.
-    $dirs.Add((Resolve-Path -LiteralPath $includeDir).Path)
-    # LLVM ships generated headers (__config_site et al) in an
-    # include/<target-triple>/c++/v1 directory next to the generic
-    # include/c++/v1; the driver and the xlings clang++.cfg both search it
-    # after the main directory. clang-scan-deps reproduces neither inference
-    # and fails with "'__config_site' file not found", so mirror it here.
-    $includeRoot = Split-Path -Parent (Split-Path -Parent $dirs[0])
-    if (Test-Path -LiteralPath $includeRoot)
-    {
-        Get-ChildItem -LiteralPath $includeRoot -Directory -ErrorAction SilentlyContinue | ForEach-Object {
-            $targetDir = Join-Path $_.FullName "c++/v1"
-            if (Test-Path -LiteralPath $targetDir)
-            {
-                $dirs.Add($targetDir)
-            }
-        }
-    }
-    # The leading comma keeps the List from being unrolled when it holds a
-    # single directory, so callers always iterate a collection.
-    return , $dirs
-}
-
-function Get-LibCxxCxxFlags
-{
-    # clang-scan-deps (invoked by CMake to scan C++20+ sources) does not
-    # reproduce the clang driver's own SDK and libc++ include path inference,
-    # failing with "'cstddef' file not found". CMake forwards CMAKE_CXX_FLAGS
-    # to the scanner, so pass both paths explicitly. The SDK lookup is
-    # macOS-only; libc++ headers live in the toolchain prefix everywhere.
-    param([string]$Compiler)
-    # xlings already selects libc++ in clang++.cfg, which makes this explicit
-    # selection unused during compile-only steps. The flag remains necessary
-    # for other Clang installations and for linking.
-    $flags = "-stdlib=libc++ -Wno-unused-command-line-argument"
-    $sdkPath = Get-MacOsSdkPath
-    if ($sdkPath) { $flags = "$flags -isysroot $sdkPath" }
-    foreach ($libcxxInclude in (Get-LibCxxIncludeDirs -Compiler $Compiler))
-    {
-        $flags = "$flags -isystem $libcxxInclude"
-    }
-    return $flags
-}
-
-# ----------------------------------------------------------------------
 # Results tracking
 # ----------------------------------------------------------------------
 $Script:AllResults = [System.Collections.Generic.List[PSCustomObject]]::new()
@@ -234,10 +149,7 @@ function Invoke-InstallTest
     param(
         [string]$Generator,
         [string]$CppStandard,
-        [bool]$UseModules,
-        [string]$CcOverride,
-        [string]$CxxOverride,
-        [switch]$UseLibCXX
+        [bool]$UseModules
     )
 
     $label = "C++$CppStandard"
@@ -302,19 +214,6 @@ function Invoke-InstallTest
     if ($UseModules)
     {
         $cmakeConfigArgs += "-DCCC_USE_CPP_MODULES=ON"
-    }
-    if ($CcOverride -and $CxxOverride)
-    {
-        $cmakeConfigArgs += "-DCMAKE_C_COMPILER=$CcOverride"
-        $cmakeConfigArgs += "-DCMAKE_CXX_COMPILER=$CxxOverride"
-        Write-Host "    CC         = $CcOverride"
-        Write-Host "    CXX        = $CxxOverride"
-    }
-    if ($UseLibCXX)
-    {
-        $cxxFlags = Get-LibCxxCxxFlags -Compiler $CxxOverride
-        $cmakeConfigArgs += "-DCMAKE_CXX_FLAGS=$cxxFlags"
-        Write-Host "    CXXFLAGS   = $cxxFlags"
     }
 
     # --- Configure ---
@@ -384,16 +283,6 @@ function Invoke-InstallTest
     if ($Generator -like "Visual Studio*")
     {
         $consumerConfigArgs += "-A", "x64"
-    }
-    if ($CcOverride -and $CxxOverride)
-    {
-        $consumerConfigArgs += "-DCMAKE_C_COMPILER=$CcOverride"
-        $consumerConfigArgs += "-DCMAKE_CXX_COMPILER=$CxxOverride"
-    }
-    if ($UseLibCXX)
-    {
-        $cxxFlags = Get-LibCxxCxxFlags -Compiler $CxxOverride
-        $consumerConfigArgs += "-DCMAKE_CXX_FLAGS=$cxxFlags"
     }
     if ($UseModules)
     {
@@ -472,42 +361,22 @@ Write-Host "  Standards   : $( $Standards -join ', ' )"
 Write-Host "  BuildType   : $BuildType"
 Write-Host "  BuildRoot   : $BuildRootFull"
 Write-Host "  InstallRoot : $InstallRootFull"
-if ($CcOverride -or $CxxOverride)
-{
-    Write-Host "  CC override  : $CcOverride"
-    Write-Host "  CXX override : $CxxOverride"
-    if (-not ($CcOverride -and $CxxOverride))
-    {
-        Write-Host "  WARNING: Both CcOverride and CxxOverride must be specified; compiler override will be ignored." -ForegroundColor Yellow
-    }
-}
-if ($UseLibCXX)
-{
-    Write-Host "  Use libc++ : yes"
-}
 Write-Host ""
 
-# Check prerequisites
+# Check prerequisites. Ninja is needed on every platform: module mode uses it
+# even on Windows, because the Visual Studio generator cannot consume the
+# BMI-only synthetic target of an installed module library.
 if (-not (Get-Command cmake -ErrorAction SilentlyContinue))
 {
     Write-Host "ERROR: cmake not found in PATH." -ForegroundColor Red
     exit 1
 }
-$needsNinja = $Platform -ne "windows"
-$moduleStandards = $Standards | Where-Object { [int]$_ -ge 20 }
-if ($moduleStandards.Count -gt 0)
+if (-not (Get-Command ninja -ErrorAction SilentlyContinue))
 {
-    $needsNinja = $true
+    Write-Host "ERROR: ninja not found in PATH." -ForegroundColor Red
+    exit 1
 }
-if ($needsNinja)
-{
-    if (-not (Get-Command ninja -ErrorAction SilentlyContinue))
-    {
-        Write-Host "ERROR: ninja not found in PATH." -ForegroundColor Red
-        exit 1
-    }
-    Write-Host "  ninja : $( ninja --version 2>&1 | Select-Object -First 1 )"
-}
+Write-Host "  ninja : $( ninja --version 2>&1 | Select-Object -First 1 )"
 
 Write-Host "  cmake : $( cmake --version | Select-Object -First 1 )"
 Write-Host ""
@@ -523,17 +392,14 @@ $Generator = if ($Platform -eq "windows") { "Visual Studio 18 2026" } else { "Ni
 foreach ($std in $Standards)
 {
     # All standards: header-only mode
-    Invoke-InstallTest -Generator $Generator -CppStandard $std -UseModules $false `
-        -CcOverride $CcOverride -CxxOverride $CxxOverride -UseLibCXX:$UseLibCXX
+    Invoke-InstallTest -Generator $Generator -CppStandard $std -UseModules $false
 
     # C++20+: also test module mode
-    if ([int]$std -ge 20 -and -not $SkipModules)
+    if ([int]$std -ge 20)
     {
-        # Ninja is required here: consuming installed modules needs the
-        # BMI-only synthetic target, which the Visual Studio generator does
-        # not support.
-        Invoke-InstallTest -Generator "Ninja" -CppStandard $std -UseModules $true `
-            -CcOverride $CcOverride -CxxOverride $CxxOverride -UseLibCXX:$UseLibCXX
+        # Consuming installed modules needs the BMI-only synthetic target,
+        # which the Visual Studio generator does not support.
+        Invoke-InstallTest -Generator "Ninja" -CppStandard $std -UseModules $true
     }
 }
 
