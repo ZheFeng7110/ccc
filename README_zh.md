@@ -4,7 +4,7 @@
 
 ---
 
-ccc 是一个 C++ 实用功能库，提供一系列现代 C++ 工具，包括管道操作符、单子 expected 等更多功能。
+ccc 是一个 C++ 实用功能库，提供一系列现代 C++ 工具，包括管道操作符、哈希工具等更多功能。
 
 ## 特性
 
@@ -22,7 +22,7 @@ ccc 是一个 C++ 实用功能库，提供一系列现代 C++ 工具，包括管
 或者，引入特定组件：
 
 ```cpp
-#include "ccc/expected.hh"
+#include "ccc/hash.hh"
 #include "ccc/pipe_operator_helper.hh"
 ```
 
@@ -30,14 +30,13 @@ ccc 是一个 C++ 实用功能库，提供一系列现代 C++ 工具，包括管
 
 ```cpp
 import ccc;  // 引入所有
-import ccc.expected;  // 仅引入 expected 组件
+import ccc.hash;  // 仅引入 hash 组件
 ```
 
 ## 文档
 
 - `ccc.utility` - 在低版本 C++ 中实现较高版本的 C++ STL 功能的实用工具
 - [ccc.pipe_operator_helper](docs/zh/pipe_operator_helper.md) - 管道风格函数调用辅助工具
-- [ccc.expected](docs/zh/expected.md) - 支持可选 Criterion 的单子 expected
 - [ccc.inplace](docs/zh/inplace/inplace.md) - 栈上分配、编译期固定容量的“就地”容器
 - [ccc.resource_guard](docs/zh/resource_guard.md) - 基于 RAII 的资源管理工具，支持 defer、try_finally、with 模式
 - [ccc.hash](docs/zh/hash.md) - 支持编译期计算的基础类型与标准库类型哈希，附带 hash_combine

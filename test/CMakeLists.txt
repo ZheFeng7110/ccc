@@ -60,7 +60,6 @@ function (globSources cmd variable cxxStdRequired)
 endfunction ()
 
 globSources(GLOB_RECURSE cccPipeOperatorHelperTestSources 17 "pipe_operator_helper_test/*.cc")
-globSources(GLOB expectedTestSources 17 "expected_test/*.cc")
 
 globSources(GLOB_RECURSE hashTestSources 11 "hash_test/*.cc")
 globSources(GLOB_RECURSE inplaceTestSources 11 "inplace/*.cc")
@@ -70,7 +69,6 @@ target_sources(${PROJECT_NAME} PRIVATE
     catch_main.cc
 
     ${cccPipeOperatorHelperTestSources}
-    ${expectedTestSources}
     ${hashTestSources}
     ${inplaceTestSources}
     ${utilityTestSources}

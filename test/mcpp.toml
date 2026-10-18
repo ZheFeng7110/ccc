@@ -11,9 +11,6 @@ defines = ["TEST_USE_MODULE=1"]
 kind = "bin"
 main = "catch_main.cc"
 
-[scan_overrides."expected_test/*.cc"]
-imports = ["ccc.utility", "ccc.expected"]
-
 [scan_overrides."hash_test/*.cc"]
 imports = ["ccc.hash"]
 

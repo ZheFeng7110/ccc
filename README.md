@@ -4,7 +4,7 @@ English | [简体中文](./README_zh.md)
 
 ---
 
-ccc is a C++ utility library that provides modern C++ tools, including pipe operators, monadic expected, and more.
+ccc is a C++ utility library that provides modern C++ tools, including pipe operators, hashing utilities, and more.
 
 ## Features
 
@@ -22,7 +22,7 @@ ccc is a C++ utility library that provides modern C++ tools, including pipe oper
 Or, for specific components:
 
 ```cpp
-#include "ccc/expected.hh"
+#include "ccc/hash.hh"
 #include "ccc/pipe_operator_helper.hh"
 ```
 
@@ -30,14 +30,13 @@ When using C++20 modules (if configured):
 
 ```cpp
 import ccc;  // import all
-import ccc.expected;  // import expected component only
+import ccc.hash;  // import hash component only
 ```
 
 ## Documentation
 
 - `ccc.utility` - Utility tools that implement higher-version C++ STL features in lower C++ standards
 - [ccc.pipe_operator_helper](docs/en/pipe_operator_helper.md) - Pipe-style function invocation helpers
-- [ccc.expected](docs/en/expected.md) - Monadic expected with optional criterion support
 - [ccc.inplace](docs/en/inplace/inplace.md) - Stack-allocated, compile-time fixed-capacity "in-place" containers
 - [ccc.resource_guard](docs/en/resource_guard.md) - RAII-based resource management with defer, try_finally, and with patterns
 - [ccc.hash](docs/en/hash.md) - Compile-time-capable hashing for basic and standard library types with hash_combine
