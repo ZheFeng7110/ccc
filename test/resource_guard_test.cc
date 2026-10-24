@@ -20,6 +20,8 @@
 
 #ifdef TEST_USE_MODULE
 #include "ccc/detail/config.hh"
+
+#include "ccc/resource_guard/macros.hh"
 import ccc.resource_guard;
 #endif
 
@@ -36,6 +38,16 @@ TEST_CASE("ResourceGuard - Defer_Lambda")
         CHECK(x == 0);
     }
     CHECK(x == 42);
+}
+
+TEST_CASE("ResourceGuard - Defer_Macro")
+{
+    int value = 0;
+    {
+        CCC_DEFER({ value = 42; });
+        CHECK(value == 0);
+    }
+    CHECK(value == 42);
 }
 
 namespace {
