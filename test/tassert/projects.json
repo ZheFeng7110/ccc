@@ -848,7 +848,7 @@
         "absent": []
       }
     ],
-    "compile_error": "constant expression|constexpr|consteval"
+    "compile_error": "constant|constexpr|consteval"
   },
   {
     "path": "compile_errors/bad_backend",
