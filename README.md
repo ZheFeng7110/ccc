@@ -41,6 +41,7 @@ import ccc.hash;  // import hash component only
 - [ccc.resource_guard](docs/en/resource_guard.md) - RAII-based resource management with defer, try_finally, and with patterns
 - [ccc.hash](docs/en/hash.md) - Compile-time-capable hashing for basic and standard library types with hash_combine
 - [ccc.when](docs/en/when.md) - Generalized switch-like expression inspired by Kotlin's when
+- [ccc.tassert](docs/en/tassert.md) - Tagged assertions configurable at compile time (C++20)
 
 ## Building
 
@@ -80,5 +81,3 @@ mcpp pack          # Package the release artifact
 ## License
 
 This project is licensed under the MIT License.
-
-[Tagged assertions (C++20)](docs/en/tassert.md)

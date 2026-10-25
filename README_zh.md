@@ -41,6 +41,7 @@ import ccc.hash;  // 仅引入 hash 组件
 - [ccc.resource_guard](docs/zh/resource_guard.md) - 基于 RAII 的资源管理工具，支持 defer、try_finally、with 模式
 - [ccc.hash](docs/zh/hash.md) - 支持编译期计算的基础类型与标准库类型哈希，附带 hash_combine
 - [ccc.when](docs/zh/when.md) - 仿照 Kotlin when 表达式设计的通用化 switch 替代方案
+- [ccc.tassert](docs/zh/tassert.md) - 按 tag 分组、可在编译期配置的断言（C++20）
 
 ## 构建
 
@@ -80,5 +81,3 @@ mcpp pack         # 打包发布产物
 ## 许可证
 
 本项目采用 MIT 许可证。
-
-[tag 断言（C++20）](docs/zh/tassert.md)
