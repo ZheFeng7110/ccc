@@ -41,6 +41,7 @@ import ccc.hash;  // 仅引入 hash 组件
 - [ccc.resource_guard](docs/zh/resource_guard.md) - 基于 RAII 的资源管理工具，支持 defer、try_finally、with 模式
 - [ccc.hash](docs/zh/hash.md) - 支持编译期计算的基础类型与标准库类型哈希，附带 hash_combine
 - [ccc.when](docs/zh/when.md) - 仿照 Kotlin when 表达式设计的通用化 switch 替代方案
+- [ccc.tassert](docs/zh/tassert.md) - 按 tag 分组、可在编译期配置的断言（C++20）
 
 ## 构建
 
@@ -64,7 +65,8 @@ cmake -DCCC_USE_CPP_MODULES=ON ..
 ```bash
 cmake -S . -B build -DCCC_BUILD_TESTS=ON
 cmake --build build
-cd build && ctest .
+ctest --test-dir build
+python3 test/tassert/run_projects.py --tool cmake --fail-fast  # 详见 test/tassert/README_zh.md
 ```
 
 ## 使用 mcpp 构建
@@ -74,6 +76,7 @@ cd build && ctest .
 ```bash
 mcpp build        # 构建库（模块模式）
 mcpp run -p test  # 编译并运行所有测试
+python3 test/tassert/run_projects.py --tool mcpp --fail-fast  # 详见 test/tassert/README_zh.md
 mcpp pack         # 打包发布产物
 ```
 

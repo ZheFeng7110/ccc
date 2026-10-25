@@ -15,4 +15,8 @@
 #include "ccc/pipe_operator_helper.hh"
 #include "ccc/when.hh"
 
+#if __cplusplus >= 202002L
+#include "ccc/tassert.hh"
+#endif
+
 #endif  // !CCC_ALL_HH

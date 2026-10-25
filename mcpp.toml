@@ -18,3 +18,10 @@ path = "modules/ccc.ccm"
 
 [targets.ccc]
 kind = "lib"
+
+# Formatting is an explicit optional dependency.
+[features]
+tassert-fmt = { defines = ["CCC_TASSERT_FORMAT_BACKEND=2"] }
+
+[feature-deps.tassert-fmt]
+fmtlib.fmt = ">=11.2.0"

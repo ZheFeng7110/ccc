@@ -41,6 +41,7 @@ import ccc.hash;  // import hash component only
 - [ccc.resource_guard](docs/en/resource_guard.md) - RAII-based resource management with defer, try_finally, and with patterns
 - [ccc.hash](docs/en/hash.md) - Compile-time-capable hashing for basic and standard library types with hash_combine
 - [ccc.when](docs/en/when.md) - Generalized switch-like expression inspired by Kotlin's when
+- [ccc.tassert](docs/en/tassert.md) - Tagged assertions configurable at compile time (C++20)
 
 ## Building
 
@@ -64,7 +65,8 @@ Run tests with:
 ```bash
 cmake -S . -B build -DCCC_BUILD_TESTS=ON
 cmake --build build
-cd build && ctest .
+ctest --test-dir build
+python3 test/tassert/run_projects.py --tool cmake --fail-fast  # see test/tassert/README.md
 ```
 
 ## Building with mcpp
@@ -74,6 +76,7 @@ This project can also be built with [mcpp](https://github.com/mcpp-community/mcp
 ```bash
 mcpp build         # Build the library (module mode)
 mcpp run -p test   # Build and run all tests
+python3 test/tassert/run_projects.py --tool mcpp --fail-fast  # see test/tassert/README.md
 mcpp pack          # Package the release artifact
 ```
 

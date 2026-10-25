@@ -1,0 +1,1181 @@
+[
+  {
+    "path": "basic",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "standard": 20,
+    "backend": 0,
+    "config": "",
+    "imports": [
+      "header"
+    ],
+    "defines": [],
+    "runs": [
+      {
+        "args": [],
+        "exit": 0,
+        "stdout": [],
+        "stderr": [],
+        "absent": []
+      },
+      {
+        "args": [
+          "fail"
+        ],
+        "exit": "failure",
+        "stdout": [],
+        "stderr": [
+          "tag: active"
+        ],
+        "absent": []
+      }
+    ],
+    "variants": [
+      {},
+      {
+        "name": "ndebug",
+        "defines": [
+          "NDEBUG"
+        ]
+      },
+      {
+        "name": "auto20",
+        "backend": "auto",
+        "defines": [
+          "TEST_EXPECT_BACKEND=0"
+        ]
+      },
+      {
+        "name": "auto23",
+        "backend": "auto",
+        "standard": 23,
+        "defines": [
+          "TEST_EXPECT_BACKEND=1"
+        ]
+      }
+    ]
+  },
+  {
+    "path": "ignore_tags",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "standard": 20,
+    "backend": 0,
+    "config": "config.hh",
+    "imports": [
+      "header"
+    ],
+    "defines": [],
+    "runs": [
+      {
+        "args": [],
+        "exit": 0,
+        "stdout": [],
+        "stderr": [],
+        "absent": []
+      }
+    ],
+    "variants": [
+      {},
+      {
+        "name": "array",
+        "config": "ignore_tags/array.hh"
+      },
+      {
+        "name": "empty",
+        "config": "ignore_tags/empty.hh",
+        "defines": [
+          "TEST_EMPTY_CONFIG=1"
+        ]
+      }
+    ]
+  },
+  {
+    "path": "lazy_condition",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "standard": 20,
+    "backend": 0,
+    "config": "config.hh",
+    "imports": [
+      "header"
+    ],
+    "defines": [],
+    "runs": [
+      {
+        "args": [],
+        "exit": 0,
+        "stdout": [],
+        "stderr": [],
+        "absent": []
+      }
+    ],
+    "variants": [
+      {},
+      {
+        "name": "std",
+        "standard": 23,
+        "backend": 1
+      }
+    ]
+  },
+  {
+    "path": "constexpr_branch",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "standard": 20,
+    "backend": 0,
+    "config": "config.hh",
+    "imports": [
+      "header"
+    ],
+    "defines": [],
+    "runs": [
+      {
+        "args": [],
+        "exit": 0,
+        "stdout": [],
+        "stderr": [],
+        "absent": []
+      }
+    ],
+    "variants": [
+      {},
+      {
+        "name": "std",
+        "standard": 23,
+        "backend": 1
+      }
+    ]
+  },
+  {
+    "path": "default_failure",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "standard": 20,
+    "backend": 0,
+    "config": "config.hh",
+    "imports": [
+      "header"
+    ],
+    "defines": [],
+    "runs": [
+      {
+        "args": [],
+        "exit": "failure",
+        "stdout": [
+          "ATEXIT"
+        ],
+        "stderr": [
+          "\\[ccc.tassert\\] assertion failed",
+          "tag: active",
+          "location: tassert_call_site.cc:123:",
+          "function: .*main"
+        ],
+        "absent": [
+          "LOCAL_DESTRUCTOR",
+          "CONTINUED"
+        ]
+      },
+      {
+        "args": [
+          "explicit"
+        ],
+        "exit": "failure",
+        "stdout": [
+          "ATEXIT"
+        ],
+        "stderr": [
+          "\\[ccc.tassert\\] assertion failed",
+          "tag: active",
+          "location: tassert_call_site.cc:123:",
+          "function: .*main"
+        ],
+        "absent": [
+          "LOCAL_DESTRUCTOR",
+          "CONTINUED"
+        ]
+      }
+    ],
+    "variants": [
+      {},
+      {
+        "name": "std",
+        "standard": 23,
+        "backend": 1,
+        "runs": [
+          {
+            "args": [
+              "message"
+            ],
+            "exit": "failure",
+            "stdout": [
+              "ATEXIT"
+            ],
+            "stderr": [
+              "\\[ccc.tassert\\] assertion failed",
+              "tag: active",
+              "location: tassert_call_site.cc:123:",
+              "function: .*main",
+              "message: value=0007"
+            ],
+            "absent": [
+              "LOCAL_DESTRUCTOR",
+              "CONTINUED"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "path": "handler",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "standard": 20,
+    "backend": 0,
+    "config": "config.hh",
+    "imports": [
+      "header"
+    ],
+    "defines": [],
+    "runs": [
+      {
+        "args": [],
+        "exit": 0,
+        "stdout": [],
+        "stderr": [],
+        "absent": []
+      },
+      {
+        "args": [
+          "capture"
+        ],
+        "exit": 42,
+        "stdout": [
+          "BASIC"
+        ],
+        "stderr": [],
+        "absent": []
+      },
+      {
+        "args": [
+          "return"
+        ],
+        "exit": "failure",
+        "stdout": [
+          "RETURNED"
+        ],
+        "stderr": [],
+        "absent": []
+      },
+      {
+        "args": [
+          "predicate"
+        ],
+        "exit": 42,
+        "stdout": [
+          "BASIC"
+        ],
+        "stderr": [],
+        "absent": []
+      }
+    ]
+  },
+  {
+    "path": "handler_concurrency",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "standard": 20,
+    "backend": 0,
+    "config": "config.hh",
+    "imports": [
+      "header"
+    ],
+    "defines": [],
+    "runs": [
+      {
+        "args": [],
+        "exit": 0,
+        "stdout": [],
+        "stderr": [],
+        "absent": []
+      },
+      {
+        "args": [
+          "dispatch"
+        ],
+        "exit": 42,
+        "stdout": [],
+        "stderr": [],
+        "absent": []
+      },
+      {
+        "args": [
+          "recursive"
+        ],
+        "exit": "failure",
+        "stdout": [],
+        "stderr": [
+          "HANDLER_ONCE\\n\\[ccc.tassert\\] recursive assertion failure\\n$"
+        ],
+        "absent": []
+      }
+    ]
+  },
+  {
+    "path": "format_std",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "standard": 23,
+    "backend": 1,
+    "config": "config.hh",
+    "imports": [
+      "header",
+      "module",
+      "aggregate"
+    ],
+    "defines": [],
+    "runs": [
+      {
+        "args": [],
+        "exit": 0,
+        "stdout": [],
+        "stderr": [],
+        "absent": []
+      },
+      {
+        "args": [
+          "zero"
+        ],
+        "exit": 42,
+        "stdout": [
+          "^zero\\n$"
+        ],
+        "stderr": [],
+        "absent": []
+      },
+      {
+        "args": [
+          "format"
+        ],
+        "exit": 42,
+        "stdout": [
+          "^0007 custom temporary\\n$"
+        ],
+        "stderr": [],
+        "absent": []
+      }
+    ]
+  },
+  {
+    "path": "format_fmt",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "standard": 20,
+    "backend": 2,
+    "config": "config.hh",
+    "imports": [
+      "header",
+      "module",
+      "aggregate"
+    ],
+    "defines": [],
+    "runs": [
+      {
+        "args": [],
+        "exit": 0,
+        "stdout": [],
+        "stderr": [],
+        "absent": []
+      },
+      {
+        "args": [
+          "zero"
+        ],
+        "exit": 42,
+        "stdout": [
+          "^zero\\n$"
+        ],
+        "stderr": [],
+        "absent": []
+      },
+      {
+        "args": [
+          "format"
+        ],
+        "exit": 42,
+        "stdout": [
+          "^0007 custom temporary\\n$"
+        ],
+        "stderr": [],
+        "absent": []
+      }
+    ],
+    "variants": [
+      {},
+      {
+        "name": "cpp23",
+        "standard": 23
+      }
+    ]
+  },
+  {
+    "path": "formatter_failure",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "standard": 23,
+    "backend": 1,
+    "config": "config.hh",
+    "imports": [
+      "header"
+    ],
+    "defines": [],
+    "runs": [
+      {
+        "args": [],
+        "exit": 42,
+        "stdout": [
+          "FORMAT_FALLBACK"
+        ],
+        "stderr": [],
+        "absent": []
+      },
+      {
+        "args": [
+          "allocation"
+        ],
+        "exit": 42,
+        "stdout": [
+          "FORMAT_FALLBACK"
+        ],
+        "stderr": [],
+        "absent": []
+      }
+    ],
+    "variants": [
+      {},
+      {
+        "name": "fmt",
+        "standard": 20,
+        "backend": 2
+      }
+    ]
+  },
+  {
+    "path": "exceptions",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "standard": 20,
+    "backend": 0,
+    "config": "config.hh",
+    "imports": [
+      "header"
+    ],
+    "defines": [],
+    "runs": [
+      {
+        "args": [],
+        "exit": 0,
+        "stdout": [],
+        "stderr": [],
+        "absent": []
+      }
+    ],
+    "variants": [
+      {},
+      {
+        "name": "std",
+        "standard": 23,
+        "backend": 1,
+        "runs": [
+          {
+            "args": [],
+            "exit": 0,
+            "stdout": [
+              "ARGUMENT\\nARGUMENT"
+            ],
+            "stderr": [],
+            "absent": []
+          },
+          {
+            "args": [
+              "failed"
+            ],
+            "exit": 42,
+            "stdout": [
+              "ARGUMENT\\nBASIC_DURING_UNWIND"
+            ],
+            "stderr": [],
+            "absent": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "path": "multiple_translation_units",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "standard": 20,
+    "backend": 0,
+    "config": "config.hh",
+    "imports": [
+      "header"
+    ],
+    "defines": [],
+    "runs": [
+      {
+        "args": [],
+        "exit": 42,
+        "stdout": [
+          "SHARED_HANDLER"
+        ],
+        "stderr": [],
+        "absent": []
+      },
+      {
+        "args": [
+          "main"
+        ],
+        "exit": 42,
+        "stdout": [
+          "SHARED_HANDLER"
+        ],
+        "stderr": [],
+        "absent": []
+      }
+    ]
+  },
+  {
+    "path": "modules",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "standard": 20,
+    "backend": 0,
+    "config": "config.hh",
+    "imports": [
+      "module",
+      "aggregate",
+      "mixed"
+    ],
+    "defines": [],
+    "runs": [
+      {
+        "args": [],
+        "exit": 42,
+        "stdout": [
+          "SHARED_HANDLER"
+        ],
+        "stderr": [],
+        "absent": []
+      },
+      {
+        "args": [
+          "main"
+        ],
+        "exit": 42,
+        "stdout": [
+          "SHARED_HANDLER"
+        ],
+        "stderr": [],
+        "absent": []
+      }
+    ],
+    "variants": [
+      {},
+      {
+        "name": "std",
+        "standard": 23,
+        "backend": 1
+      },
+      {
+        "name": "fmt",
+        "backend": 2
+      },
+      {
+        "name": "empty",
+        "config": "ignore_tags/empty.hh",
+        "defines": [
+          "TEST_EMPTY_MODULE_CONFIG=1"
+        ]
+      },
+      {
+        "name": "rebuild",
+        "rebuild_config": true
+      }
+    ]
+  },
+  {
+    "path": "install_consumer",
+    "tools": [
+      "cmake"
+    ],
+    "standard": 20,
+    "backend": 0,
+    "config": "",
+    "imports": [
+      "header",
+      "module",
+      "aggregate"
+    ],
+    "defines": [],
+    "runs": [
+      {
+        "args": [],
+        "exit": 0,
+        "stdout": [],
+        "stderr": [],
+        "absent": []
+      },
+      {
+        "args": [
+          "fail"
+        ],
+        "exit": "failure",
+        "stdout": [],
+        "stderr": [
+          "tag: active"
+        ],
+        "absent": []
+      }
+    ],
+    "variants": [
+      {},
+      {
+        "name": "configured",
+        "config": "config.hh",
+        "defines": [
+          "TEST_CONFIGURED=1"
+        ]
+      },
+      {
+        "name": "std",
+        "standard": 23,
+        "backend": 1,
+        "runs": [
+          {
+            "args": [],
+            "exit": 0,
+            "stdout": [],
+            "stderr": [],
+            "absent": []
+          },
+          {
+            "args": [
+              "fail"
+            ],
+            "exit": "failure",
+            "stdout": [],
+            "stderr": [
+              "message: installed 7"
+            ],
+            "absent": []
+          }
+        ]
+      },
+      {
+        "name": "fmt",
+        "backend": 2,
+        "config": "config.hh",
+        "defines": [
+          "TEST_CONFIGURED=1"
+        ],
+        "runs": [
+          {
+            "args": [],
+            "exit": 0,
+            "stdout": [],
+            "stderr": [],
+            "absent": []
+          },
+          {
+            "args": [
+              "fail"
+            ],
+            "exit": "failure",
+            "stdout": [],
+            "stderr": [
+              "message: installed 7"
+            ],
+            "absent": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "path": "compile_errors/low_standard",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "standard": 17,
+    "backend": 0,
+    "config": "",
+    "imports": [
+      "header"
+    ],
+    "defines": [],
+    "runs": [
+      {
+        "args": [],
+        "exit": 0,
+        "stdout": [],
+        "stderr": [],
+        "absent": []
+      }
+    ],
+    "compile_error": "C\\+\\+20"
+  },
+  {
+    "path": "compile_errors/missing_config",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "standard": 20,
+    "backend": 0,
+    "config": "does-not-exist.hh",
+    "imports": [
+      "header"
+    ],
+    "defines": [],
+    "runs": [
+      {
+        "args": [],
+        "exit": 0,
+        "stdout": [],
+        "stderr": [],
+        "absent": []
+      }
+    ],
+    "compile_error": "does.not.exist|not found|No such file"
+  },
+  {
+    "path": "compile_errors/missing_variable",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "standard": 20,
+    "backend": 0,
+    "config": "compile_errors/missing_variable/config.hh",
+    "imports": [
+      "header"
+    ],
+    "defines": [],
+    "runs": [
+      {
+        "args": [],
+        "exit": 0,
+        "stdout": [],
+        "stderr": [],
+        "absent": []
+      }
+    ],
+    "compile_error": "ignore_tags"
+  },
+  {
+    "path": "compile_errors/wrong_type",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "standard": 20,
+    "backend": 0,
+    "config": "compile_errors/wrong_type/config.hh",
+    "imports": [
+      "header"
+    ],
+    "defines": [],
+    "runs": [
+      {
+        "args": [],
+        "exit": 0,
+        "stdout": [],
+        "stderr": [],
+        "absent": []
+      }
+    ],
+    "compile_error": "ignore_tags.*must|tassert_config_sequence"
+  },
+  {
+    "path": "compile_errors/non_constant",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "standard": 20,
+    "backend": 0,
+    "config": "compile_errors/non_constant/config.hh",
+    "imports": [
+      "header"
+    ],
+    "defines": [],
+    "runs": [
+      {
+        "args": [],
+        "exit": 0,
+        "stdout": [],
+        "stderr": [],
+        "absent": []
+      }
+    ],
+    "compile_error": "constant|constexpr|consteval"
+  },
+  {
+    "path": "compile_errors/bad_backend",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "standard": 20,
+    "backend": 9,
+    "config": "",
+    "imports": [
+      "header"
+    ],
+    "defines": [],
+    "runs": [
+      {
+        "args": [],
+        "exit": 0,
+        "stdout": [],
+        "stderr": [],
+        "absent": []
+      }
+    ],
+    "compile_error": "invalid CCC_TASSERT_FORMAT_BACKEND"
+  },
+  {
+    "path": "compile_errors/std_cpp20",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "standard": 20,
+    "backend": 1,
+    "config": "",
+    "imports": [
+      "header"
+    ],
+    "defines": [],
+    "runs": [
+      {
+        "args": [],
+        "exit": 0,
+        "stdout": [],
+        "stderr": [],
+        "absent": []
+      }
+    ],
+    "compile_error": "requires C\\+\\+23"
+  },
+  {
+    "path": "compile_errors/no_message_backend",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "standard": 20,
+    "backend": 0,
+    "config": "",
+    "imports": [
+      "header"
+    ],
+    "defines": [],
+    "runs": [
+      {
+        "args": [],
+        "exit": 0,
+        "stdout": [],
+        "stderr": [],
+        "absent": []
+      }
+    ],
+    "compile_error": "requires a formatting backend"
+  },
+  {
+    "path": "compile_errors/copy",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "standard": 20,
+    "backend": 0,
+    "config": "",
+    "imports": [
+      "header"
+    ],
+    "defines": [],
+    "runs": [
+      {
+        "args": [],
+        "exit": 0,
+        "stdout": [],
+        "stderr": [],
+        "absent": []
+      }
+    ],
+    "compile_error": "deleted"
+  },
+  {
+    "path": "compile_errors/move",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "standard": 20,
+    "backend": 0,
+    "config": "",
+    "imports": [
+      "header"
+    ],
+    "defines": [],
+    "runs": [
+      {
+        "args": [],
+        "exit": 0,
+        "stdout": [],
+        "stderr": [],
+        "absent": []
+      }
+    ],
+    "compile_error": "deleted"
+  },
+  {
+    "path": "compile_errors/predicate",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "standard": 20,
+    "backend": 0,
+    "config": "",
+    "imports": [
+      "header"
+    ],
+    "defines": [],
+    "runs": [
+      {
+        "args": [],
+        "exit": 0,
+        "stdout": [],
+        "stderr": [],
+        "absent": []
+      }
+    ],
+    "compile_error": "no matching|no viable|cannot convert|could not convert"
+  },
+  {
+    "path": "compile_errors/format_type",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "standard": 23,
+    "backend": 1,
+    "config": "",
+    "imports": [
+      "header"
+    ],
+    "defines": [],
+    "runs": [
+      {
+        "args": [],
+        "exit": 0,
+        "stdout": [],
+        "stderr": [],
+        "absent": []
+      }
+    ],
+    "compile_error": "format|constant expression|consteval|no matching|qualifier|rvalue"
+  },
+  {
+    "path": "compile_errors/format_index",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "standard": 23,
+    "backend": 1,
+    "config": "",
+    "imports": [
+      "header"
+    ],
+    "defines": [],
+    "runs": [
+      {
+        "args": [],
+        "exit": 0,
+        "stdout": [],
+        "stderr": [],
+        "absent": []
+      }
+    ],
+    "compile_error": "format|constant expression|consteval|no matching|qualifier|rvalue"
+  },
+  {
+    "path": "compile_errors/unformattable",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "standard": 23,
+    "backend": 1,
+    "config": "",
+    "imports": [
+      "header"
+    ],
+    "defines": [],
+    "runs": [
+      {
+        "args": [],
+        "exit": 0,
+        "stdout": [],
+        "stderr": [],
+        "absent": []
+      }
+    ],
+    "compile_error": "format|constant expression|consteval|no matching|qualifier|rvalue"
+  },
+  {
+    "path": "compile_errors/runtime_format",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "standard": 23,
+    "backend": 1,
+    "config": "",
+    "imports": [
+      "header"
+    ],
+    "defines": [],
+    "runs": [
+      {
+        "args": [],
+        "exit": 0,
+        "stdout": [],
+        "stderr": [],
+        "absent": []
+      }
+    ],
+    "compile_error": "format|constant expression|consteval|no matching|qualifier|rvalue"
+  },
+  {
+    "path": "compile_errors/lvalue_message",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "standard": 23,
+    "backend": 1,
+    "config": "",
+    "imports": [
+      "header"
+    ],
+    "defines": [],
+    "runs": [
+      {
+        "args": [],
+        "exit": 0,
+        "stdout": [],
+        "stderr": [],
+        "absent": []
+      }
+    ],
+    "compile_error": "format|constant expression|consteval|no matching|qualifier|rvalue"
+  },
+  {
+    "standard": 20,
+    "backend": 0,
+    "config": "",
+    "compile_error": "fmt backend requires",
+    "path": "compile_errors/missing_fmt",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "imports": [
+      "header"
+    ],
+    "defines": [],
+    "runs": []
+  },
+  {
+    "standard": 23,
+    "backend": 1,
+    "config": "config.hh",
+    "compile_error": "format|constant expression|consteval",
+    "path": "compile_errors/disabled_format_type",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "imports": [
+      "header"
+    ],
+    "defines": [],
+    "runs": []
+  },
+  {
+    "standard": 20,
+    "backend": 2,
+    "config": "config.hh",
+    "compile_error": "format|constant expression|constexpr",
+    "path": "compile_errors/fmt_format_type",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "imports": [
+      "header"
+    ],
+    "defines": [],
+    "runs": []
+  },
+  {
+    "standard": 20,
+    "backend": 2,
+    "config": "",
+    "compile_error": "format|constant expression|constexpr",
+    "path": "compile_errors/fmt_unformattable",
+    "tools": [
+      "cmake",
+      "mcpp"
+    ],
+    "imports": [
+      "header"
+    ],
+    "defines": [],
+    "runs": []
+  }
+]

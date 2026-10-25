@@ -1,0 +1,19 @@
+[workspace]
+members = []
+
+[package]
+name = "test"
+version = "0.0.0"
+standard = "c++23"
+
+[build]
+sources = ["main.cc"]
+dialect_cxxflags = ["-DCCC_TASSERT_FORMAT_BACKEND=1", "-DCCC_TASSERT_CONFIG_HEADER=\\\"../../../test/tassert/config.hh\\\""]
+defines = ["TEST_FORMAT=1", "TEST_FORMAT_BACKEND=1"]
+
+[targets.test]
+kind = "bin"
+main = "main.cc"
+
+[dependencies]
+ccc = { path = "../../../" }

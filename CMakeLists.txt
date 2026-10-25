@@ -11,6 +11,9 @@ option(CCC_BUILD_TESTS "Build tests for library `ccc`" OFF)
 option(CCC_USE_CPP_MODULES "Use C++ modules for library `ccc`" OFF)
 option(CCC_BUILD_SHARED "Build shared library `ccc`" OFF)
 option(CCC_INSTALL "Install library `ccc`" OFF)
+set(CCC_TASSERT_FORMAT_BACKEND "" CACHE STRING "tassert backend: empty=auto, 0=none, 1=std, 2=fmt")
+set_property(CACHE CCC_TASSERT_FORMAT_BACKEND PROPERTY STRINGS "" 0 1 2)
+set(CCC_TASSERT_CONFIG_HEADER "" CACHE FILEPATH "tassert inline constexpr ignore_tags configuration header")
 
 message(STATUS "Configuring library ${PROJECT_NAME}@${PROJECT_VERSION}")
 list(APPEND CMAKE_MESSAGE_INDENT "    ")
@@ -57,6 +60,7 @@ if (CCC_USE_CPP_MODULES)
         modules/ccc.inplace.inplace_vector.ccm
         modules/ccc.inplace.inplace_map.ccm
         modules/ccc.when.ccm
+        modules/ccc.tassert.ccm
     )
 
     # Must be PUBLIC: MSVC reports __cplusplus as 199711L without this flag,
@@ -79,6 +83,51 @@ else ()
 endif ()
 
 add_library(ccc::ccc ALIAS ${PROJECT_NAME})
+
+if (CCC_USE_CPP_MODULES)
+    set(cccVisibility PUBLIC)
+else ()
+    set(cccVisibility INTERFACE)
+endif ()
+
+if (NOT CCC_TASSERT_FORMAT_BACKEND STREQUAL "")
+    if (NOT CCC_TASSERT_FORMAT_BACKEND MATCHES "^[012]$")
+        message(FATAL_ERROR "CCC_TASSERT_FORMAT_BACKEND must be 0, 1 or 2")
+    endif ()
+    target_compile_definitions(ccc ${cccVisibility}
+        CCC_TASSERT_FORMAT_BACKEND=${CCC_TASSERT_FORMAT_BACKEND})
+endif ()
+
+if (CCC_TASSERT_FORMAT_BACKEND STREQUAL "1")
+    target_compile_features(ccc ${cccVisibility} cxx_std_23)
+    function (cccCheckStdFormat)
+        set(CMAKE_CXX_STANDARD 23)
+        include(CheckCXXSourceCompiles)
+        check_cxx_source_compiles("#include <format>
+            #if !defined(__cpp_lib_format) || __cpp_lib_format < 202110L
+            #error unavailable std::format
+            #endif
+            int main() { return std::format(\"{}\", 1).size() != 1; }" CCC_HAS_STD_FORMAT)
+        if (NOT CCC_HAS_STD_FORMAT)
+            message(FATAL_ERROR "tassert standard backend requires usable C++23 std::format")
+        endif ()
+    endfunction ()
+    cccCheckStdFormat()
+elseif (CCC_TASSERT_FORMAT_BACKEND STREQUAL "2")
+    find_package(fmt 11.2.0 CONFIG REQUIRED)
+    target_link_libraries(ccc ${cccVisibility} fmt::fmt)
+endif ()
+
+if (CCC_TASSERT_CONFIG_HEADER)
+    get_filename_component(cccTassertConfig "${CCC_TASSERT_CONFIG_HEADER}" ABSOLUTE)
+    if (NOT EXISTS "${cccTassertConfig}")
+        message(FATAL_ERROR "tassert configuration header does not exist: ${cccTassertConfig}")
+    endif ()
+    get_filename_component(cccTassertConfigName "${cccTassertConfig}" NAME)
+    target_compile_definitions(ccc ${cccVisibility}
+        "$<BUILD_INTERFACE:CCC_TASSERT_CONFIG_HEADER=\"${cccTassertConfig}\">"
+        "$<INSTALL_INTERFACE:CCC_TASSERT_CONFIG_HEADER=<${cccTassertConfigName}$<ANGLE-R>>")
+endif ()
 
 if (CCC_INSTALL)
     if (CCC_USE_CPP_MODULES)

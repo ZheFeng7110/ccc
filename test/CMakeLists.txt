@@ -59,6 +59,7 @@ function (globSources cmd variable cxxStdRequired)
     endif ()
 endfunction ()
 
+# tassert/* contains independent projects; collect only the Catch2 directories below.
 globSources(GLOB_RECURSE cccPipeOperatorHelperTestSources 17 "pipe_operator_helper_test/*.cc")
 
 globSources(GLOB_RECURSE hashTestSources 11 "hash_test/*.cc")

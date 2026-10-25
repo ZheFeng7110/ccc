@@ -30,6 +30,7 @@ jobs:
     env:
       XLINGS_NON_INTERACTIVE: '1'
       XLINGS_RELEASE_MIRROR: GLOBAL
+      CPM_SOURCE_CACHE: ${{ github.workspace }}/.deps/cpm
 
     steps:
       - name: Checkout
@@ -120,6 +121,17 @@ jobs:
                       }
                   }
           }
+          # Select the scanner from the same LLVM distribution as the compiler.
+          # Ubuntu may also provide a different clang-scan-deps-22 on PATH.
+          $llvmRoot = Split-Path -Parent $includeRoot
+          $scanner = Join-Path $llvmRoot "bin/clang-scan-deps"
+          if (-not (Test-Path -LiteralPath $scanner)) {
+              throw "LLVM scanner missing: $scanner"
+          }
+          $toolchain = Join-Path $env:RUNNER_TEMP "ccc-llvm-toolchain.cmake"
+          $scannerPath = $scanner.Replace("\", "/")
+          Set-Content -Path $toolchain -Value "set(CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS `"$scannerPath`" CACHE FILEPATH `"`" FORCE)"
+          Add-Content -Path $env:GITHUB_ENV -Value "CMAKE_TOOLCHAIN_FILE=$toolchain"
           Add-Content -Path $env:GITHUB_ENV -Value "CXXFLAGS=$flags"
           Write-Host "CXXFLAGS=$flags"
 
@@ -175,3 +187,22 @@ jobs:
       - name: Install tests (C++11-23)
         shell: pwsh
         run: ./scripts/Run-InstallTest.ps1 -Verbose
+
+      - name: Set up Python for assertion scenarios
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Tagged assertion scenarios
+        shell: pwsh
+        run: |
+          $generator = if ($IsWindows) { "Visual Studio 18 2026" } else { "Ninja" }
+          python3 test/tassert/run_projects.py --generator "$generator" --fail-fast
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Upload assertion scenario logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tassert-cmake-${{ matrix.os }}-${{ matrix.toolchain }}
+          path: build-tassert/**/scenario.log

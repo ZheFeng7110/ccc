@@ -1,0 +1,19 @@
+[workspace]
+members = []
+
+[package]
+name = "test"
+version = "0.0.0"
+standard = "c++20"
+
+[build]
+sources = ["main.cc"]
+dialect_cxxflags = ["-DCCC_TASSERT_FORMAT_BACKEND=0", "-DCCC_TASSERT_CONFIG_HEADER=\\\"../../../test/tassert/does-not-exist.hh\\\""]
+defines = []
+
+[targets.test]
+kind = "bin"
+main = "main.cc"
+
+[dependencies]
+ccc = { path = "../../../../" }

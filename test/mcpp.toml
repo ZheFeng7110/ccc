@@ -3,7 +3,7 @@ name = "ccc-test"
 version = "_"
 
 [build]
-sources = ["**/*.cc"]
+sources = ["catch_main.cc", "resource_guard_test.cc", "when_test.cc", "hash_test/**/*.cc", "inplace/**/*.cc", "utility_test/**/*.cc", "pipe_operator_helper_test/**/*.cc"]
 include_dirs = ["."]
 defines = ["TEST_USE_MODULE=1"]
 
