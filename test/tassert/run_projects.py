@@ -61,8 +61,7 @@ def cmake_build(entry, mode, build, args, log):
     if entry["path"] == "install_consumer" and entry["backend"] == 2:
         dependencies = build / 'dependencies'
         dependency_prefix = build / 'dependency-prefix'
-        checked(['cmake', '-S', str(ROOT / 'test'), '-B', str(dependencies)] + common + [
-            '-DCCC_TEST_PREPARE_FMT=ON', '-DCCC_TEST_DEPENDENCIES_ONLY=ON',
+        checked(['cmake', '-S', str(HERE), '-B', str(dependencies)] + common + [
             f'-DCMAKE_INSTALL_PREFIX={dependency_prefix}'], cwd=ROOT, log=log)
         checked(['cmake', '--build', str(dependencies), '--config', 'Release', '-j', '2'], cwd=ROOT, log=log)
         checked(['cmake', '--install', str(dependencies), '--config', 'Release'], cwd=ROOT, log=log)

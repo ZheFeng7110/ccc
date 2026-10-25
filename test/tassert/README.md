@@ -30,6 +30,7 @@ mcpp 驱动会为每个场景生成临时清单，并保留场景原有的依赖
 - [config.hh](config.hh) 提供内建 `std::string_view` 数组，包含重复 tag、空 tag 和带内嵌空字符的字符串，用来验证精确匹配。
 - [format_support.hh](format_support.hh) 为 `std::format` 和 fmt 各提供一个 `Item` formatter。formatter 统计调用次数，并可主动抛出异常。
 - [project.cmake](project.cmake) 统一设置 C++ 标准、后端、配置头、模块模式、警告选项和线程库；负例直接使用头文件，避免根 CMake 在错误配置阶段提前终止。
+- [fmt.cmake](fmt.cmake) 通过本目录的 [get_cpm.cmake](get_cpm.cmake) 集成 fmt，仅在场景选择 fmt 后端时引入；[CMakeLists.txt](CMakeLists.txt) 提供独立依赖工程，供安装消费者场景构建和安装 fmt。
 - [run_projects.py](run_projects.py) 负责变体展开、独立构建、运行检查、直接二进制检查、编译错误匹配和模块配置重建检查。
 - CMake 矩阵共有 76 个场景：56 个运行场景和 20 个编译负例。mcpp 矩阵共有 64 个场景，因为安装消费者只由 CMake 测试。
 
