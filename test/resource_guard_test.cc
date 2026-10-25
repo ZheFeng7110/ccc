@@ -40,6 +40,7 @@ TEST_CASE("ResourceGuard - Defer_Lambda")
     CHECK(x == 42);
 }
 
+#if (__cplusplus >= 201402L)
 TEST_CASE("ResourceGuard - Defer_Macro")
 {
     int value = 0;
@@ -49,6 +50,7 @@ TEST_CASE("ResourceGuard - Defer_Macro")
     }
     CHECK(value == 42);
 }
+#endif  // (__cplusplus >= 201402L)
 
 namespace {
 

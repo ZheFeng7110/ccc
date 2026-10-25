@@ -35,16 +35,6 @@ private:
     Func func_;
 };
 
-namespace detail {
-
-template<typename Func>
-inline CCC_CPP20_CONSTEXPR defer<typename std::decay<Func>::type> make_defer(Func&& func)
-{
-    return defer<typename std::decay<Func>::type>(std::forward<Func>(func));
-}
-
-}  // namespace detail
-
 template<typename TryBlock, typename FinallyBlock>
 inline CCC_CPP20_CONSTEXPR void try_finally(TryBlock&& try_block, FinallyBlock&& finally_block)
 {
