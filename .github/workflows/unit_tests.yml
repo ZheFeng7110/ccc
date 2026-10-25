@@ -80,6 +80,12 @@ jobs:
           xlings install cmake@4.4.2 -y -g
           xlings install llvm@22.1.8 -y -g
           echo "CXX=clang++" >> "$GITHUB_ENV"
+          # CMake can prefer a system version-suffixed scanner over the managed one.
+          scan_deps="$XLINGS_BIN/clang-scan-deps"
+          test -x "$scan_deps"
+          clang++ --version
+          "$scan_deps" --version
+          echo "CCC_CLANG_SCAN_DEPS=$scan_deps" >> "$GITHUB_ENV"
 
       - name: Configure libc++ flags
         if: matrix.toolchain == 'llvm'
@@ -145,6 +151,9 @@ jobs:
                       "-DCCC_BUILD_TESTS=ON",
                       "-DCCC_TEST_CPP_STANDARD=$std"
                   )
+                  if ($env:CCC_CLANG_SCAN_DEPS) {
+                      $configureArgs += "-DCMAKE_CXX_COMPILER_CLANG_SCAN_DEPS:FILEPATH=$env:CCC_CLANG_SCAN_DEPS"
+                  }
                   if ($IsWindows) {
                       $configureArgs += @("-A", "x64")
                   }
