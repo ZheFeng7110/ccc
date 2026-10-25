@@ -65,7 +65,8 @@ cmake -DCCC_USE_CPP_MODULES=ON ..
 ```bash
 cmake -S . -B build -DCCC_BUILD_TESTS=ON
 cmake --build build
-cd build && ctest .
+ctest --test-dir build
+python3 test/tassert/run_projects.py --tool cmake --fail-fast  # 详见 test/tassert/README_zh.md
 ```
 
 ## 使用 mcpp 构建
@@ -75,6 +76,7 @@ cd build && ctest .
 ```bash
 mcpp build        # 构建库（模块模式）
 mcpp run -p test  # 编译并运行所有测试
+python3 test/tassert/run_projects.py --tool mcpp --fail-fast  # 详见 test/tassert/README_zh.md
 mcpp pack         # 打包发布产物
 ```
 

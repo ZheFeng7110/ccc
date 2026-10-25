@@ -65,7 +65,8 @@ Run tests with:
 ```bash
 cmake -S . -B build -DCCC_BUILD_TESTS=ON
 cmake --build build
-cd build && ctest .
+ctest --test-dir build
+python3 test/tassert/run_projects.py --tool cmake --fail-fast  # see test/tassert/README.md
 ```
 
 ## Building with mcpp
@@ -75,6 +76,7 @@ This project can also be built with [mcpp](https://github.com/mcpp-community/mcp
 ```bash
 mcpp build         # Build the library (module mode)
 mcpp run -p test   # Build and run all tests
+python3 test/tassert/run_projects.py --tool mcpp --fail-fast  # see test/tassert/README.md
 mcpp pack          # Package the release artifact
 ```
 
