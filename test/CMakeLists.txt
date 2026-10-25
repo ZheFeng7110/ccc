@@ -1,5 +1,28 @@
 cmake_minimum_required(VERSION 3.28...4.0)
 
+if (CCC_TEST_DEPENDENCIES_ONLY AND CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_LIST_DIR)
+    project(ccc_test_dependencies LANGUAGES CXX)
+endif ()
+
+# Scenario projects can use this dependency setup before adding the ccc target.
+if (CCC_TEST_PREPARE_FMT OR CCC_TASSERT_FORMAT_BACKEND STREQUAL "2")
+    find_package(fmt 11.2.0 CONFIG QUIET)
+    if (NOT fmt_FOUND)
+        include("${CMAKE_CURRENT_LIST_DIR}/../cmake/get_cpm.cmake")
+        CPMAddPackage(
+            NAME fmt
+            GITHUB_REPOSITORY fmtlib/fmt
+            GIT_TAG master
+            OPTIONS "FMT_TEST OFF" "FMT_DOC OFF" "FMT_INSTALL ON"
+        )
+        set(fmt_DIR "${fmt_BINARY_DIR}" CACHE PATH "fmt package configuration" FORCE)
+        find_package(fmt 11.2.0 CONFIG REQUIRED)
+    endif ()
+endif ()
+if (CCC_TEST_DEPENDENCIES_ONLY)
+    return()
+endif ()
+
 project(ccc_test CXX)
 
 message(STATUS "Configuring tests for library ccc (target: ${PROJECT_NAME})")
@@ -59,6 +82,7 @@ function (globSources cmd variable cxxStdRequired)
     endif ()
 endfunction ()
 
+# tassert/* contains independent projects; collect only the Catch2 directories below.
 globSources(GLOB_RECURSE cccPipeOperatorHelperTestSources 17 "pipe_operator_helper_test/*.cc")
 
 globSources(GLOB_RECURSE hashTestSources 11 "hash_test/*.cc")

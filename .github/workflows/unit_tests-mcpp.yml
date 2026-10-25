@@ -73,3 +73,21 @@ jobs:
           mcpp --version
           mcpp build -p test --verbose
           mcpp run -p test
+
+      - name: Set up Python for assertion scenarios
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Tagged assertion scenarios
+        shell: pwsh
+        run: |
+          python3 test/tassert/run_projects.py --tool mcpp --fail-fast
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Upload assertion scenario logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tassert-mcpp-${{ matrix.os }}
+          path: build-tassert/**/scenario.log

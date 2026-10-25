@@ -80,3 +80,5 @@ mcpp pack          # Package the release artifact
 ## License
 
 This project is licensed under the MIT License.
+
+[Tagged assertions (C++20)](docs/en/tassert.md)

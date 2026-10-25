@@ -162,3 +162,22 @@ jobs:
       - name: Install tests (C++11-23)
         shell: pwsh
         run: ./scripts/Run-InstallTest.ps1 -Verbose
+
+      - name: Set up Python for assertion scenarios
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Tagged assertion scenarios
+        shell: pwsh
+        run: |
+          $generator = if ($IsWindows) { "Visual Studio 18 2026" } else { "Ninja" }
+          python3 test/tassert/run_projects.py --generator "$generator" --fail-fast
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Upload assertion scenario logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tassert-cmake-${{ matrix.os }}-${{ matrix.toolchain }}
+          path: build-tassert/**/scenario.log

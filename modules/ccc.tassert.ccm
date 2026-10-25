@@ -1,0 +1,15 @@
+module;
+
+#include "ccc/tassert.hh"
+
+export module ccc.tassert;
+
+export namespace ccc {
+using ::ccc::if_enabled;
+using ::ccc::tassert;
+using ::ccc::tassert_failure_info;
+using ::ccc::tassert_get_handler;
+using ::ccc::tassert_handler;
+using ::ccc::tassert_set_handler;
+using ::ccc::tassert_tag;
+}  // namespace ccc

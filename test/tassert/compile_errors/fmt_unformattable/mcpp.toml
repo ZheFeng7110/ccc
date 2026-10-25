@@ -1,0 +1,19 @@
+[workspace]
+members = []
+
+[package]
+name = "test"
+version = "0.0.0"
+standard = "c++20"
+
+[build]
+sources = ["main.cc"]
+dialect_cxxflags = ["-DCCC_TASSERT_FORMAT_BACKEND=2", "-DFMT_ATTACH_TO_GLOBAL_MODULE=1"]
+
+[targets.test]
+kind = "bin"
+main = "main.cc"
+
+[dependencies]
+ccc = { path = "../../../..", features = ["tassert-fmt"] }
+fmtlib.fmt = ">=11.2.0"
