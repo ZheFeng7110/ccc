@@ -90,7 +90,7 @@ cmake -S . -B build -DCCC_USE_CPP_MODULES=ON -DCMAKE_CXX_STANDARD=23 \
   -DCCC_TASSERT_CONFIG_HEADER=/absolute/path/project_assert_config.hh
 ```
 
-宏配置通过 `ccc::ccc` 传播到模块接口及消费方。后端 `2` 使用 `find_package(fmt 11.2.0 CONFIG REQUIRED)` 查找 **>=11.2.0** 的 fmt，链接 `fmt::fmt`。`test/CMakeLists.txt` 在缺少兼容包时通过 CPM **0.43.2** 获取测试依赖；后端 `1` 还执行配置阶段的标准格式化编译、链接检查。其他组件仍可按原最低语言版本使用，显式请求标准格式化后端时目标要求 C++23。
+宏配置通过 `ccc::ccc` 传播到模块接口及消费方。后端 `2` 使用 `find_package(fmt 11.2.0 CONFIG REQUIRED)` 查找 **>=11.2.0** 的 fmt，链接 `fmt::fmt`。`test/CMakeLists.txt` 通过 CPM **0.43.2** 按场景工具链构建 fmt 测试依赖；后端 `1` 还执行配置阶段的标准格式化编译、链接检查。其他组件仍可按原最低语言版本使用，显式请求标准格式化后端时目标要求 C++23。
 
 `CCC_INSTALL=ON` 安装头文件，模块模式还安装模块源码及库。配置头及其依赖由用户提供。安装目标记录配置头文件名；消费方应在编译模块接口和使用代码前，将配置头所在目录加入安装目标的接口包含目录，并保证其内容与提供方构建一致。fmt 构建的包配置会查找已安装的 fmt。模块消费方使用兼容配置重新构建已安装的接口源码；BMI、对象和缓存均属于具体配置及工具链。不同配置请安装到不同前缀。
 
