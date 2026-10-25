@@ -1,4 +1,4 @@
-name: Unit Tests
+name: Build and Tests
 
 on:
   push:
@@ -189,7 +189,7 @@ jobs:
         run: ./scripts/Run-InstallTest.ps1 -Verbose
 
       - name: Set up Python for assertion scenarios
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: '3.12'
 

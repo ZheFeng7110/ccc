@@ -1,4 +1,4 @@
-name: Unit Tests (mcpp)
+name: Build and Tests (mcpp)
 
 on:
   push:
@@ -39,10 +39,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Cache mcpp toolchains
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.mcpp
           key: mcpp-${{ matrix.os }}-${{ hashFiles('mcpp.toml', 'test/mcpp.toml') }}
@@ -75,7 +75,7 @@ jobs:
           mcpp run -p test
 
       - name: Set up Python for assertion scenarios
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: '3.12'
 
