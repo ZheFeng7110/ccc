@@ -51,14 +51,17 @@ jobs:
 
       - name: Install xlings
         if: matrix.toolchain != 'msvc'
+        shell: bash
         run: |
           curl -fsSL https://d2learn.org/xlings-install.sh | bash
-          XLINGS="$HOME/.xlings/subos/current/bin"
-          export PATH="$XLINGS:$HOME/.xlings/bin:$PATH"
+          source "$HOME/.xlings/config/shell/xlings-profile.sh"
           xlings config --mirror GLOBAL
           xlings update
-          echo "$XLINGS" >> "$GITHUB_PATH"
-          echo "$HOME/.xlings/bin" >> "$GITHUB_PATH"
+          printf '%s\n' \
+            "PATH=$PATH" \
+            "XLINGS_HOME=$XLINGS_HOME" \
+            "XLINGS_BIN=$XLINGS_BIN" \
+            "XLINGS_SUBOS_LIB=$XLINGS_SUBOS_LIB" >> "$GITHUB_ENV"
 
       - name: Install GCC toolchain
         if: matrix.toolchain == 'gcc'
@@ -76,6 +79,7 @@ jobs:
           # Same CMake floor as above.
           xlings install cmake@4.4.2 -y -g
           xlings install llvm@22.1.8 -y -g
+          echo "CXX=clang++" >> "$GITHUB_ENV"
 
       - name: Configure libc++ flags
         if: matrix.toolchain == 'llvm'
