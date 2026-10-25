@@ -15,6 +15,8 @@
     one compiler per job, so this script never selects a compiler. Callers
     that need extra compiler flags (for example libc++ scan-deps flags) pass
     them through the CXXFLAGS environment variable, which CMake reads.
+    CCC_CLANG_SCAN_DEPS optionally pins the dependency scanner for both the
+    library and downstream consumer CMake configurations.
 
     CMake variables used:
         CCC_INSTALL=ON
@@ -207,6 +209,10 @@ function Invoke-InstallTest
         "-DCCC_BUILD_TESTS=OFF",
         "-DCCC_TEST_CPP_STANDARD=$CppStandard"
     )
+    if ($env:CCC_CLANG_SCAN_DEPS)
+    {
+        $cmakeConfigArgs += "-DCMAKE_CXX_COMPILER_CLANG_SCAN_DEPS:FILEPATH=$env:CCC_CLANG_SCAN_DEPS"
+    }
     if ($Generator -like "Visual Studio*")
     {
         $cmakeConfigArgs += "-A", "x64"
@@ -280,6 +286,10 @@ function Invoke-InstallTest
         "-DCMAKE_CXX_STANDARD=$CppStandard",
         "-DCMAKE_CXX_STANDARD_REQUIRED=ON"
     )
+    if ($env:CCC_CLANG_SCAN_DEPS)
+    {
+        $consumerConfigArgs += "-DCMAKE_CXX_COMPILER_CLANG_SCAN_DEPS:FILEPATH=$env:CCC_CLANG_SCAN_DEPS"
+    }
     if ($Generator -like "Visual Studio*")
     {
         $consumerConfigArgs += "-A", "x64"

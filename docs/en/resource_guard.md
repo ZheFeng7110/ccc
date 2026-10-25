@@ -25,6 +25,7 @@ Include the header:
 When using C++20 modules:
 
 ```cpp
+#include "ccc/resource_guard/macros.hh"  // Includes `ccc/macros.hh` to get all the macros; The header file needs to be included only when macros are required
 import ccc.resource_guard;
 ```
 
@@ -47,6 +48,16 @@ import ccc.resource_guard;
     ccc::defer df{[&] { if (f) fclose(f); }};
     // use f...
     // fclose is called automatically on scope exit
+}
+```
+
+`CCC_DEFER` takes a code block as its argument:
+
+```cpp
+{
+    FILE* f = fopen("data.txt", "r");
+    CCC_DEFER({ if (f) fclose(f); });
+    // use f...
 }
 ```
 
@@ -110,4 +121,3 @@ const auto result = ccc::with(l, [&] {
 
 For more usage examples, see the test file:
 - `test/resource_guard_test.cc`
-

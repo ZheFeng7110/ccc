@@ -25,6 +25,7 @@
 使用 C++20 模块时：
 
 ```cpp
+#include "ccc/resource_guard/macros.hh"  // 或导入 `ccc/macros.hh` 引入所有的宏; 当且仅当需要宏的时候，才需要包含该头文件
 import ccc.resource_guard;
 ```
 
@@ -47,6 +48,16 @@ import ccc.resource_guard;
     ccc::defer df{[&] { if (f) fclose(f); }};
     // 使用 f...
     // 作用域退出时自动 fclose
+}
+```
+
+`CCC_DEFER` 使用一个代码块参数注册延迟操作：
+
+```cpp
+{
+    FILE* f = fopen("data.txt", "r");
+    CCC_DEFER({ if (f) fclose(f); });
+    // 使用 f...
 }
 ```
 
@@ -110,4 +121,3 @@ const auto result = ccc::with(l, [&] {
 
 更多用法请参阅测试文件：
 - `test/resource_guard_test.cc`
-

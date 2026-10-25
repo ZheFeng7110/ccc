@@ -10,6 +10,7 @@
 #include "ccc/detail/config.hh"
 
 #include "ccc/utility.hh"
+#include "ccc/resource_guard.hh"
 #include "ccc/hash.hh"
 #include "ccc/pipe_operator_helper.hh"
 #include "ccc/when.hh"
